@@ -83,7 +83,6 @@
   .guar-line.partial { color: #f57f17; }
   .guar-line.non-g { color: #c62828; }
   .end-ch { display: block; font-size: 0.55rem; color: #667eea; font-weight: 600; margin-top: 2px; white-space: nowrap; }
-  .opt-ch { display: block; font-size: 0.55rem; color: #c62828; font-weight: 600; margin-top: 2px; white-space: nowrap; }
 
   /* Tags */
   .tag { display: inline-block; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.6rem; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
@@ -171,7 +170,7 @@
     <div class="legend-item"><div class="legend-sw" style="background:#f3e5f5;border:1px solid #ce93d8;"></div>Player Opt</div>
     <div class="legend-item"><div class="legend-sw" style="background:#e0e0e0;border:1px solid #bdbdbd;"></div>Two-Way</div>
     <div class="legend-item"><div class="legend-sw" style="background:#fff3e0;border:1px solid #ffcc80;"></div>10-Day</div>
-    <div class="legend-item" style="margin-left:auto;color:#8892b0;font-size:0.65rem;"><b style="color:#f57f17;">G:</b> guaranteed portion · <b style="color:#667eea;">CH:</b> projected cap hold · <b style="color:#c62828;">If decl:</b> cap hold if option declined</div>
+    <div class="legend-item" style="margin-left:auto;color:#8892b0;font-size:0.65rem;">Dotted underline = cap hold differs (hover for value)</div>
   </div>
 
   <div id="loading" class="loading"><div class="loading-spinner"></div><p>Loading contract data...</p></div>
@@ -609,23 +608,8 @@ function renderTable() {
     }
     html += `<td>${endHtml}</td>`;
 
-    // Option + Cap Hold if declined
-    let optHtml = optTag(p.option);
-    if ((p.option === 'TEAM OPT' || p.option === 'PLAYER OPT') && p.exc) {
-      // Find the option year index
-      const optYrIdx = p.yrs.findIndex(y => y.st === 'TEAM OPT' || y.st === 'PLAYER OPT');
-      if (optYrIdx >= 0) {
-        // Previous year salary (before option year)
-        const prevSal = optYrIdx > 0 ? (p.yrs[optYrIdx - 1]?.sal || 0) : p.sal2425;
-        if (prevSal) {
-          const ch = calcCapHold(prevSal, p.exc, optYrIdx);
-          if (ch !== null) {
-            optHtml += `<span class="opt-ch" title="Cap hold if declined: ${fmtFull(ch)}">If decl: ${fmtS(ch)}</span>`;
-          }
-        }
-      }
-    }
-    html += `<td>${optHtml}</td>`;
+    // Option
+    html += '<td>' + optTag(p.option) + '</td>';
 
     // Total Guaranteed
     html += `<td style="font-weight:700;font-size:0.75rem;">${fmtS(p.totG)}</td>`;
