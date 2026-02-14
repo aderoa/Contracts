@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NBA Contract Database</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: white; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem; }
+
+  /* Header */
+  header { text-align: center; padding: 2rem 0 1.5rem; }
+  header h1 { font-size: 2.4rem; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .subtitle { color: #8892b0; font-size: 1rem; margin-top: 0.25rem; }
+  .subtitle a { color: #667eea; text-decoration: none; }
+
+  /* Loading */
+  .loading { text-align: center; padding: 4rem 2rem; color: #8892b0; }
+  .loading-spinner { width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.15); border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error { text-align: center; padding: 2rem; color: #f87171; }
+
+  /* Team Grid */
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; }
+  .team-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all 0.2s; text-decoration: none; color: white; }
+  .team-card:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
+  .team-card img { width: 56px; height: 56px; margin-bottom: 0.5rem; }
+  .team-card .tc-name { font-weight: 700; font-size: 0.9rem; }
+  .team-card .tc-meta { color: #8892b0; font-size: 0.75rem; margin-top: 0.3rem; }
+  .team-card .tc-salary { color: #667eea; font-weight: 700; font-size: 0.85rem; margin-top: 0.2rem; }
+  .team-card.fa-card { border-color: rgba(102,126,234,0.3); background: rgba(102,126,234,0.08); }
+  .team-card.fa-card:hover { background: rgba(102,126,234,0.15); }
+
+  /* Team Detail View */
+  .team-detail { display: none; }
+  .team-detail.active { display: block; }
+  .back-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; text-decoration: none; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; margin-bottom: 1.25rem; }
+  .back-btn:hover { background: rgba(255,255,255,0.15); }
+  .team-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+  .team-header img { width: 64px; height: 64px; }
+  .team-header h2 { font-size: 1.8rem; font-weight: 800; }
+  .team-header .th-meta { color: #8892b0; font-size: 0.9rem; }
+
+  /* Summary Cards */
+  .summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+  .summary-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.75rem 1rem; }
+  .summary-card .sc-label { color: #8892b0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .summary-card .sc-value { font-size: 1.3rem; font-weight: 800; margin-top: 0.15rem; }
+  .summary-card .sc-value.purple { color: #667eea; }
+  .summary-card .sc-value.green { color: #4ade80; }
+  .summary-card .sc-value.amber { color: #fbbf24; }
+  .summary-card .sc-value.red { color: #f87171; }
+
+  /* Contract Table */
+  .contract-table-wrap { background: rgba(255,255,255,0.95); border-radius: 16px; overflow-x: auto; box-shadow: 0 4px 24px rgba(0,0,0,0.3); -webkit-overflow-scrolling: touch; }
+  .contract-table { width: 100%; border-collapse: collapse; color: #1a1a2e; font-size: 0.8rem; min-width: 1000px; }
+  .contract-table thead { position: sticky; top: 0; z-index: 10; }
+  .contract-table th { background: #1a1a2e; color: white; padding: 0.6rem 0.5rem; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; text-align: center; border-bottom: 3px solid #667eea; }
+  .contract-table th:first-child, .contract-table th:nth-child(2) { text-align: left; }
+  .contract-table th.yr-current { background: #2a2a5e; }
+  .contract-table td { padding: 0.5rem; text-align: center; border-bottom: 1px solid #eef0f6; vertical-align: middle; white-space: nowrap; }
+  .contract-table tr:hover { background: #f5f6ff; }
+  .contract-table tr.totals-row { background: #f0f2ff; font-weight: 700; border-top: 2px solid #667eea; }
+  .contract-table tr.totals-row:hover { background: #f0f2ff; }
+
+  /* Player cell */
+  .player-cell { display: flex; align-items: center; gap: 0.5rem; text-align: left; min-width: 160px; }
+  .pc-headshot { width: 36px; height: 28px; border-radius: 4px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .pc-headshot img { width: 100%; height: 100%; object-fit: cover; }
+  .pc-headshot .ini { color: white; font-weight: 700; font-size: 0.55rem; }
+  .pc-name { font-weight: 700; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; }
+  .pc-detail { font-size: 0.65rem; color: #8892b0; }
+
+  /* Salary cells with status colors */
+  .sal-cell { border-radius: 4px; padding: 0.25rem 0.35rem; font-weight: 600; font-size: 0.75rem; display: inline-block; min-width: 70px; }
+  .sal-cell.guaranteed { background: #e8f5e9; color: #2e7d32; }
+  .sal-cell.partial { background: #fff8e1; color: #f57f17; background-image: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(245,127,23,0.08) 3px, rgba(245,127,23,0.08) 6px); }
+  .sal-cell.not-g { background: #fce4ec; color: #c62828; border: 1px dashed #ef9a9a; }
+  .sal-cell.team-opt { background: #e3f2fd; color: #1565c0; }
+  .sal-cell.player-opt { background: #f3e5f5; color: #7b1fa2; }
+  .sal-cell.two-way { background: #e0e0e0; color: #616161; font-size: 0.65rem; }
+  .sal-cell.ten-day { background: #fff3e0; color: #e65100; font-size: 0.65rem; }
+  .sal-cell.empty { background: transparent; color: #ccc; font-weight: 400; }
+
+  /* Contract meta row (expandable) */
+  .meta-row td { padding: 0.4rem 0.75rem; background: #f8f9ff; border-bottom: 2px solid #e8eaf6; }
+  .meta-row .meta-grid { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.72rem; color: #5c6370; }
+  .meta-row .meta-grid .ml { font-weight: 700; color: #1a1a2e; }
+  .meta-row .meta-grid .tag { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.65rem; font-weight: 600; }
+  .tag-exception { background: #e8eaf6; color: #3949ab; }
+  .tag-type { background: #f3e5f5; color: #7b1fa2; }
+  .tag-kicker { background: #fff3e0; color: #e65100; }
+  .tag-bonus { background: #e8f5e9; color: #2e7d32; }
+  .tag-signed { background: #e0f2f1; color: #00695c; }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: #c0c8e0; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+  /* Toggle detail */
+  .expand-btn { cursor: pointer; color: #667eea; font-size: 0.7rem; padding: 0.15rem 0.4rem; border-radius: 3px; transition: background 0.15s; }
+  .expand-btn:hover { background: #e8eaf6; }
+
+  /* Footer */
+  footer { text-align: center; margin-top: 2rem; padding: 1rem; color: #8892b0; font-size: 0.85rem; }
+  footer a { color: #667eea; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* CH tooltip */
+  .has-ch { cursor: help; border-bottom: 1px dotted currentColor; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    header h1 { font-size: 1.6rem; }
+    .team-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; }
+    .team-card { padding: 0.75rem; }
+    .team-card img { width: 40px; height: 40px; }
+    .summary-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>📋 NBA Contract Database</h1>
+    <p class="subtitle">Powered by <a href="https://hoopsmatic.com" target="_blank">HoopsMatic</a></p>
+  </header>
+
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading contract data...</p>
+  </div>
+
+  <div id="teamGrid" style="display:none;"></div>
+
+  <div id="teamDetail" class="team-detail">
+    <button class="back-btn" onclick="showGrid()">← All Teams</button>
+    <div id="teamHeaderArea"></div>
+    <div id="summaryArea"></div>
+    <div class="legend" id="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#e8f5e9;border:1px solid #a5d6a7;"></div>Guaranteed</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:repeating-linear-gradient(45deg,#fff8e1,#fff8e1 3px,#fff0b3 3px,#fff0b3 6px);border:1px solid #ffe082;"></div>Partial G</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fce4ec;border:1px dashed #ef9a9a;"></div>Non-G</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#e3f2fd;border:1px solid #90caf9;"></div>Team Option</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f3e5f5;border:1px solid #ce93d8;"></div>Player Option</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#e0e0e0;border:1px solid #bdbdbd;"></div>Two-Way</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fff3e0;border:1px solid #ffcc80;"></div>10-Day</div>
+    </div>
+    <div id="contractTableArea"></div>
+  </div>
+
+  <div id="error" class="error" style="display:none;"></div>
+  <footer>Data compiled by <a href="https://hoopsmatic.com" target="_blank">HoopsMatic</a> · <a href="https://aderoa.github.io/DepthCharts/" target="_blank">Depth Charts</a> · <a href="https://aderoa.github.io/Injuries/" target="_blank">Injury Report</a></footer>
+</div>
+
+<script>
+// =====================================================
+// CONFIG
+// =====================================================
+const SHEET_ID = '2PACX-1vSg6im6IYB6HXMGzQbmmBnLw9SfQLzxCSo8OfChxlJLhsB6BBCO0wPF_TMch0YgAbtFqYkwDWrsxRe7';
+const CONTRACT_GID = '1649473047';
+const CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${CONTRACT_GID}&single=true&output=csv`;
+
+// Headshots from Depth Charts roster
+const ROSTER_GID = '0';
+const ROSTER_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${ROSTER_GID}&single=true&output=csv`;
+
+const TEAM_IDS = {
+  'Atlanta':1610612737,'Boston':1610612738,'Brooklyn':1610612751,
+  'Charlotte':1610612766,'Chicago':1610612741,'Cleveland':1610612739,
+  'Dallas':1610612742,'Denver':1610612743,'Detroit':1610612765,
+  'Golden State':1610612744,'Houston':1610612745,'Indiana':1610612754,
+  'LA Clippers':1610612746,'LA Lakers':1610612747,'Memphis':1610612763,
+  'Miami':1610612748,'Milwaukee':1610612749,'Minnesota':1610612750,
+  'New Orleans':1610612740,'New York':1610612752,'Oklahoma City':1610612760,
+  'Orlando':1610612753,'Philadelphia':1610612755,'Phoenix':1610612756,
+  'Portland':1610612757,'Sacramento':1610612758,'San Antonio':1610612759,
+  'Toronto':1610612761,'Utah':1610612762,'Washington':1610612764
+};
+const TEAM_ORDER = Object.keys(TEAM_IDS).sort();
+
+function teamLogo(t) { const id = TEAM_IDS[t]; return id ? `https://cdn.nba.com/logos/nba/${id}/primary/L/logo.svg` : ''; }
+function initials(name) { return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+// =====================================================
+// YEAR DEFINITIONS
+// =====================================================
+const YEARS = [
+  { label: "'24-25", key: '2025', salCol: 4, chCol: 5, stCol: 6 },
+  { label: "'25-26", key: '2026', salCol: 7, chCol: 8, stCol: 9, current: true },
+  { label: "'26-27", key: '2027', salCol: 10, chCol: 11, stCol: 12 },
+  { label: "'27-28", key: '2028', salCol: 13, chCol: 14, stCol: 15 },
+  { label: "'28-29", key: '2029', salCol: 16, chCol: 17, stCol: 18 },
+  { label: "'29-30", key: '2030', salCol: 19, chCol: 20, stCol: 21 },
+  { label: "'30-31", key: '2031', salCol: 22, chCol: 23, stCol: 24 },
+];
+
+// =====================================================
+// DATA
+// =====================================================
+let allPlayers = [];
+let headshots = {};
+let expandedRows = new Set();
+
+// =====================================================
+// CSV PARSER
+// =====================================================
+function parseCSV(text) {
+  const rows = []; let cur = '', inQ = false, row = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { if (inQ && text[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+    else if (c === ',' && !inQ) { row.push(cur); cur = ''; }
+    else if ((c === '\n' || c === '\r') && !inQ) {
+      if (c === '\r' && text[i+1] === '\n') i++;
+      row.push(cur); cur = '';
+      if (row.some(v => v.trim())) rows.push(row);
+      row = [];
+    } else cur += c;
+  }
+  row.push(cur);
+  if (row.some(v => v.trim())) rows.push(row);
+  return rows;
+}
+
+function parseSal(v) {
+  const s = (v||'').trim().replace(/[$,]/g, '');
+  return s && /^\d+$/.test(s) ? parseInt(s) : 0;
+}
+
+function normStatus(v) {
+  const s = (v||'').trim().toUpperCase();
+  if (s.startsWith('GUAR') || s === 'GIUARANTEED' || s === 'GUARANTEEED') return 'GUARANTEED';
+  if (s === 'PARTIAL G') return 'PARTIAL G';
+  if (s === 'NOT G') return 'NOT G';
+  if (s === 'TEAM OPT') return 'TEAM OPT';
+  if (s === 'PLAYER OPT') return 'PLAYER OPT';
+  if (s === 'TWO-WAY') return 'TWO-WAY';
+  if (s === '10-DAY') return '10-DAY';
+  return s;
+}
+
+function fmtSal(n) {
+  if (!n) return '';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return '$' + (n / 1e3).toFixed(0) + 'K';
+  return '$' + n.toLocaleString();
+}
+function fmtSalFull(n) { return n ? '$' + n.toLocaleString() : ''; }
+
+// =====================================================
+// LOAD DATA
+// =====================================================
+async function loadData() {
+  try {
+    const csvR = await fetch(CSV_URL);
+    if (!csvR.ok) throw new Error('CSV fetch failed');
+    const rows = parseCSV(await csvR.text());
+    if (rows.length < 2) throw new Error('No data');
+
+    allPlayers = [];
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      const name = (r[0]||'').trim();
+      if (!name) continue;
+
+      const team = (r[2]||'').trim();
+      const years = [];
+      for (const yr of YEARS) {
+        const sal = parseSal(r[yr.salCol]);
+        const ch = parseSal(r[yr.chCol]);
+        const st = normStatus(r[yr.stCol]);
+        years.push({ sal, ch, st });
+      }
+
+      allPlayers.push({
+        name,
+        team: team || null,
+        years,
+        totalGuaranteed: parseSal(r[28]),
+        totalWithCurrent: parseSal(r[25]),
+        option: (r[26]||'').trim(),
+        end: (r[27]||'').trim(),
+        signingDate: (r[29]||'').trim(),
+        signingTeam: (r[30]||'').trim(),
+        exception: (r[31]||'').trim(),
+        notes: (r[32]||'').trim(),
+        tradeKicker: (r[33]||'').trim(),
+        likelyBonus: (r[34]||'').trim(),
+        unlikelyBonus: (r[35]||'').trim(),
+      });
+    }
+
+    // Fetch headshots (non-blocking)
+    try {
+      const rR = await fetch(ROSTER_CSV_URL);
+      if (rR.ok) {
+        const rRows = parseCSV(await rR.text());
+        if (rRows.length > 1) {
+          const hdr = rRows[0];
+          const pi = hdr.findIndex(h => h.toUpperCase() === 'PLAYER');
+          const hi = hdr.findIndex(h => h.toUpperCase() === 'HEADSHOT');
+          if (pi >= 0 && hi >= 0) {
+            for (let j = 1; j < rRows.length; j++) {
+              const n = (rRows[j][pi]||'').trim();
+              const hs = (rRows[j][hi]||'').trim();
+              if (n && hs) headshots[n] = hs;
+            }
+          }
+        }
+      }
+    } catch(e) { console.warn('Headshots unavailable', e); }
+
+    document.getElementById('loading').style.display = 'none';
+    renderGrid();
+
+    // Check URL for team param
+    const params = new URLSearchParams(location.search);
+    const tp = params.get('team');
+    if (tp) {
+      const match = TEAM_ORDER.find(t => t.replace(/\s/g,'').toLowerCase() === tp.toLowerCase()) || (tp.toLowerCase() === 'fa' ? '__FA__' : null);
+      if (match) showTeam(match);
+    }
+
+  } catch(err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = 'Failed to load data: ' + err.message;
+    document.getElementById('error').style.display = 'block';
+  }
+}
+
+// =====================================================
+// TEAM GRID
+// =====================================================
+function renderGrid() {
+  const grid = document.getElementById('teamGrid');
+  let html = '<div class="team-grid">';
+
+  for (const team of TEAM_ORDER) {
+    const players = allPlayers.filter(p => p.team === team);
+    const totalSal = players.reduce((s, p) => s + (p.years[1]?.sal || 0), 0); // 25-26
+    html += `<div class="team-card" onclick="showTeam('${team}')">
+      <img src="${teamLogo(team)}" alt="${team}">
+      <div class="tc-name">${team}</div>
+      <div class="tc-salary">${fmtSal(totalSal)}</div>
+      <div class="tc-meta">${players.length} players</div>
+    </div>`;
+  }
+
+  // Free Agents card
+  const fas = allPlayers.filter(p => !p.team);
+  html += `<div class="team-card fa-card" onclick="showTeam('__FA__')">
+    <div style="font-size:2.5rem;margin-bottom:0.25rem;">🏷️</div>
+    <div class="tc-name">Free Agents</div>
+    <div class="tc-salary">${fas.length} players</div>
+    <div class="tc-meta">Expired contracts</div>
+  </div>`;
+
+  html += '</div>';
+  grid.innerHTML = html;
+  grid.style.display = 'block';
+}
+
+// =====================================================
+// TEAM DETAIL
+// =====================================================
+function showTeam(teamKey) {
+  const isFA = teamKey === '__FA__';
+  const players = isFA
+    ? allPlayers.filter(p => !p.team)
+    : allPlayers.filter(p => p.team === teamKey);
+
+  if (!players.length) return;
+  expandedRows = new Set();
+
+  // Update URL
+  const urlKey = isFA ? 'fa' : teamKey.replace(/\s/g, '');
+  history.replaceState(null, '', '?team=' + urlKey);
+  document.title = isFA ? 'Free Agents — NBA Contracts' : `${teamKey} Contracts — NBA Contract Database`;
+
+  // Header
+  const hdrArea = document.getElementById('teamHeaderArea');
+  if (isFA) {
+    hdrArea.innerHTML = `<div class="team-header"><div style="font-size:3rem;">🏷️</div><div><h2>Free Agents</h2><div class="th-meta">${players.length} players with expired contracts</div></div></div>`;
+  } else {
+    hdrArea.innerHTML = `<div class="team-header"><img src="${teamLogo(teamKey)}" alt="${teamKey}"><div><h2>${teamKey}</h2><div class="th-meta">${players.length} players under contract</div></div></div>`;
+  }
+
+  // Summary cards (only for active teams)
+  const sumArea = document.getElementById('summaryArea');
+  if (isFA) {
+    sumArea.innerHTML = '';
+  } else {
+    const sal2526 = players.reduce((s, p) => s + (p.years[1]?.sal || 0), 0);
+    const ch2526 = players.reduce((s, p) => s + (p.years[1]?.ch || 0), 0);
+    const guar = players.reduce((s, p) => s + (p.totalGuaranteed || 0), 0);
+    const expiring = players.filter(p => p.end === '2026').length;
+    const options = players.filter(p => p.option === 'TEAM OPT' || p.option === 'PLAYER OPT').length;
+
+    sumArea.innerHTML = `<div class="summary-row">
+      <div class="summary-card"><div class="sc-label">2025-26 Salary</div><div class="sc-value purple">${fmtSal(sal2526)}</div></div>
+      <div class="summary-card"><div class="sc-label">2025-26 Cap Holds</div><div class="sc-value">${fmtSal(ch2526)}</div></div>
+      <div class="summary-card"><div class="sc-label">Total Guaranteed</div><div class="sc-value green">${fmtSal(guar)}</div></div>
+      <div class="summary-card"><div class="sc-label">Expiring 2026</div><div class="sc-value amber">${expiring}</div></div>
+      <div class="summary-card"><div class="sc-label">With Options</div><div class="sc-value">${options}</div></div>
+    </div>`;
+  }
+
+  // Sort: by 25-26 salary descending
+  players.sort((a, b) => {
+    const sa = a.years[1]?.sal || a.years[0]?.sal || 0;
+    const sb = b.years[1]?.sal || b.years[0]?.sal || 0;
+    return sb - sa;
+  });
+
+  // Contract table
+  renderContractTable(players, isFA);
+
+  // Show/hide
+  document.getElementById('teamGrid').style.display = 'none';
+  document.getElementById('teamDetail').classList.add('active');
+}
+
+function renderContractTable(players, isFA) {
+  const area = document.getElementById('contractTableArea');
+
+  // Determine which year columns to show
+  const startYr = isFA ? 0 : 1; // FAs show 24-25, active teams start at 25-26
+  const visibleYears = YEARS.slice(startYr);
+
+  let html = '<div class="contract-table-wrap"><table class="contract-table"><thead><tr>';
+  html += '<th style="width:30px;"></th>';
+  html += '<th style="min-width:160px;">Player</th>';
+  for (const yr of visibleYears) {
+    html += `<th class="${yr.current ? 'yr-current' : ''}">${yr.label}</th>`;
+  }
+  html += '<th>End</th><th>Option</th>';
+  html += '</tr></thead><tbody>';
+
+  players.forEach((p, idx) => {
+    const rid = 'row-' + idx;
+    // Main row
+    html += `<tr id="${rid}">`;
+    html += `<td><span class="expand-btn" onclick="toggleMeta(${idx})" id="exp-${idx}">▸</span></td>`;
+
+    // Player cell with headshot
+    const hs = headshots[p.name];
+    const hsHtml = hs
+      ? `<div class="pc-headshot"><img src="${hs}" onerror="this.parentElement.innerHTML='<span class=\\'ini\\'>${initials(p.name)}</span>'"></div>`
+      : `<div class="pc-headshot"><span class="ini">${initials(p.name)}</span></div>`;
+    const traded = p.signingTeam && p.team && p.signingTeam !== p.team;
+    const detailText = traded ? `via ${p.signingTeam}` : (p.notes || '');
+    html += `<td><div class="player-cell">${hsHtml}<div><div class="pc-name">${p.name}</div>${detailText ? `<div class="pc-detail">${detailText}</div>` : ''}</div></div></td>`;
+
+    // Year cells
+    for (let yi = startYr; yi < YEARS.length; yi++) {
+      const y = p.years[yi];
+      html += '<td>' + salCellHtml(y) + '</td>';
+    }
+
+    // End + Option
+    html += `<td style="font-weight:700;font-size:0.8rem;">${p.end || ''}</td>`;
+    html += `<td>${optionBadge(p.option)}</td>`;
+    html += '</tr>';
+
+    // Meta row (hidden by default)
+    html += `<tr class="meta-row" id="meta-${idx}" style="display:none;"><td colspan="${visibleYears.length + 4}">`;
+    html += buildMetaContent(p);
+    html += '</td></tr>';
+  });
+
+  // Totals row
+  if (!isFA) {
+    html += '<tr class="totals-row"><td></td><td style="text-align:left;font-weight:800;">TEAM TOTAL</td>';
+    for (let yi = startYr; yi < YEARS.length; yi++) {
+      const total = players.reduce((s, p) => s + (p.years[yi]?.sal || 0), 0);
+      html += `<td style="font-weight:800;font-size:0.8rem;">${total ? fmtSal(total) : ''}</td>`;
+    }
+    html += '<td></td><td></td></tr>';
+  }
+
+  html += '</tbody></table></div>';
+  area.innerHTML = html;
+}
+
+function salCellHtml(y) {
+  if (!y || (!y.sal && !y.st)) return '<span class="sal-cell empty">—</span>';
+
+  const cls = {
+    'GUARANTEED': 'guaranteed',
+    'PARTIAL G': 'partial',
+    'NOT G': 'not-g',
+    'TEAM OPT': 'team-opt',
+    'PLAYER OPT': 'player-opt',
+    'TWO-WAY': 'two-way',
+    '10-DAY': 'ten-day',
+  }[y.st] || 'guaranteed';
+
+  const salText = fmtSal(y.sal);
+  // Show CH if different from salary
+  if (y.ch && y.ch !== y.sal && y.sal) {
+    return `<span class="sal-cell ${cls} has-ch" title="Cap Hold: ${fmtSalFull(y.ch)}">${salText}</span>`;
+  }
+  return `<span class="sal-cell ${cls}">${salText}</span>`;
+}
+
+function optionBadge(opt) {
+  if (!opt) return '';
+  if (opt === 'TEAM OPT') return '<span class="sal-cell team-opt" style="font-size:0.65rem;">TEAM</span>';
+  if (opt === 'PLAYER OPT') return '<span class="sal-cell player-opt" style="font-size:0.65rem;">PLAYER</span>';
+  return '';
+}
+
+function buildMetaContent(p) {
+  let parts = [];
+  if (p.exception) parts.push(`<span class="tag tag-exception">${p.exception}</span>`);
+  if (p.notes) {
+    // notes can have multiple items separated by /
+    p.notes.split(/\s*\/\s*/).forEach(n => {
+      if (n.trim()) parts.push(`<span class="tag tag-type">${n.trim()}</span>`);
+    });
+  }
+  if (p.tradeKicker) parts.push(`<span class="tag tag-kicker">Trade Kicker: ${p.tradeKicker}</span>`);
+  if (p.likelyBonus) parts.push(`<span class="tag tag-bonus">Likely Bonus: ${p.likelyBonus}</span>`);
+  if (p.unlikelyBonus) parts.push(`<span class="tag tag-bonus">Unlikely Bonus: ${p.unlikelyBonus}</span>`);
+  if (p.signingDate) parts.push(`<span class="tag tag-signed">Signed: ${p.signingDate}</span>`);
+  if (p.signingTeam) parts.push(`<span class="ml">Signing Team:</span> ${p.signingTeam}`);
+  if (p.totalGuaranteed) parts.push(`<span class="ml">Total Guaranteed:</span> ${fmtSalFull(p.totalGuaranteed)}`);
+
+  // Cap hold detail per year where CH differs
+  const chDiffs = [];
+  p.years.forEach((y, i) => {
+    if (y.ch && y.sal && y.ch !== y.sal) {
+      chDiffs.push(`${YEARS[i].label}: salary ${fmtSal(y.sal)} → cap hold ${fmtSal(y.ch)}`);
+    }
+  });
+  if (chDiffs.length) {
+    parts.push(`<span class="ml">Cap Hold Diffs:</span> ${chDiffs.join(' · ')}`);
+  }
+
+  return `<div class="meta-grid">${parts.join(' ')}</div>`;
+}
+
+function toggleMeta(idx) {
+  const metaRow = document.getElementById('meta-' + idx);
+  const btn = document.getElementById('exp-' + idx);
+  if (!metaRow) return;
+  if (expandedRows.has(idx)) {
+    expandedRows.delete(idx);
+    metaRow.style.display = 'none';
+    btn.textContent = '▸';
+  } else {
+    expandedRows.add(idx);
+    metaRow.style.display = '';
+    btn.textContent = '▾';
+  }
+}
+
+// =====================================================
+// NAVIGATION
+// =====================================================
+function showGrid() {
+  document.getElementById('teamDetail').classList.remove('active');
+  document.getElementById('teamGrid').style.display = 'block';
+  history.replaceState(null, '', location.pathname);
+  document.title = 'NBA Contract Database';
+}
+
+window.addEventListener('popstate', () => {
+  const params = new URLSearchParams(location.search);
+  if (params.get('team')) {
+    // handled by URL check
+  } else {
+    showGrid();
+  }
+});
+
+// =====================================================
+// INIT
+// =====================================================
+loadData();
+</script>
+</body>
+</html>
