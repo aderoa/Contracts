@@ -88,6 +88,13 @@
   .tag-opt-to { background: #e3f2fd; color: #1565c0; }
   .tag-opt-po { background: #f3e5f5; color: #7b1fa2; }
   .tag-tk { background: #fff3e0; color: #e65100; }
+  .tag-ext-elig { background: #e8f5e9; color: #2e7d32; }
+  .tag-ext-date { background: #e3f2fd; color: #1565c0; }
+  .tag-ext-inelig { background: #fce4ec; color: #c62828; }
+  .tag-ext-rookie { background: #f3e5f5; color: #7b1fa2; }
+  .tag-ext-done { background: #e0e0e0; color: #616161; }
+  .tag-ext-na { background: transparent; color: #bbb; }
+  .ext-note { font-size: 0.55rem; color: #999; display: block; margin-top: 1px; }
   td.meta-val { font-size: 0.7rem; color: #5c6370; }
 
   /* Legend */
@@ -142,6 +149,14 @@
       <option value="2030">2030</option>
       <option value="2031">2031</option>
     </select>
+    <select class="filter-select" id="filterExt">
+      <option value="">Extension Elig.</option>
+      <option value="eligible">Eligible Now</option>
+      <option value="future">Future Date</option>
+      <option value="ineligible">Ineligible (1-2yr)</option>
+      <option value="rookie">Rookie Scale</option>
+      <option value="extended">Already Extended</option>
+    </select>
     <span class="result-count" id="resultCount"></span>
   </div>
 
@@ -186,7 +201,6 @@ function teamLogo(t) { const id = TEAM_IDS[t]; return id ? `https://cdn.nba.com/
 function ini(n) { return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
 
 const YEARS = [
-  { label: "'24-25", sc: 4, cc: 5, tc: 6 },
   { label: "'25-26", sc: 7, cc: 8, tc: 9, current: true },
   { label: "'26-27", sc: 10, cc: 11, tc: 12 },
   { label: "'27-28", sc: 13, cc: 14, tc: 15 },
@@ -198,7 +212,7 @@ const YEARS = [
 let allPlayers = [];
 let filteredPlayers = [];
 let headshots = {};
-let sortCol = 'sal1';
+let sortCol = 'sal0';
 let sortDir = 'desc';
 
 function parseCSV(text) {
@@ -244,6 +258,86 @@ function fmtS(n) {
 }
 function fmtFull(n) { return n ? '$' + n.toLocaleString() : ''; }
 
+// =====================================================
+// EXTENSION ELIGIBILITY
+// =====================================================
+function calcExtElig(p) {
+  // No team = free agent
+  if (!p.team) return { status: 'na', text: 'Free Agent', sortVal: 9 };
+
+  // Two-Way / 10-Day
+  const notes_lc = (p.notes||'').toLowerCase();
+  if (notes_lc.includes('two-way') || p.yrs.every(y => y.st === 'TWO-WAY' || !y.st))
+    return { status: 'na', text: 'N/A', detail: 'Two-Way', sortVal: 8 };
+  if (notes_lc.includes('10-day') || p.yrs.every(y => y.st === '10-DAY' || !y.st))
+    return { status: 'na', text: 'N/A', detail: '10-Day', sortVal: 8 };
+
+  // Already extended — can't calculate next eligibility without original start
+  if (notes_lc.includes('extension')) {
+    return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+  }
+
+  // Rookie Scale Contract — different rules (eligible between 3rd-4th year)
+  if (notes_lc.includes('rookie scale')) {
+    return { status: 'rookie', text: 'Rookie Scale', detail: 'Different rules apply', sortVal: 5 };
+  }
+
+  // No signing date → unknown
+  if (!p.sigDate || !p.end) return { status: 'unknown', text: '—', sortVal: 10 };
+
+  // Parse signing date (M/D/YYYY)
+  const parts = p.sigDate.split('/');
+  if (parts.length !== 3) return { status: 'unknown', text: '—', sortVal: 10 };
+  let sigMonth = parseInt(parts[0]);
+  let sigDay = parseInt(parts[1]);
+  const sigYear = parseInt(parts[2]);
+  if (isNaN(sigMonth) || isNaN(sigDay) || isNaN(sigYear)) return { status: 'unknown', text: '—', sortVal: 10 };
+
+  // Oct 1 rule: signings Oct 2 through end of Oct count as Oct 1 for anniversary
+  if (sigMonth === 10 && sigDay >= 2) { sigDay = 1; }
+
+  // First NBA season "end year": signed Jul+ → year+1, signed Jan-Jun → year
+  const firstSeasonEnd = sigMonth >= 7 ? sigYear + 1 : sigYear;
+
+  // Contract length
+  const endYear = parseInt(p.end);
+  if (isNaN(endYear)) return { status: 'unknown', text: '—', sortVal: 10 };
+  const length = endYear - firstSeasonEnd + 1;
+
+  // 1-2 year deals cannot be extended
+  if (length <= 2) return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal`, sortVal: 7 };
+
+  // Waiting period: 3-4yr → 2nd anniversary, 5-6yr → 3rd anniversary
+  const waitYears = length <= 4 ? 2 : 3;
+
+  // Anniversary date
+  const annivDate = new Date(sigYear + waitYears, sigMonth - 1, sigDay);
+
+  // Compare to today
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Format the date
+  const fmtDate = annivDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  // Traded player caveat: 6-month post-trade restriction may apply
+  const traded = p.sigTeam && p.team && p.sigTeam !== p.team;
+
+  if (annivDate <= today) {
+    return {
+      status: 'eligible', text: 'Eligible',
+      detail: `Since ${fmtDate}` + (traded ? ' · Trade restriction may apply' : ''),
+      sortVal: 1, dateVal: annivDate.getTime()
+    };
+  } else {
+    return {
+      status: 'future', text: fmtDate,
+      detail: `${length}-year deal, ${waitYears === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Trade restriction may apply' : ''),
+      sortVal: 2, dateVal: annivDate.getTime()
+    };
+  }
+}
+
 async function loadData() {
   try {
     const csvR = await fetch(CSV_URL);
@@ -268,6 +362,9 @@ async function loadData() {
         tk: (r[33]||'').trim(), lb: (r[34]||'').trim(), ub: (r[35]||'').trim(),
       });
     }
+
+    // Compute extension eligibility for all players
+    allPlayers.forEach(p => { p.ext = calcExtElig(p); });
 
     // Headshots
     try {
@@ -314,6 +411,7 @@ function applyFilters() {
   const fSt = document.getElementById('filterStatus').value;
   const fExc = document.getElementById('filterException').value;
   const fEnd = document.getElementById('filterEnd').value;
+  const fExt = document.getElementById('filterExt').value;
 
   filteredPlayers = allPlayers.filter(p => {
     if (q && !p.name.toLowerCase().includes(q) && !(p.team||'').toLowerCase().includes(q) && !(p.notes||'').toLowerCase().includes(q)) return false;
@@ -322,6 +420,7 @@ function applyFilters() {
     if (fSt && !p.yrs.some(y => y.st === fSt)) return false;
     if (fExc && p.exc !== fExc) return false;
     if (fEnd && p.end !== fEnd) return false;
+    if (fExt && p.ext.status !== fExt) return false;
     return true;
   });
 
@@ -346,6 +445,11 @@ function doSort() {
     else if (sortCol === 'sigTeam') { va = a.sigTeam; vb = b.sigTeam; }
     else if (sortCol === 'option') { va = a.option; vb = b.option; }
     else if (sortCol === 'tk') { va = parseFloat(a.tk) || 0; vb = parseFloat(b.tk) || 0; }
+    else if (sortCol === 'ext') {
+      // Sort by status priority first, then by date for eligible/future
+      va = a.ext.sortVal * 1e15 + (a.ext.dateVal || 0);
+      vb = b.ext.sortVal * 1e15 + (b.ext.dateVal || 0);
+    }
     else if (sortCol.startsWith('sal')) {
       const yi = parseInt(sortCol.slice(3));
       va = a.yrs[yi]?.sal || 0; vb = b.yrs[yi]?.sal || 0;
@@ -361,7 +465,7 @@ function doSort() {
 
 function setSort(col) {
   if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
-  else { sortCol = col; sortDir = (col === 'name' || col === 'team' || col === 'exc' || col === 'notes' || col === 'sigTeam') ? 'asc' : 'desc'; }
+  else { sortCol = col; sortDir = (col === 'name' || col === 'team' || col === 'exc' || col === 'notes' || col === 'sigTeam' || col === 'ext') ? 'asc' : 'desc'; }
   applyFilters();
 }
 
@@ -380,6 +484,7 @@ function renderTable() {
   html += thS('Signed', 'sigDate', 'meta-col');
   html += thS('Sign. Team', 'sigTeam', 'meta-col');
   html += thS('TK', 'tk', 'meta-col');
+  html += thS('Ext. Eligible', 'ext', 'meta-col');
   html += '</tr></thead><tbody>';
 
   for (const p of filteredPlayers) {
@@ -427,6 +532,9 @@ function renderTable() {
     // Trade Kicker
     html += `<td>${p.tk ? `<span class="tag tag-tk">${p.tk}</span>` : ''}</td>`;
 
+    // Extension Eligibility
+    html += '<td>' + extTag(p.ext) + '</td>';
+
     html += '</tr>';
   }
 
@@ -462,11 +570,31 @@ function shortNotes(notes) {
   return n.length > 30 ? n.slice(0,28) + '…' : n;
 }
 
+function extTag(ext) {
+  const cls = {
+    'eligible': 'tag-ext-elig',
+    'future': 'tag-ext-date',
+    'ineligible': 'tag-ext-inelig',
+    'rookie': 'tag-ext-rookie',
+    'extended': 'tag-ext-done',
+    'na': 'tag-ext-na',
+    'unknown': 'tag-ext-na',
+  }[ext.status] || 'tag-ext-na';
+
+  const title = ext.detail ? ` title="${ext.detail}"` : '';
+  let html = `<span class="tag ${cls}"${title}>${ext.text}</span>`;
+  if (ext.detail && (ext.status === 'eligible' || ext.status === 'future') && ext.detail.includes('Trade restriction')) {
+    html += '<span class="ext-note">⚠ traded</span>';
+  }
+  return html;
+}
+
 document.getElementById('searchBox').addEventListener('input', applyFilters);
 document.getElementById('filterTeam').addEventListener('change', applyFilters);
 document.getElementById('filterStatus').addEventListener('change', applyFilters);
 document.getElementById('filterException').addEventListener('change', applyFilters);
 document.getElementById('filterEnd').addEventListener('change', applyFilters);
+document.getElementById('filterExt').addEventListener('change', applyFilters);
 
 loadData();
 </script>
