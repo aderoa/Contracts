@@ -80,6 +80,9 @@
   .sc.td { background: #fff3e0; color: #e65100; font-size: 0.6rem; }
   .sc.ch { cursor: help; border-bottom: 1px dotted currentColor; }
   .empty { color: #d0d0d0; }
+  .cap-hold-line { display: block; font-size: 0.55rem; color: #888; margin-top: 2px; font-weight: 500; white-space: nowrap; }
+  .cap-hold-line.declined { color: #c62828; }
+  .cap-hold-line.exercised { color: #2e7d32; }
 
   /* Tags */
   .tag { display: inline-block; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.6rem; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
@@ -258,6 +261,53 @@ function fmtS(n) {
 function fmtFull(n) { return n ? '$' + n.toLocaleString() : ''; }
 
 // =====================================================
+// CAP HOLD CALCULATIONS
+// =====================================================
+const AVG_SAL_2526 = 13870000;
+const AVG_GROWTH = 1.073412352001655;
+const VET_MIN_2526 = 2087519; // 2-year vet minimum 2025-26 (cap hold for min players)
+function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWTH, yi)); }
+function vetMinForYear(yi) { return Math.round(VET_MIN_2526 * Math.pow(AVG_GROWTH, yi)); }
+
+function calcCapHold(prevSal, exc, yearIndex) {
+  // Determine Bird rights category from exception
+  const e = (exc || '').toLowerCase();
+  let pct;
+
+  if (e.includes('minimum') || e.includes('two-way')) {
+    return vetMinForYear(yearIndex);
+  }
+  if (e.includes('rookie') || e.includes('second round')) {
+    // First-round picks: 300% below avg, 250% above avg
+    const avg = avgSalForYear(yearIndex);
+    pct = prevSal < avg ? 3.0 : 2.5;
+    return Math.round(prevSal * pct);
+  }
+  if (e.includes('early bird')) {
+    pct = 1.3;
+    return Math.round(prevSal * pct);
+  }
+  if (e.includes('non-bird')) {
+    pct = 1.2;
+    return Math.round(prevSal * pct);
+  }
+  if (e.includes('bird')) {
+    // Full Bird: 190% below avg, 150% above avg
+    const avg = avgSalForYear(yearIndex);
+    pct = prevSal < avg ? 1.9 : 1.5;
+    return Math.round(prevSal * pct);
+  }
+  // MLE, BAE, Tax MLE, Room MLE → typically Non-Bird or Early Bird
+  // Default to Non-Bird (120%) as conservative estimate
+  if (e.includes('mid-level') || e.includes('biannual') || e.includes('room')) {
+    pct = 1.2;
+    return Math.round(prevSal * pct);
+  }
+  // Unknown exception — can't calculate
+  return null;
+}
+
+// =====================================================
 // EXTENSION ELIGIBILITY
 // =====================================================
 function calcExtElig(p) {
@@ -390,6 +440,7 @@ async function loadData() {
 
       allPlayers.push({
         name, team, yrs,
+        sal2425: parseSal(r[4]),
         totG: parseSal(r[28]), totGCur: parseSal(r[25]),
         option: (r[26]||'').trim(), end: (r[27]||'').trim(),
         sigDate: (r[29]||'').trim(), sigTeam: (r[30]||'').trim(),
@@ -537,7 +588,7 @@ function renderTable() {
     html += `<td class="col-team"><div class="tm"><img src="${teamLogo(p.team)}" alt=""><span>${p.team}</span></div></td>`;
 
     // Year cells
-    for (let i = 0; i < YEARS.length; i++) { html += '<td>' + salCell(p.yrs[i]) + '</td>'; }
+    for (let i = 0; i < YEARS.length; i++) { html += '<td>' + salCell(p, i) + '</td>'; }
 
     // End
     html += `<td style="font-weight:700;font-size:0.75rem;">${p.end || ''}</td>`;
@@ -579,12 +630,29 @@ function thS(label, col, cls) {
   return `<th class="${cls || ''}${sc}" onclick="setSort('${col}')">${label}</th>`;
 }
 
-function salCell(y) {
+function salCell(p, yi) {
+  const y = p.yrs[yi];
   if (!y || (!y.sal && !y.st)) return '<span class="empty">—</span>';
+
   const cls = { 'GUARANTEED':'g','PARTIAL G':'pg','NOT G':'ng','TEAM OPT':'to','PLAYER OPT':'po','TWO-WAY':'tw','10-DAY':'td' }[y.st] || 'g';
   const chDiff = y.ch && y.ch !== y.sal && y.sal;
   const tt = chDiff ? ` title="Cap Hold: ${fmtFull(y.ch)}"` : '';
-  return `<span class="sc ${cls}${chDiff ? ' ch' : ''}"${tt}>${fmtS(y.sal)}</span>`;
+  let html = `<span class="sc ${cls}${chDiff ? ' ch' : ''}"${tt}>${fmtS(y.sal)}</span>`;
+
+  // Cap hold if option declined
+  if (y.st === 'TEAM OPT' || y.st === 'PLAYER OPT') {
+    // Previous year salary: year before this one, or 2024-25 if this is index 0
+    const prevSal = yi > 0 ? (p.yrs[yi - 1]?.sal || 0) : p.sal2425;
+    if (prevSal && p.exc) {
+      const capHold = calcCapHold(prevSal, p.exc, yi);
+      if (capHold !== null) {
+        const optType = y.st === 'TEAM OPT' ? 'TO' : 'PO';
+        html += `<span class="cap-hold-line declined" title="Cap hold if ${optType} declined: ${fmtFull(capHold)}">✗ ${fmtS(capHold)}</span>`;
+      }
+    }
+  }
+
+  return html;
 }
 
 function optTag(opt) {
