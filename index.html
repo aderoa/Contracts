@@ -401,6 +401,9 @@ async function loadData() {
     // Compute extension eligibility for all players
     allPlayers.forEach(p => { p.ext = calcExtElig(p); });
 
+    // Remove free agents (no current team)
+    allPlayers = allPlayers.filter(p => p.team);
+
     // Headshots
     try {
       const rR = await fetch(ROSTER_CSV_URL);
@@ -425,7 +428,6 @@ async function loadData() {
     const teams = [...new Set(allPlayers.filter(p=>p.team).map(p=>p.team))].sort();
     const sel = document.getElementById('filterTeam');
     teams.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
-    const oFA = document.createElement('option'); oFA.value = '__FA__'; oFA.textContent = '— Free Agents —'; sel.appendChild(oFA);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('controls').style.display = 'flex';
@@ -450,8 +452,7 @@ function applyFilters() {
 
   filteredPlayers = allPlayers.filter(p => {
     if (q && !p.name.toLowerCase().includes(q) && !(p.team||'').toLowerCase().includes(q) && !(p.notes||'').toLowerCase().includes(q)) return false;
-    if (fTeam === '__FA__' && p.team) return false;
-    if (fTeam && fTeam !== '__FA__' && p.team !== fTeam) return false;
+    if (fTeam && p.team !== fTeam) return false;
     if (fSt && !p.yrs.some(y => y.st === fSt)) return false;
     if (fExc && p.exc !== fExc) return false;
     if (fEnd && p.end !== fEnd) return false;
@@ -533,11 +534,7 @@ function renderTable() {
     html += `<td class="col-player"><div class="pc">${hsH}<span class="pc-nm">${p.name}</span></div></td>`;
 
     // Team
-    if (p.team) {
-      html += `<td class="col-team"><div class="tm"><img src="${teamLogo(p.team)}" alt=""><span>${p.team}</span></div></td>`;
-    } else {
-      html += `<td class="col-team meta-val" style="color:#aaa;">Free Agent</td>`;
-    }
+    html += `<td class="col-team"><div class="tm"><img src="${teamLogo(p.team)}" alt=""><span>${p.team}</span></div></td>`;
 
     // Year cells
     for (let i = 0; i < YEARS.length; i++) { html += '<td>' + salCell(p.yrs[i]) + '</td>'; }
