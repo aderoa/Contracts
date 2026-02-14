@@ -155,7 +155,6 @@
       <option value="future">Future Date</option>
       <option value="ineligible">Ineligible (1-2yr)</option>
       <option value="rookie">Rookie Scale</option>
-      <option value="extended">Already Extended</option>
     </select>
     <span class="result-count" id="resultCount"></span>
   </div>
@@ -272,9 +271,45 @@ function calcExtElig(p) {
   if (notes_lc.includes('10-day') || p.yrs.every(y => y.st === '10-DAY' || !y.st))
     return { status: 'na', text: 'N/A', detail: '10-Day', sortVal: 8 };
 
-  // Already extended — can't calculate next eligibility without original start
+  // Already extended — calculate next eligibility from the extension signing date
   if (notes_lc.includes('extension')) {
-    return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+    if (!p.sigDate || !p.end) return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+
+    const parts = p.sigDate.split('/');
+    if (parts.length !== 3) return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+    let eMonth = parseInt(parts[0]), eDay = parseInt(parts[1]), eYear = parseInt(parts[2]);
+    if (isNaN(eMonth) || isNaN(eDay) || isNaN(eYear)) return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+
+    // Oct 1 rule
+    if (eMonth === 10 && eDay >= 2) eDay = 1;
+
+    const eFirstEnd = eMonth >= 7 ? eYear + 1 : eYear;
+    const eEndYear = parseInt(p.end);
+    if (isNaN(eEndYear)) return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+    const eTotalLen = eEndYear - eFirstEnd + 1;
+
+    // Extension resulted in 1-2 years total — shouldn't happen, but handle it
+    if (eTotalLen <= 2) return { status: 'extended', text: 'Extended', detail: `${p.notes} · ${eTotalLen}-yr total, next ext. ineligible`, sortVal: 6 };
+
+    const eWait = eTotalLen <= 4 ? 2 : 3;
+    const eAnniv = new Date(eYear + eWait, eMonth - 1, eDay);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const eFmt = eAnniv.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const traded = p.sigTeam && p.team && p.sigTeam !== p.team;
+
+    if (eAnniv <= today) {
+      return {
+        status: 'eligible', text: 'Eligible',
+        detail: `Extended (${p.notes}) · Re-eligible since ${eFmt}` + (traded ? ' · Trade restriction may apply' : ''),
+        sortVal: 1, dateVal: eAnniv.getTime()
+      };
+    } else {
+      return {
+        status: 'future', text: eFmt,
+        detail: `Extended (${p.notes}) · ${eTotalLen}-yr total, ${eWait === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Trade restriction may apply' : ''),
+        sortVal: 2, dateVal: eAnniv.getTime()
+      };
+    }
   }
 
   // Rookie Scale Contract — different rules (eligible between 3rd-4th year)
