@@ -78,11 +78,12 @@
   .sc.po { background: #f3e5f5; color: #7b1fa2; }
   .sc.tw { background: #e0e0e0; color: #616161; font-size: 0.6rem; }
   .sc.td { background: #fff3e0; color: #e65100; font-size: 0.6rem; }
-  .sc.ch { cursor: help; border-bottom: 1px dotted currentColor; }
   .empty { color: #d0d0d0; }
-  .cap-hold-line { display: block; font-size: 0.55rem; color: #888; margin-top: 2px; font-weight: 500; white-space: nowrap; }
-  .cap-hold-line.declined { color: #c62828; }
-  .cap-hold-line.exercised { color: #2e7d32; }
+  .guar-line { display: block; font-size: 0.55rem; margin-top: 2px; font-weight: 600; white-space: nowrap; }
+  .guar-line.partial { color: #f57f17; }
+  .guar-line.non-g { color: #c62828; }
+  .end-ch { display: block; font-size: 0.55rem; color: #667eea; font-weight: 600; margin-top: 2px; white-space: nowrap; }
+  .opt-ch { display: block; font-size: 0.55rem; color: #c62828; font-weight: 600; margin-top: 2px; white-space: nowrap; }
 
   /* Tags */
   .tag { display: inline-block; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.6rem; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
@@ -170,7 +171,7 @@
     <div class="legend-item"><div class="legend-sw" style="background:#f3e5f5;border:1px solid #ce93d8;"></div>Player Opt</div>
     <div class="legend-item"><div class="legend-sw" style="background:#e0e0e0;border:1px solid #bdbdbd;"></div>Two-Way</div>
     <div class="legend-item"><div class="legend-sw" style="background:#fff3e0;border:1px solid #ffcc80;"></div>10-Day</div>
-    <div class="legend-item" style="margin-left:auto;color:#8892b0;font-size:0.65rem;">Dotted underline = cap hold differs (hover for value)</div>
+    <div class="legend-item" style="margin-left:auto;color:#8892b0;font-size:0.65rem;"><b style="color:#f57f17;">G:</b> guaranteed portion · <b style="color:#667eea;">CH:</b> projected cap hold · <b style="color:#c62828;">If decl:</b> cap hold if option declined</div>
   </div>
 
   <div id="loading" class="loading"><div class="loading-spinner"></div><p>Loading contract data...</p></div>
@@ -590,11 +591,41 @@ function renderTable() {
     // Year cells
     for (let i = 0; i < YEARS.length; i++) { html += '<td>' + salCell(p, i) + '</td>'; }
 
-    // End
-    html += `<td style="font-weight:700;font-size:0.75rem;">${p.end || ''}</td>`;
+    // End + Cap Hold for every player
+    const endYear = parseInt(p.end);
+    let endHtml = `<span style="font-weight:700;font-size:0.75rem;">${p.end || ''}</span>`;
+    if (endYear && p.exc) {
+      // Last year salary: YEARS index = endYear - 2026
+      const lastYrIdx = endYear - 2026;
+      const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+      // Cap hold year index (the season after contract ends)
+      const chYrIdx = endYear - 2025;
+      if (lastSal) {
+        const ch = calcCapHold(lastSal, p.exc, chYrIdx);
+        if (ch !== null) {
+          endHtml += `<span class="end-ch" title="Projected cap hold: ${fmtFull(ch)}">Cap Hold: ${fmtS(ch)}</span>`;
+        }
+      }
+    }
+    html += `<td>${endHtml}</td>`;
 
-    // Option
-    html += '<td>' + optTag(p.option) + '</td>';
+    // Option + Cap Hold if declined
+    let optHtml = optTag(p.option);
+    if ((p.option === 'TEAM OPT' || p.option === 'PLAYER OPT') && p.exc) {
+      // Find the option year index
+      const optYrIdx = p.yrs.findIndex(y => y.st === 'TEAM OPT' || y.st === 'PLAYER OPT');
+      if (optYrIdx >= 0) {
+        // Previous year salary (before option year)
+        const prevSal = optYrIdx > 0 ? (p.yrs[optYrIdx - 1]?.sal || 0) : p.sal2425;
+        if (prevSal) {
+          const ch = calcCapHold(prevSal, p.exc, optYrIdx);
+          if (ch !== null) {
+            optHtml += `<span class="opt-ch" title="Cap hold if declined: ${fmtFull(ch)}">If decl: ${fmtS(ch)}</span>`;
+          }
+        }
+      }
+    }
+    html += `<td>${optHtml}</td>`;
 
     // Total Guaranteed
     html += `<td style="font-weight:700;font-size:0.75rem;">${fmtS(p.totG)}</td>`;
@@ -635,21 +666,13 @@ function salCell(p, yi) {
   if (!y || (!y.sal && !y.st)) return '<span class="empty">—</span>';
 
   const cls = { 'GUARANTEED':'g','PARTIAL G':'pg','NOT G':'ng','TEAM OPT':'to','PLAYER OPT':'po','TWO-WAY':'tw','10-DAY':'td' }[y.st] || 'g';
-  const chDiff = y.ch && y.ch !== y.sal && y.sal;
-  const tt = chDiff ? ` title="Cap Hold: ${fmtFull(y.ch)}"` : '';
-  let html = `<span class="sc ${cls}${chDiff ? ' ch' : ''}"${tt}>${fmtS(y.sal)}</span>`;
+  let html = `<span class="sc ${cls}">${fmtS(y.sal)}</span>`;
 
-  // Cap hold if option declined
-  if (y.st === 'TEAM OPT' || y.st === 'PLAYER OPT') {
-    // Previous year salary: year before this one, or 2024-25 if this is index 0
-    const prevSal = yi > 0 ? (p.yrs[yi - 1]?.sal || 0) : p.sal2425;
-    if (prevSal && p.exc) {
-      const capHold = calcCapHold(prevSal, p.exc, yi);
-      if (capHold !== null) {
-        const optType = y.st === 'TEAM OPT' ? 'TO' : 'PO';
-        html += `<span class="cap-hold-line declined" title="Cap hold if ${optType} declined: ${fmtFull(capHold)}">✗ ${fmtS(capHold)}</span>`;
-      }
-    }
+  // Show guaranteed portion inline for PARTIAL G and NOT G
+  if (y.st === 'PARTIAL G' && y.ch && y.ch !== y.sal) {
+    html += `<span class="guar-line partial">G: ${fmtS(y.ch)}</span>`;
+  } else if (y.st === 'NOT G') {
+    html += `<span class="guar-line non-g">G: ${y.ch ? fmtS(y.ch) : '$0'}</span>`;
   }
 
   return html;
