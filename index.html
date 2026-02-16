@@ -271,15 +271,16 @@ function fmtFull(n) { return n ? '$' + n.toLocaleString() : ''; }
 // =====================================================
 // CAP HOLD CALCULATIONS
 // =====================================================
-const AVG_SAL_2526 = 13870000;
-const AVG_GROWTH = 1.073412352001655;
+const AVG_SAL_2526 = 12930000; // Estimated Average Player Salary 2025-26
+const AVG_GROWTH = 1.045;       // CBA: 104.5% of prior year's average
+const MIN_GROWTH = 1.07;        // Minimum salaries grow ~7% (NBA projected cap growth 26-27)
 // Cap hold for minimum salary players = 2-yr vet minimum (non-reimbursed portion)
 const MIN_CH_2627 = 2464849;  // projected 2026-27
 // Cap hold for two-way players = 1 YOS minimum
 const TWOWAY_CH_2526 = 2048494; // 1 YOS minimum 2025-26
 function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWTH, yi)); }
-function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CH_2627 / AVG_GROWTH) : Math.round(MIN_CH_2627 * Math.pow(AVG_GROWTH, yi - 1)); }
-function twowayCapHoldForYear(yi) { return Math.round(TWOWAY_CH_2526 * Math.pow(AVG_GROWTH, yi)); }
+function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CH_2627 / MIN_GROWTH) : Math.round(MIN_CH_2627 * Math.pow(MIN_GROWTH, yi - 1)); }
+function twowayCapHoldForYear(yi) { return Math.round(TWOWAY_CH_2526 * Math.pow(MIN_GROWTH, yi)); }
 
 function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
   const e = (p.exc || '').toLowerCase();
