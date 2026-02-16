@@ -194,8 +194,10 @@
 <script>
 const SHEET_ID = '2PACX-1vSg6im6IYB6HXMGzQbmmBnLw9SfQLzxCSo8OfChxlJLhsB6BBCO0wPF_TMch0YgAbtFqYkwDWrsxRe7';
 const CONTRACT_GID = '1649473047';
+const DRAFT_GID = '1889032294';
 const CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${CONTRACT_GID}&single=true&output=csv`;
 const ROSTER_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=0&single=true&output=csv`;
+const DRAFT_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${DRAFT_GID}&single=true&output=csv`;
 
 const TEAM_IDS = {
   'Atlanta':1610612737,'Boston':1610612738,'Brooklyn':1610612751,
@@ -391,19 +393,45 @@ function getEndScenarios(p) {
   if (optYears.length === 1) {
     const opt = optYears[0];
     const declinedEnd = 2025 + opt.idx;
-    scenarios.push({ endYr: declinedEnd, cls: 'sc-first' });
-    scenarios.push({ endYr: endYear, cls: 'sc-last' });
+    scenarios.push({ endYr: declinedEnd, cls: 'sc-first', optDeclined: opt.type });
+    scenarios.push({ endYr: endYear, cls: 'sc-last', optDeclined: null });
   } else {
     for (let o = 0; o < optYears.length; o++) {
       const opt = optYears[o];
       const declinedEnd = 2025 + opt.idx;
       const cls = o === 0 ? 'sc-first' : 'sc-mid';
-      scenarios.push({ endYr: declinedEnd, cls });
+      scenarios.push({ endYr: declinedEnd, cls, optDeclined: opt.type });
     }
-    scenarios.push({ endYr: endYear, cls: 'sc-last' });
+    scenarios.push({ endYr: endYear, cls: 'sc-last', optDeclined: null });
   }
 
   return scenarios;
+}
+
+// =====================================================
+// QUALIFYING OFFER — pick-specific percentages
+// =====================================================
+// Old CBA (drafts ≤2022, RFA ≤2026): raise over 4th year salary
+const QO_PCT_OLD = [30.0,30.5,31.2,31.9,32.6,33.4,34.1,34.8,35.5,36.2,36.9,37.6,38.3,39.1,39.8,40.5,41.2,41.9,42.6,43.3,44.1,44.8,45.5,46.2,46.9,47.6,48.3,49.0,50.0,50.0];
+// New CBA (drafts ≥2023, RFA ≥2027): +10% across the board
+const QO_PCT_NEW = [40.0,40.5,41.2,41.9,42.6,43.4,44.1,44.8,45.5,46.2,46.9,47.6,48.3,49.1,49.8,50.5,51.2,51.9,52.6,53.3,54.1,54.8,55.5,56.2,56.9,57.6,58.3,59.0,60.0,60.0];
+
+// Starter criteria bump/cap pick references (same structure both CBAs)
+// Picks 10-30 who MEET SC → use 9th pick's QO (on 120% of 9th pick's scale)
+// Picks 1-14 who FAIL SC → capped at 15th pick's QO (on 120% of 15th pick's scale)
+// Non-rookie ≤3 YOS who MEET SC → use 21st pick's QO (on 100% of 21st pick's scale)
+
+function qoTooltip(fa, p) {
+  let tip = fa.detail || fa.status;
+  if (fa.qo) tip += ` · QO: ${fmtFull(fa.qo)}`;
+  if (p.scStats) {
+    const s = p.scStats;
+    tip += ` · GS: ${s.gs4}/${s.gs3} (curr/prev) · MIN: ${Math.round(s.min4)}/${Math.round(s.min3)}`;
+    tip += ` · SC: ${p.starterCriteria ? 'MET' : 'NOT MET'}`;
+  } else if (p.draftPick > 0) {
+    tip += ' · SC: data unavailable';
+  }
+  return tip;
 }
 
 // =====================================================
@@ -411,35 +439,80 @@ function getEndScenarios(p) {
 // =====================================================
 // RFA: Rookie Scale players at end of rookie contract, OR players with ≤3 YOS
 // QO: Rookie Scale = 130% of last year salary; Non-Rookie ≤3 YOS = 125% (if sal ≤ avg) or 110% (if sal > avg)
-function calcFAStatus(p, endYear) {
+function calcFAStatus(p, endYear, optDeclined) {
   const e = (p.exc || '').toLowerCase();
   const notes_lc = (p.notes || '').toLowerCase();
   const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
   const faYOS = p.yos + (endYear - 2025);
 
-  // Two-Way: treat as RFA if ≤3 YOS, no QO amount (minimum cap hold covers it)
+  // Two-Way: RFA if ≤3 YOS, no QO amount
   if (isTwoWay) {
     return faYOS <= 3 ? { status: 'RFA', qo: null, detail: 'Two-Way' } : { status: 'UFA', qo: null };
   }
 
-  // Rookie Scale (1st round picks) → always RFA at end of rookie contract
+  // Rookie Scale (1st round picks)
   const isRookie = e.includes('rookie') && !e.includes('second');
   if (isRookie) {
+    // TO declined → automatic UFA
+    if (optDeclined === 'TEAM OPT') {
+      return { status: 'UFA', qo: null, detail: 'Rookie TO declined → UFA' };
+    }
+    // End of full rookie contract → RFA with pick-specific QO
     const lastYrIdx = endYear - 2026;
     const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+    const pick = p.draftPick || 0;
+    if (pick >= 1 && pick <= 30) {
+      const pctTable = endYear <= 2026 ? QO_PCT_OLD : QO_PCT_NEW;
+      let effectivePick = pick;
+      let scNote = '';
+
+      // Starter criteria adjustments
+      if (p.starterCriteria === true) {
+        if (pick >= 10) {
+          effectivePick = 9; // bumped up to 9th pick's QO
+          scNote = ' (SC↑ → pick 9)';
+        }
+      } else if (p.starterCriteria === false) {
+        if (pick <= 14) {
+          effectivePick = 15; // capped down to 15th pick's QO
+          scNote = ' (SC↓ → pick 15)';
+        }
+      }
+      // starterCriteria === null → use normal pick (no adjustment)
+
+      const pct = 1 + pctTable[effectivePick - 1] / 100;
+      const qo = Math.round(lastSal * pct);
+      return { status: 'RFA', qo, detail: `QO Pick ${pick}${scNote} (+${pctTable[effectivePick-1]}%)` };
+    }
+    // Fallback if no pick data
     const qo = Math.round(lastSal * 1.3);
-    return { status: 'RFA', qo, detail: 'Rookie Scale QO (130%)' };
+    return { status: 'RFA', qo, detail: 'Rookie Scale QO (~130%)' };
   }
 
   // Non-rookie: RFA if ≤3 YOS at FA
   if (faYOS <= 3) {
     const lastYrIdx = endYear - 2026;
     const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+    // New CBA: 135% of prior salary or min+$200K, whichever greater
+    // Old CBA (signed before 2023-24): 125%
+    const sigBefore2324 = p.sigDate && parseInt((p.sigDate.split('/')[2]||'')) < 2023;
+    const pct = sigBefore2324 ? 1.25 : 1.35;
     const chYrIdx = endYear - 2025;
-    const avg = avgSalForYear(chYrIdx);
-    const pct = lastSal > avg ? 1.10 : 1.25;
-    const qo = Math.round(lastSal * pct);
-    return { status: 'RFA', qo, detail: `QO (${Math.round(pct*100)}%)` };
+    // Min salary + $200K floor
+    const minFloor = minCapHoldForYear(chYrIdx) + 200000;
+    const qoBase = Math.round(lastSal * pct);
+    const qo = Math.max(qoBase, minFloor);
+
+    let scNote = '';
+    // Starter criteria for non-rookie ≤3 YOS: bump to 21st pick's QO
+    if (p.starterCriteria === true) {
+      const pctTable = endYear <= 2026 ? QO_PCT_OLD : QO_PCT_NEW;
+      // 21st pick on 100% scale — for this we'd need the scale value
+      // For now just flag it
+      scNote = ' (SC eligible for bump)';
+    }
+
+    return { status: 'RFA', qo, detail: `QO (${Math.round(pct*100)}%)${scNote}` };
   }
 
   return { status: 'UFA', qo: null };
@@ -585,6 +658,7 @@ async function loadData() {
         exc: (r[31]||'').trim(), notes: (r[32]||'').trim(),
         tk: (r[33]||'').trim(), lb: (r[34]||'').trim(), ub: (r[35]||'').trim(),
         yos: parseInt((r[38]||'').trim()) || 0,
+        draftPick: 0, starterCriteria: null, scStats: null,
       });
     }
 
@@ -613,6 +687,60 @@ async function loadData() {
         }
       }
     } catch(e) {}
+
+    // Draft position from draft sheet (gid 1889032294, col BK = index 62)
+    try {
+      const dR = await fetch(DRAFT_CSV_URL);
+      if (dR.ok) {
+        const dRows = parseCSV(await dR.text());
+        if (dRows.length > 1) {
+          const draftMap = {};
+          for (let j = 1; j < dRows.length; j++) {
+            const n = (dRows[j][1]||'').trim(); // col B = player name
+            const dp = parseInt((dRows[j][62]||'').trim()); // col BK = index 62
+            if (n && dp > 0) draftMap[n] = dp;
+          }
+          allPlayers.forEach(p => { p.draftPick = draftMap[p.name] || 0; });
+        }
+      }
+    } catch(e) { console.warn('Draft sheet fetch failed:', e); }
+
+    // Games started + minutes for starter criteria (from NBA stats API)
+    // Fetches current + prior season stats for all players
+    try {
+      const scMap = {}; // name → { gs4, gs3, min4, min3 }
+      const seasons = ['2025-26', '2024-25'];
+      for (const ssn of seasons) {
+        const url = `https://stats.nba.com/stats/leaguedashplayerstats?Season=${ssn}&SeasonType=Regular+Season&PerMode=Totals&MeasureType=Base&LeagueID=00`;
+        const resp = await fetch(url, {
+          headers: { 'Referer': 'https://stats.nba.com/', 'Accept': 'application/json' }
+        });
+        if (resp.ok) {
+          const json = await resp.json();
+          const hdr = json.resultSets[0].headers;
+          const gi = hdr.indexOf('PLAYER_NAME'), gsi = hdr.indexOf('GS'), mi = hdr.indexOf('MIN');
+          if (gi >= 0 && gsi >= 0 && mi >= 0) {
+            for (const row of json.resultSets[0].rowSet) {
+              const name = row[gi];
+              if (!scMap[name]) scMap[name] = {};
+              if (ssn === '2025-26') { scMap[name].gs4 = row[gsi]; scMap[name].min4 = row[mi]; }
+              else { scMap[name].gs3 = row[gsi]; scMap[name].min3 = row[mi]; }
+            }
+          }
+        }
+      }
+      // Evaluate starter criteria for each player
+      allPlayers.forEach(p => {
+        const sc = scMap[p.name];
+        if (!sc) { p.starterCriteria = null; return; }
+        const gs4 = sc.gs4 || 0, gs3 = sc.gs3 || 0;
+        const min4 = sc.min4 || 0, min3 = sc.min3 || 0;
+        const avgGS = (gs4 + gs3) / 2;
+        const avgMIN = (min4 + min3) / 2;
+        p.starterCriteria = (gs4 >= 41 || avgGS >= 41 || min4 >= 2000 || avgMIN >= 2000);
+        p.scStats = { gs4, gs3, min4, min3 };
+      });
+    } catch(e) { console.warn('NBA stats fetch failed (CORS likely):', e); }
 
     // Populate team filter
     const teams = [...new Set(allPlayers.filter(p=>p.team).map(p=>p.team))].sort();
@@ -751,7 +879,7 @@ function renderTable() {
           }
         }
         const fa = calcFAStatus(p, ey);
-        const qoTitle = fa.qo ? `${fa.detail} · Qualifying Offer: ${fmtFull(fa.qo)}` : (fa.detail || fa.status);
+        const qoTitle = qoTooltip(fa, p);
         endHtml += `<span class="fa-badge ${fa.status.toLowerCase()}" title="${qoTitle}">${fa.status}${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
       }
     } else {
@@ -769,8 +897,8 @@ function renderTable() {
             chHtml = `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">CH: ${fmtS(ch.hold)}</span>`;
           }
         }
-        const fa = calcFAStatus(p, ey);
-        const qoTitle = fa.qo ? `${fa.detail} · Qualifying Offer: ${fmtFull(fa.qo)}` : (fa.detail || fa.status);
+        const fa = calcFAStatus(p, ey, sc.optDeclined);
+        const qoTitle = qoTooltip(fa, p);
         const faHtml = `<span class="fa-badge ${fa.status.toLowerCase()}" title="${qoTitle}">${fa.status}${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
         endHtml += `<div class="end-scenario ${sc.cls}">`;
         endHtml += `<span class="end-sc-year">${ey}</span>`;
