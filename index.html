@@ -265,17 +265,19 @@ function fmtFull(n) { return n ? '$' + n.toLocaleString() : ''; }
 // =====================================================
 const AVG_SAL_2526 = 13870000;
 const AVG_GROWTH = 1.073412352001655;
-const VET_MIN_2526 = 2087519; // 2-year vet minimum 2025-26 (cap hold for min players)
+const MIN_CAP_HOLD_2627 = 2464849; // projected 2-year vet minimum for 2026-27
 function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWTH, yi)); }
-function vetMinForYear(yi) { return Math.round(VET_MIN_2526 * Math.pow(AVG_GROWTH, yi)); }
+function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CAP_HOLD_2627 / AVG_GROWTH) : Math.round(MIN_CAP_HOLD_2627 * Math.pow(AVG_GROWTH, yi - 1)); }
 
 function calcCapHold(prevSal, p, yearIndex) {
   const e = (p.exc || '').toLowerCase();
   const notes_lc = (p.notes || '').toLowerCase();
+  const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
+  const isMinimum = e.includes('minimum') || e.includes('two-way') || isTwoWay;
 
-  // Special cases: Minimum / Two-Way → vet minimum cap hold
-  if (e.includes('minimum') || e.includes('two-way') || notes_lc.includes('two-way')) {
-    return { hold: vetMinForYear(yearIndex), rights: 'Minimum' };
+  // Minimum / Two-Way → fixed cap hold amount
+  if (isMinimum) {
+    return { hold: minCapHoldForYear(yearIndex), rights: isTwoWay ? 'Two-Way' : 'Minimum' };
   }
   // Rookie / 2nd Round → special percentages
   if (e.includes('rookie') || e.includes('second round')) {
@@ -618,13 +620,13 @@ function renderTable() {
     // End + Cap Hold for every player
     const endYear = parseInt(p.end);
     let endHtml = `<span style="font-weight:700;font-size:0.75rem;">${p.end || ''}</span>`;
-    if (endYear && p.sigDate) {
+    if (endYear) {
       // Last year salary: YEARS index = endYear - 2026
       const lastYrIdx = endYear - 2026;
       const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
       // Cap hold year index (the season after contract ends)
       const chYrIdx = endYear - 2025;
-      if (lastSal) {
+      if (lastSal || p.yrs.some(y => y.st === 'TWO-WAY') || (p.notes||'').toLowerCase().includes('two-way') || (p.exc||'').toLowerCase().includes('minimum')) {
         const ch = calcCapHold(lastSal, p, chYrIdx);
         if (ch !== null) {
           endHtml += `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">Cap Hold: ${fmtS(ch.hold)}</span>`;
