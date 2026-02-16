@@ -84,6 +84,15 @@
   .guar-line.non-g { color: #c62828; }
   .end-ch { display: block; font-size: 0.55rem; color: #667eea; font-weight: 600; margin-top: 2px; white-space: nowrap; }
 
+  /* End column scenario cells */
+  .end-scenarios { display: flex; flex-direction: column; gap: 3px; }
+  .end-scenario { padding: 3px 5px; border-radius: 3px; border: 1px solid #333; background: #1a1a2e; }
+  .end-scenario:first-child:not(:last-child) { border-color: #c62828; background: rgba(198,40,40,0.08); }
+  .end-scenario:last-child:not(:first-child) { border-color: #2e7d32; background: rgba(46,125,50,0.08); }
+  .end-scenario:not(:first-child):not(:last-child) { border-color: #f57f17; background: rgba(245,127,23,0.08); }
+  .end-sc-label { display: block; font-size: 0.5rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.3px; }
+  .end-sc-year { display: block; font-weight: 700; font-size: 0.75rem; }
+
   /* Tags */
   .tag { display: inline-block; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.6rem; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
   .tag-exc { background: #e8eaf6; color: #3949ab; }
@@ -273,13 +282,13 @@ function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWT
 function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CH_2627 / AVG_GROWTH) : Math.round(MIN_CH_2627 * Math.pow(AVG_GROWTH, yi - 1)); }
 function twowayCapHoldForYear(yi) { return Math.round(TWOWAY_CH_2526 * Math.pow(AVG_GROWTH, yi)); }
 
-function calcCapHold(prevSal, p, yearIndex) {
+function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
   const e = (p.exc || '').toLowerCase();
   const notes_lc = (p.notes || '').toLowerCase();
   const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
   const isMinimum = e.includes('minimum') || e.includes('two-way');
 
-  // Two-Way → 0 YOS minimum cap hold (CBA 4(d)(7))
+  // Two-Way → 1 YOS minimum cap hold
   if (isTwoWay) {
     return { hold: twowayCapHoldForYear(yearIndex), rights: 'Two-Way (1 YOS min)' };
   }
@@ -294,33 +303,27 @@ function calcCapHold(prevSal, p, yearIndex) {
     return { hold: Math.round(prevSal * pct), rights: `Rookie Scale (${pct*100}%)` };
   }
 
-  // Derive contract length from signing date + end year
+  // Derive contract length from signing date + effective end year
+  const effectiveEnd = endYearOverride || parseInt(p.end);
   let contractLen = null;
-  if (p.sigDate && p.end) {
+  if (p.sigDate && effectiveEnd) {
     const parts = p.sigDate.split('/');
     if (parts.length === 3) {
       const sigMonth = parseInt(parts[0]), sigYear = parseInt(parts[2]);
       const firstSeasonEnd = sigMonth >= 7 ? sigYear + 1 : sigYear;
-      const endYear = parseInt(p.end);
-      if (!isNaN(firstSeasonEnd) && !isNaN(endYear)) contractLen = endYear - firstSeasonEnd + 1;
+      if (!isNaN(firstSeasonEnd) && !isNaN(effectiveEnd)) contractLen = effectiveEnd - firstSeasonEnd + 1;
     }
   }
 
   // Determine Bird rights combining exception + contract length
-  // If signed via Bird Exception → team already had 3+ years → Full Bird at end
-  // If signed via Early Bird → team had 2 years → add contract length
-  // If signed via Non-Bird → team had 1 year → add contract length
-  // MLE/BAE/Room → external FA, use contract length as total service
   let totalService;
   if (e.includes('bird') && !e.includes('early') && !e.includes('non-bird')) {
-    // Full Bird signing → 3+ years already, still Full Bird at contract end
     totalService = 99;
   } else if (e.includes('early bird')) {
     totalService = 2 + (contractLen || 0);
   } else if (e.includes('non-bird')) {
     totalService = 1 + (contractLen || 0);
   } else {
-    // MLE, BAE, Room, or other → assume external FA, contract length = service
     totalService = contractLen;
   }
 
@@ -340,6 +343,56 @@ function calcCapHold(prevSal, p, yearIndex) {
   }
 
   return { hold: Math.round(prevSal * pct), rights };
+}
+
+// Build end-year scenarios based on option years
+function getEndScenarios(p) {
+  const endYear = parseInt(p.end);
+  if (!endYear) return [];
+
+  // Find option year indices (sorted)
+  const optYears = [];
+  for (let i = 0; i < YEARS.length; i++) {
+    const st = p.yrs[i].st;
+    if (st === 'TEAM OPT' || st === 'PLAYER OPT') {
+      optYears.push({ idx: i, type: st });
+    }
+  }
+
+  if (optYears.length === 0) {
+    // No options — single scenario
+    return [{ endYr: endYear, label: null, type: null }];
+  }
+
+  // Build scenarios from earliest decline to full exercise
+  const scenarios = [];
+  const isTO = (t) => t === 'TEAM OPT';
+
+  if (optYears.length === 1) {
+    const opt = optYears[0];
+    const declinedEnd = 2025 + opt.idx;
+    const decLabel = isTO(opt.type) ? 'TO declined' : 'PO opts out';
+    const exLabel = isTO(opt.type) ? 'TO exercised' : 'PO opts in';
+    scenarios.push({ endYr: declinedEnd, label: decLabel });
+    scenarios.push({ endYr: endYear, label: exLabel });
+  } else {
+    // Multiple options — label by which option is the decision point
+    for (let o = 0; o < optYears.length; o++) {
+      const opt = optYears[o];
+      const declinedEnd = 2025 + opt.idx;
+      const yr = 2026 + opt.idx; // the option season end year
+      const short = isTO(opt.type) ? 'TO' : 'PO';
+      const verb = isTO(opt.type) ? 'declined' : 'opts out';
+      scenarios.push({ endYr: declinedEnd, label: `${yr} ${short} ${verb}` });
+    }
+    // Last scenario: all exercised
+    const lastOpt = optYears[optYears.length - 1];
+    const allLabel = optYears.every(o => o.type === 'TEAM OPT') ? 'All TOs exercised' :
+                     optYears.every(o => o.type === 'PLAYER OPT') ? 'All POs opted in' : 'All options exercised';
+    scenarios.push({ endYr: endYear, label: allLabel });
+  }
+
+  return scenarios;
 }
 
 // =====================================================
@@ -625,21 +678,50 @@ function renderTable() {
     // Year cells
     for (let i = 0; i < YEARS.length; i++) { html += '<td>' + salCell(p, i) + '</td>'; }
 
-    // End + Cap Hold for every player
-    const endYear = parseInt(p.end);
-    let endHtml = `<span style="font-weight:700;font-size:0.75rem;">${p.end || ''}</span>`;
-    if (endYear) {
-      // Last year salary: YEARS index = endYear - 2026
-      const lastYrIdx = endYear - 2026;
-      const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
-      // Cap hold year index (the season after contract ends)
-      const chYrIdx = endYear - 2025;
-      if (lastSal || p.yrs.some(y => y.st === 'TWO-WAY') || (p.notes||'').toLowerCase().includes('two-way') || (p.exc||'').toLowerCase().includes('minimum')) {
-        const ch = calcCapHold(lastSal, p, chYrIdx);
-        if (ch !== null) {
-          endHtml += `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">Cap Hold: ${fmtS(ch.hold)}</span>`;
+    // End + Cap Hold scenarios
+    const scenarios = getEndScenarios(p);
+    let endHtml = '';
+    const isTW = (p.notes||'').toLowerCase().includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
+    const isMin = (p.exc||'').toLowerCase().includes('minimum');
+
+    if (scenarios.length <= 1) {
+      // No options — single end year
+      const sc = scenarios[0];
+      const ey = sc ? sc.endYr : parseInt(p.end);
+      endHtml = `<span style="font-weight:700;font-size:0.75rem;">${ey || p.end || ''}</span>`;
+      if (ey) {
+        const lastYrIdx = ey - 2026;
+        const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+        const chYrIdx = ey - 2025;
+        if (lastSal || isTW || isMin) {
+          const ch = calcCapHold(lastSal, p, chYrIdx, ey);
+          if (ch !== null) {
+            endHtml += `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">Cap Hold: ${fmtS(ch.hold)}</span>`;
+          }
         }
       }
+    } else {
+      // Multiple scenarios
+      endHtml = '<div class="end-scenarios">';
+      for (const sc of scenarios) {
+        const ey = sc.endYr;
+        const lastYrIdx = ey - 2026;
+        const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+        const chYrIdx = ey - 2025;
+        let chHtml = '';
+        if (lastSal || isTW || isMin) {
+          const ch = calcCapHold(lastSal, p, chYrIdx, ey);
+          if (ch !== null) {
+            chHtml = `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">Cap Hold: ${fmtS(ch.hold)}</span>`;
+          }
+        }
+        endHtml += `<div class="end-scenario">`;
+        endHtml += `<span class="end-sc-label">${sc.label}</span>`;
+        endHtml += `<span class="end-sc-year">${ey}</span>`;
+        endHtml += chHtml;
+        endHtml += `</div>`;
+      }
+      endHtml += '</div>';
     }
     html += `<td>${endHtml}</td>`;
 
