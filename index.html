@@ -265,19 +265,27 @@ function fmtFull(n) { return n ? '$' + n.toLocaleString() : ''; }
 // =====================================================
 const AVG_SAL_2526 = 13870000;
 const AVG_GROWTH = 1.073412352001655;
-const MIN_CAP_HOLD_2627 = 2464849; // projected 2-year vet minimum for 2026-27
+// Cap hold for minimum salary players = 2-yr vet minimum (non-reimbursed portion)
+const MIN_CH_2627 = 2464849;  // projected 2026-27
+// Cap hold for two-way players = 1 YOS minimum
+const TWOWAY_CH_2526 = 2048494; // 1 YOS minimum 2025-26
 function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWTH, yi)); }
-function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CAP_HOLD_2627 / AVG_GROWTH) : Math.round(MIN_CAP_HOLD_2627 * Math.pow(AVG_GROWTH, yi - 1)); }
+function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CH_2627 / AVG_GROWTH) : Math.round(MIN_CH_2627 * Math.pow(AVG_GROWTH, yi - 1)); }
+function twowayCapHoldForYear(yi) { return Math.round(TWOWAY_CH_2526 * Math.pow(AVG_GROWTH, yi)); }
 
 function calcCapHold(prevSal, p, yearIndex) {
   const e = (p.exc || '').toLowerCase();
   const notes_lc = (p.notes || '').toLowerCase();
   const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
-  const isMinimum = e.includes('minimum') || e.includes('two-way') || isTwoWay;
+  const isMinimum = e.includes('minimum') || e.includes('two-way');
 
-  // Minimum / Two-Way → fixed cap hold amount
+  // Two-Way → 0 YOS minimum cap hold (CBA 4(d)(7))
+  if (isTwoWay) {
+    return { hold: twowayCapHoldForYear(yearIndex), rights: 'Two-Way (1 YOS min)' };
+  }
+  // Minimum salary → 2-yr vet minimum cap hold (CBA 4(d)(4))
   if (isMinimum) {
-    return { hold: minCapHoldForYear(yearIndex), rights: isTwoWay ? 'Two-Way' : 'Minimum' };
+    return { hold: minCapHoldForYear(yearIndex), rights: 'Minimum (2 YOS min)' };
   }
   // Rookie / 2nd Round → special percentages
   if (e.includes('rookie') || e.includes('second round')) {
