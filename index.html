@@ -269,42 +269,67 @@ const VET_MIN_2526 = 2087519; // 2-year vet minimum 2025-26 (cap hold for min pl
 function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWTH, yi)); }
 function vetMinForYear(yi) { return Math.round(VET_MIN_2526 * Math.pow(AVG_GROWTH, yi)); }
 
-function calcCapHold(prevSal, exc, yearIndex) {
-  // Determine Bird rights category from exception
-  const e = (exc || '').toLowerCase();
-  let pct;
+function calcCapHold(prevSal, p, yearIndex) {
+  const e = (p.exc || '').toLowerCase();
+  const notes_lc = (p.notes || '').toLowerCase();
 
-  if (e.includes('minimum') || e.includes('two-way')) {
-    return vetMinForYear(yearIndex);
+  // Special cases: Minimum / Two-Way → vet minimum cap hold
+  if (e.includes('minimum') || e.includes('two-way') || notes_lc.includes('two-way')) {
+    return { hold: vetMinForYear(yearIndex), rights: 'Minimum' };
   }
+  // Rookie / 2nd Round → special percentages
   if (e.includes('rookie') || e.includes('second round')) {
-    // First-round picks: 300% below avg, 250% above avg
     const avg = avgSalForYear(yearIndex);
-    pct = prevSal < avg ? 3.0 : 2.5;
-    return Math.round(prevSal * pct);
+    const pct = prevSal < avg ? 3.0 : 2.5;
+    return { hold: Math.round(prevSal * pct), rights: `Rookie (${pct*100}%)` };
   }
-  if (e.includes('early bird')) {
-    pct = 1.3;
-    return Math.round(prevSal * pct);
+
+  // Derive contract length from signing date + end year
+  let contractLen = null;
+  if (p.sigDate && p.end) {
+    const parts = p.sigDate.split('/');
+    if (parts.length === 3) {
+      const sigMonth = parseInt(parts[0]), sigYear = parseInt(parts[2]);
+      const firstSeasonEnd = sigMonth >= 7 ? sigYear + 1 : sigYear;
+      const endYear = parseInt(p.end);
+      if (!isNaN(firstSeasonEnd) && !isNaN(endYear)) contractLen = endYear - firstSeasonEnd + 1;
+    }
   }
-  if (e.includes('non-bird')) {
-    pct = 1.2;
-    return Math.round(prevSal * pct);
+
+  // Determine Bird rights combining exception + contract length
+  // If signed via Bird Exception → team already had 3+ years → Full Bird at end
+  // If signed via Early Bird → team had 2 years → add contract length
+  // If signed via Non-Bird → team had 1 year → add contract length
+  // MLE/BAE/Room → external FA, use contract length as total service
+  let totalService;
+  if (e.includes('bird') && !e.includes('early') && !e.includes('non-bird')) {
+    // Full Bird signing → 3+ years already, still Full Bird at contract end
+    totalService = 99;
+  } else if (e.includes('early bird')) {
+    totalService = 2 + (contractLen || 0);
+  } else if (e.includes('non-bird')) {
+    totalService = 1 + (contractLen || 0);
+  } else {
+    // MLE, BAE, Room, or other → assume external FA, contract length = service
+    totalService = contractLen;
   }
-  if (e.includes('bird')) {
-    // Full Bird: 190% below avg, 150% above avg
-    const avg = avgSalForYear(yearIndex);
+
+  if (totalService === null) return null;
+
+  const avg = avgSalForYear(yearIndex);
+  let pct, rights;
+  if (totalService >= 3) {
     pct = prevSal < avg ? 1.9 : 1.5;
-    return Math.round(prevSal * pct);
-  }
-  // MLE, BAE, Tax MLE, Room MLE → typically Non-Bird or Early Bird
-  // Default to Non-Bird (120%) as conservative estimate
-  if (e.includes('mid-level') || e.includes('biannual') || e.includes('room')) {
+    rights = `Full Bird (${Math.round(pct*100)}%)`;
+  } else if (totalService >= 2) {
+    pct = 1.3;
+    rights = 'Early Bird (130%)';
+  } else {
     pct = 1.2;
-    return Math.round(prevSal * pct);
+    rights = 'Non-Bird (120%)';
   }
-  // Unknown exception — can't calculate
-  return null;
+
+  return { hold: Math.round(prevSal * pct), rights };
 }
 
 // =====================================================
@@ -593,16 +618,16 @@ function renderTable() {
     // End + Cap Hold for every player
     const endYear = parseInt(p.end);
     let endHtml = `<span style="font-weight:700;font-size:0.75rem;">${p.end || ''}</span>`;
-    if (endYear && p.exc) {
+    if (endYear && p.sigDate) {
       // Last year salary: YEARS index = endYear - 2026
       const lastYrIdx = endYear - 2026;
       const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
       // Cap hold year index (the season after contract ends)
       const chYrIdx = endYear - 2025;
       if (lastSal) {
-        const ch = calcCapHold(lastSal, p.exc, chYrIdx);
+        const ch = calcCapHold(lastSal, p, chYrIdx);
         if (ch !== null) {
-          endHtml += `<span class="end-ch" title="Projected cap hold: ${fmtFull(ch)}">Cap Hold: ${fmtS(ch)}</span>`;
+          endHtml += `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">Cap Hold: ${fmtS(ch.hold)}</span>`;
         }
       }
     }
