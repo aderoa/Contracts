@@ -90,7 +90,6 @@
   .end-scenario.sc-first { border-color: #c62828; background: rgba(198,40,40,0.08); }
   .end-scenario.sc-last { border-color: #2e7d32; background: rgba(46,125,50,0.08); }
   .end-scenario.sc-mid { border-color: #f57f17; background: rgba(245,127,23,0.08); }
-  .end-sc-label { display: block; font-size: 0.45rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.3px; line-height: 1.1; }
   .end-sc-year { display: block; font-weight: 700; font-size: 0.7rem; line-height: 1.2; }
 
   /* Tags */
@@ -360,27 +359,24 @@ function getEndScenarios(p) {
   }
 
   if (optYears.length === 0) {
-    return [{ endYr: endYear, label: null, cls: '' }];
+    return [{ endYr: endYear, cls: '' }];
   }
 
   const scenarios = [];
-  const isTO = (t) => t === 'TEAM OPT';
 
   if (optYears.length === 1) {
     const opt = optYears[0];
     const declinedEnd = 2025 + opt.idx;
-    const tag = isTO(opt.type) ? 'TO' : 'PO';
-    scenarios.push({ endYr: declinedEnd, label: `${tag} ✗`, cls: 'sc-first' });
-    scenarios.push({ endYr: endYear, label: `${tag} ✓`, cls: 'sc-last' });
+    scenarios.push({ endYr: declinedEnd, cls: 'sc-first' });
+    scenarios.push({ endYr: endYear, cls: 'sc-last' });
   } else {
     for (let o = 0; o < optYears.length; o++) {
       const opt = optYears[o];
       const declinedEnd = 2025 + opt.idx;
-      const tag = isTO(opt.type) ? 'TO' : 'PO';
       const cls = o === 0 ? 'sc-first' : 'sc-mid';
-      scenarios.push({ endYr: declinedEnd, label: `${tag}${o+1} ✗`, cls });
+      scenarios.push({ endYr: declinedEnd, cls });
     }
-    scenarios.push({ endYr: endYear, label: 'All ✓', cls: 'sc-last' });
+    scenarios.push({ endYr: endYear, cls: 'sc-last' });
   }
 
   return scenarios;
@@ -687,7 +683,7 @@ function renderTable() {
         if (lastSal || isTW || isMin) {
           const ch = calcCapHold(lastSal, p, chYrIdx, ey);
           if (ch !== null) {
-            endHtml += `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">Cap Hold: ${fmtS(ch.hold)}</span>`;
+            endHtml += `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">CH: ${fmtS(ch.hold)}</span>`;
           }
         }
       }
@@ -707,7 +703,6 @@ function renderTable() {
           }
         }
         endHtml += `<div class="end-scenario ${sc.cls}">`;
-        endHtml += `<span class="end-sc-label">${sc.label}</span>`;
         endHtml += `<span class="end-sc-year">${ey}</span>`;
         endHtml += chHtml;
         endHtml += `</div>`;
