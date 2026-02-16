@@ -419,16 +419,10 @@ const QO_PCT_NEW = [40.0,40.5,41.2,41.9,42.6,43.4,44.1,44.8,45.5,46.2,46.9,47.6,
 // =====================================================
 // STARTER CRITERIA OVERRIDES & REFERENCE QO AMOUNTS
 // =====================================================
-// SC override: true = meets SC, false = fails SC, absent = unknown (no adjustment)
-const SC_OVERRIDE = {
-  // 2022 draft class (2026 RFAs) — update as season progresses
-  'Jalen Duren': true,        // Pick 13, All-Star starter
-  'Keegan Murray': true,      // Pick 4, starter
-  'Jaden Ivey': true,         // Pick 5, starter
-  'Bennedict Mathurin': true,  // Pick 6, starter
-  'Tari Eason': true,         // Pick 17, starter
-  'Walker Kessler': true,     // Pick 22, starter
-};
+// SC override: loaded from sc_data.json (updated daily by GitHub Action)
+// Fallback to empty object if fetch fails — QO will use base pick percentage
+let SC_OVERRIDE = {};
+let SC_STATS = {};  // { playerName: { gs4, min4, gs3, min3, reason } }
 
 // Reference QO dollar amounts per draft class year (used when SC triggers)
 // Calculated as: 120% of scale 4th-year salary × (1 + QO pct)
@@ -454,12 +448,13 @@ function qoTooltip(fa, p) {
   let tip = fa.detail || fa.status;
   if (fa.qo) tip += ` · QO: ${fmtFull(fa.qo)}`;
   const sc = (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
-  if (p.scStats) {
-    const s = p.scStats;
-    tip += ` · GS: ${s.gs_curr}/${s.gs_prev} (curr/prev) · MIN: ${s.min_curr}/${s.min_prev}`;
+  const stats = SC_STATS[p.name] || p.scStats;
+  if (stats) {
+    tip += ` · GS: ${stats.gs_curr}/${stats.gs_prev} (S4/S3) · MIN: ${stats.min_curr}/${stats.min_prev}`;
     tip += ` · SC: ${sc ? 'MET' : 'NOT MET'}`;
+    if (stats.reason) tip += ` (${stats.reason})`;
   } else if (sc !== null && sc !== undefined) {
-    tip += ` · SC: ${sc ? 'MET (override)' : 'NOT MET (override)'}`;
+    tip += ` · SC: ${sc ? 'MET' : 'NOT MET'}`;
   } else if (p.draftPick > 0) {
     tip += ' · SC: data unavailable';
   }
@@ -680,66 +675,53 @@ function calcExtElig(p) {
 }
 
 async function loadStarterCriteria() {
-  const scMap = {}; // name → { gs_curr, min_curr, gs_prev, min_prev }
-  // Basketball Reference: current season = 2026, prior = 2025
-  // SC eval needs last season + season before (for 2-season average)
-  const bbrSeasons = [
-    { year: 2026, key: 'curr' },
-    { year: 2025, key: 'prev' }
+  // Fetch SC data from GitHub-hosted JSON (updated daily by Action)
+  // Try relative path first (same repo), then absolute URL
+  const urls = [
+    './sc_data.json',
+    'https://aderoa.github.io/Contracts/sc_data.json',  // Update with your actual repo URL
   ];
-  for (const { year, key } of bbrSeasons) {
-    const url = `https://www.basketball-reference.com/leagues/NBA_${year}_totals.html`;
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 8000);
+  let scJson = null;
+  for (const url of urls) {
     try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 5000);
       const resp = await fetch(url, { signal: ctrl.signal });
       clearTimeout(timer);
-      if (!resp.ok) continue;
-      const html = await resp.text();
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const table = doc.querySelector('#totals_stats') || doc.querySelector('table');
-      if (!table) continue;
-      const ths = [...table.querySelectorAll('thead th')];
-      const headers = ths.map(th => th.textContent.trim());
-      const playerIdx = headers.indexOf('Player');
-      const gsIdx = headers.indexOf('GS');
-      const mpIdx = headers.indexOf('MP');
-      if (playerIdx < 0 || gsIdx < 0 || mpIdx < 0) continue;
-      const trs = table.querySelectorAll('tbody tr:not(.thead)');
-      for (const tr of trs) {
-        const tds = tr.querySelectorAll('td, th');
-        if (tds.length < Math.max(playerIdx, gsIdx, mpIdx) + 1) continue;
-        let name = (tds[playerIdx]?.textContent || '').trim().replace(/\*/g, '');
-        const gs = parseInt(tds[gsIdx]?.textContent) || 0;
-        const mp = parseInt(tds[mpIdx]?.textContent) || 0;
-        if (!name) continue;
-        // BBRef may have multiple rows for traded players; keep the TOT row or highest
-        if (!scMap[name]) scMap[name] = {};
-        if (key === 'curr') {
-          scMap[name].gs_curr = Math.max(scMap[name].gs_curr || 0, gs);
-          scMap[name].min_curr = Math.max(scMap[name].min_curr || 0, mp);
-        } else {
-          scMap[name].gs_prev = Math.max(scMap[name].gs_prev || 0, gs);
-          scMap[name].min_prev = Math.max(scMap[name].min_prev || 0, mp);
-        }
+      if (resp.ok) {
+        scJson = await resp.json();
+        console.log(`SC: loaded from ${url}, updated ${scJson.updated}`);
+        break;
       }
-      console.log(`SC: loaded ${year} season, ${Object.keys(scMap).length} players`);
-    } catch(e) { clearTimeout(timer); console.warn(`SC: ${year} fetch failed`, e.message); }
+    } catch(e) { console.warn(`SC: ${url} failed`, e.message); }
   }
-  // Apply to players
+  if (!scJson || !scJson.players) {
+    console.warn('SC: no data available, QO will use base pick percentages');
+    return;
+  }
+
+  // Populate SC_OVERRIDE and SC_STATS globals
+  const norm = s => s.replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase();
+  const scByNorm = {};
+  for (const [name, data] of Object.entries(scJson.players)) {
+    scByNorm[norm(name)] = { name, ...data };
+  }
+
   let matched = 0;
   allPlayers.forEach(p => {
-    const sc = scMap[p.name];
-    if (!sc) { p.starterCriteria = null; return; }
-    const gsCurr = sc.gs_curr || 0, gsPrev = sc.gs_prev || 0;
-    const minCurr = sc.min_curr || 0, minPrev = sc.min_prev || 0;
-    const avgGS = (gsCurr + gsPrev) / 2;
-    const avgMIN = (minCurr + minPrev) / 2;
-    p.starterCriteria = (gsCurr >= 41 || avgGS >= 41 || minCurr >= 2000 || avgMIN >= 2000);
-    p.scStats = { gs_curr: gsCurr, gs_prev: gsPrev, min_curr: minCurr, min_prev: minPrev };
+    const sc = scByNorm[norm(p.name)];
+    if (!sc) return;
+    SC_OVERRIDE[p.name] = sc.met;
+    SC_STATS[p.name] = {
+      gs_curr: sc.gs4, min_curr: sc.min4,
+      gs_prev: sc.gs3, min_prev: sc.min3,
+      reason: sc.reason,
+    };
+    p.starterCriteria = sc.met;
+    p.scStats = SC_STATS[p.name];
     matched++;
   });
-  console.log(`SC: matched ${matched} players`);
+  console.log(`SC: matched ${matched} players from JSON`);
 }
 
 async function loadData() {
