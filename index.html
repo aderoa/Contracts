@@ -278,9 +278,13 @@ const MIN_GROWTH = 1.07;        // Minimum salaries grow ~7% (NBA projected cap 
 const MIN_CH_2627 = 2464849;  // projected 2026-27
 // Cap hold for two-way players = 1 YOS minimum
 const TWOWAY_CH_2526 = 2048494; // 1 YOS minimum 2025-26
+// Projected salary cap by season (RealGM) — index 0 = 2025-26
+const PROJ_CAP = [154647000, 166000000, 174300000, 183015000, 192166000, 201774000, 211863000, 222456000, 233579000, 245258000];
 function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWTH, yi)); }
 function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CH_2627 / MIN_GROWTH) : Math.round(MIN_CH_2627 * Math.pow(MIN_GROWTH, yi - 1)); }
 function twowayCapHoldForYear(yi) { return Math.round(TWOWAY_CH_2526 * Math.pow(MIN_GROWTH, yi)); }
+// Max cap hold = 35% of projected cap (CBA 4(d)(5))
+function maxCapHold(yi) { const cap = yi >= 0 && yi < PROJ_CAP.length ? PROJ_CAP[yi] : PROJ_CAP[PROJ_CAP.length-1]; return Math.round(cap * 0.35); }
 
 function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
   const e = (p.exc || '').toLowerCase();
@@ -300,7 +304,11 @@ function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
   if (e.includes('rookie') && !e.includes('second')) {
     const avg = avgSalForYear(yearIndex);
     const pct = prevSal < avg ? 3.0 : 2.5;
-    return { hold: Math.round(prevSal * pct), rights: `Rookie Scale (${pct*100}%)` };
+    let hold = Math.round(prevSal * pct);
+    const cap = maxCapHold(yearIndex);
+    let rights = `Rookie Scale (${pct*100}%)`;
+    if (hold > cap) { rights += ' → capped'; hold = cap; }
+    return { hold, rights };
   }
 
   // Derive contract length from signing date + effective end year
@@ -342,7 +350,10 @@ function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
     rights = 'Non-Bird (120%)';
   }
 
-  return { hold: Math.round(prevSal * pct), rights };
+  let hold = Math.round(prevSal * pct);
+  const cap = maxCapHold(yearIndex);
+  if (hold > cap) { rights += ' → capped'; hold = cap; }
+  return { hold, rights };
 }
 
 // Build end-year scenarios based on option years
