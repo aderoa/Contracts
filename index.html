@@ -416,18 +416,50 @@ const QO_PCT_OLD = [30.0,30.5,31.2,31.9,32.6,33.4,34.1,34.8,35.5,36.2,36.9,37.6,
 // New CBA (drafts ≥2023, RFA ≥2027): +10% across the board
 const QO_PCT_NEW = [40.0,40.5,41.2,41.9,42.6,43.4,44.1,44.8,45.5,46.2,46.9,47.6,48.3,49.1,49.8,50.5,51.2,51.9,52.6,53.3,54.1,54.8,55.5,56.2,56.9,57.6,58.3,59.0,60.0,60.0];
 
-// Starter criteria bump/cap pick references (same structure both CBAs)
-// Picks 10-30 who MEET SC → use 9th pick's QO (on 120% of 9th pick's scale)
-// Picks 1-14 who FAIL SC → capped at 15th pick's QO (on 120% of 15th pick's scale)
-// Non-rookie ≤3 YOS who MEET SC → use 21st pick's QO (on 100% of 21st pick's scale)
+// =====================================================
+// STARTER CRITERIA OVERRIDES & REFERENCE QO AMOUNTS
+// =====================================================
+// SC override: true = meets SC, false = fails SC, absent = unknown (no adjustment)
+const SC_OVERRIDE = {
+  // 2022 draft class (2026 RFAs) — update as season progresses
+  'Jalen Duren': true,        // Pick 13, All-Star starter
+  'Keegan Murray': true,      // Pick 4, starter
+  'Jaden Ivey': true,         // Pick 5, starter
+  'Bennedict Mathurin': true,  // Pick 6, starter
+  'Tari Eason': true,         // Pick 17, starter
+  'Walker Kessler': true,     // Pick 22, starter
+};
+
+// Reference QO dollar amounts per draft class year (used when SC triggers)
+// Calculated as: 120% of scale 4th-year salary × (1 + QO pct)
+// For pick 21 (non-rookie SC): 100% of scale × (1 + QO pct)
+const REF_QO = {
+  2026: { // 2022 draft class becoming RFA in 2026 (old CBA percentages)
+    // Pick 9 (Sochan): 4th yr $7,096,231 × 1.355 = $9,615,393
+    pick9: 9615393,
+    // Pick 15 (M. Williams): 4th yr $6,276,531 × 1.398 = $8,778,695
+    pick15: 8778695,
+    // Pick 21 (Braun): 100% of scale = $4,921,797/1.2 = $4,101,498 × 1.441 = $5,910,258
+    pick21: 5910258,
+  },
+  // 2027: { pick9: ..., pick15: ..., pick21: ... },  // 2023 draft class (new CBA pcts)
+};
+
+// Starter criteria bump/cap pick references:
+// Picks 10-30 who MEET SC → use pick 9's QO dollar amount
+// Picks 1-14 who FAIL SC → capped at lesser of (own QO, pick 15's QO dollar amount)
+// Non-rookie ≤3 YOS who MEET SC → bumped to pick 21's QO dollar amount (if higher)
 
 function qoTooltip(fa, p) {
   let tip = fa.detail || fa.status;
   if (fa.qo) tip += ` · QO: ${fmtFull(fa.qo)}`;
+  const sc = (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
   if (p.scStats) {
     const s = p.scStats;
     tip += ` · GS: ${s.gs_curr}/${s.gs_prev} (curr/prev) · MIN: ${s.min_curr}/${s.min_prev}`;
-    tip += ` · SC: ${p.starterCriteria ? 'MET' : 'NOT MET'}`;
+    tip += ` · SC: ${sc ? 'MET' : 'NOT MET'}`;
+  } else if (sc !== null && sc !== undefined) {
+    tip += ` · SC: ${sc ? 'MET (override)' : 'NOT MET (override)'}`;
   } else if (p.draftPick > 0) {
     tip += ' · SC: data unavailable';
   }
@@ -463,26 +495,38 @@ function calcFAStatus(p, endYear, optDeclined) {
     const pick = p.draftPick || 0;
     if (pick >= 1 && pick <= 30) {
       const pctTable = endYear <= 2026 ? QO_PCT_OLD : QO_PCT_NEW;
-      let effectivePick = pick;
+
+      // Apply SC override if available
+      const sc = (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
+      const ref = REF_QO[endYear];
+
+      // Base QO for this pick (no SC adjustment)
+      const basePct = 1 + pctTable[pick - 1] / 100;
+      let qo = Math.round(lastSal * basePct);
       let scNote = '';
 
-      // Starter criteria adjustments
-      if (p.starterCriteria === true) {
-        if (pick >= 10) {
-          effectivePick = 9; // bumped up to 9th pick's QO
-          scNote = ' (SC↑ → pick 9)';
+      if (sc === true && ref) {
+        if (pick >= 10 && pick <= 30) {
+          // Bumped to pick 9's reference QO dollar amount
+          qo = ref.pick9;
+          scNote = ` (SC met → pick 9 QO $${(ref.pick9/1e6).toFixed(1)}M)`;
         }
-      } else if (p.starterCriteria === false) {
-        if (pick <= 14) {
-          effectivePick = 15; // capped down to 15th pick's QO
-          scNote = ' (SC↓ → pick 15)';
+        // Picks 1-9 who meet SC → no change (already high)
+      } else if (sc === false && ref) {
+        if (pick >= 1 && pick <= 14) {
+          // Capped at lesser of own QO or pick 15's reference amount
+          const capped = Math.min(qo, ref.pick15);
+          if (capped < qo) {
+            scNote = ` (SC not met → capped at pick 15 QO $${(ref.pick15/1e6).toFixed(1)}M)`;
+            qo = capped;
+          } else {
+            scNote = ' (SC not met, own QO already lower)';
+          }
         }
       }
-      // starterCriteria === null → use normal pick (no adjustment)
+      // sc === null → use normal pick QO (no adjustment)
 
-      const pct = 1 + pctTable[effectivePick - 1] / 100;
-      const qo = Math.round(lastSal * pct);
-      return { status: 'RFA', qo, detail: `QO Pick ${pick}${scNote} (+${pctTable[effectivePick-1]}%)` };
+      return { status: 'RFA', qo, detail: `QO Pick ${pick}${scNote} (+${pctTable[pick-1]}%)` };
     }
     // Fallback if no pick data
     const qo = Math.round(lastSal * 1.3);
@@ -504,12 +548,13 @@ function calcFAStatus(p, endYear, optDeclined) {
     const qo = Math.max(qoBase, minFloor);
 
     let scNote = '';
-    // Starter criteria for non-rookie ≤3 YOS: bump to 21st pick's QO
-    if (p.starterCriteria === true) {
-      const pctTable = endYear <= 2026 ? QO_PCT_OLD : QO_PCT_NEW;
-      // 21st pick on 100% scale — for this we'd need the scale value
-      // For now just flag it
-      scNote = ' (SC eligible for bump)';
+    // Starter criteria for non-rookie ≤3 YOS: bump to 21st pick's QO if higher
+    const sc = (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
+    const ref = REF_QO[endYear];
+    if (sc === true && ref && ref.pick21 > qo) {
+      const prevQo = qo;
+      qo = ref.pick21;
+      scNote = ` (SC met → pick 21 QO $${(ref.pick21/1e6).toFixed(1)}M)`;
     }
 
     return { status: 'RFA', qo, detail: `QO (${Math.round(pct*100)}%)${scNote}` };
