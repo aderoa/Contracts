@@ -286,7 +286,7 @@ function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
   const e = (p.exc || '').toLowerCase();
   const notes_lc = (p.notes || '').toLowerCase();
   const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
-  const isMinimum = e.includes('minimum') || e.includes('two-way');
+  const isMinimum = e.includes('minimum') || e.includes('two-way') || notes_lc.includes('minimum salary');
 
   // Two-Way → 1 YOS minimum cap hold
   if (isTwoWay) {
@@ -670,7 +670,7 @@ function renderTable() {
     const scenarios = getEndScenarios(p);
     let endHtml = '';
     const isTW = (p.notes||'').toLowerCase().includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
-    const isMin = (p.exc||'').toLowerCase().includes('minimum');
+    const isMin = (p.exc||'').toLowerCase().includes('minimum') || (p.notes||'').toLowerCase().includes('minimum salary');
 
     if (scenarios.length <= 1) {
       // No options — single end year
