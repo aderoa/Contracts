@@ -90,6 +90,9 @@
   .end-scenario.sc-first { border-color: #c62828; background: rgba(198,40,40,0.08); }
   .end-scenario.sc-last { border-color: #2e7d32; background: rgba(46,125,50,0.08); }
   .end-scenario.sc-mid { border-color: #f57f17; background: rgba(245,127,23,0.08); }
+  .fa-badge { font-size: 0.6rem; font-weight: 700; padding: 1px 3px; border-radius: 2px; display: inline-block; margin-top: 1px; }
+  .fa-badge.rfa { background: #e65100; color: #fff; }
+  .fa-badge.ufa { background: #455a64; color: #ccc; }
   .end-sc-year { display: block; font-weight: 700; font-size: 0.7rem; line-height: 1.2; }
 
   /* Tags */
@@ -404,6 +407,45 @@ function getEndScenarios(p) {
 }
 
 // =====================================================
+// RESTRICTED FREE AGENCY & QUALIFYING OFFER
+// =====================================================
+// RFA: Rookie Scale players at end of rookie contract, OR players with ≤3 YOS
+// QO: Rookie Scale = 130% of last year salary; Non-Rookie ≤3 YOS = 125% (if sal ≤ avg) or 110% (if sal > avg)
+function calcFAStatus(p, endYear) {
+  const e = (p.exc || '').toLowerCase();
+  const notes_lc = (p.notes || '').toLowerCase();
+  const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
+  const faYOS = p.yos + (endYear - 2025);
+
+  // Two-Way: treat as RFA if ≤3 YOS, no QO amount (minimum cap hold covers it)
+  if (isTwoWay) {
+    return faYOS <= 3 ? { status: 'RFA', qo: null, detail: 'Two-Way' } : { status: 'UFA', qo: null };
+  }
+
+  // Rookie Scale (1st round picks) → always RFA at end of rookie contract
+  const isRookie = e.includes('rookie') && !e.includes('second');
+  if (isRookie) {
+    const lastYrIdx = endYear - 2026;
+    const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+    const qo = Math.round(lastSal * 1.3);
+    return { status: 'RFA', qo, detail: 'Rookie Scale QO (130%)' };
+  }
+
+  // Non-rookie: RFA if ≤3 YOS at FA
+  if (faYOS <= 3) {
+    const lastYrIdx = endYear - 2026;
+    const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+    const chYrIdx = endYear - 2025;
+    const avg = avgSalForYear(chYrIdx);
+    const pct = lastSal > avg ? 1.10 : 1.25;
+    const qo = Math.round(lastSal * pct);
+    return { status: 'RFA', qo, detail: `QO (${Math.round(pct*100)}%)` };
+  }
+
+  return { status: 'UFA', qo: null };
+}
+
+// =====================================================
 // EXTENSION ELIGIBILITY
 // =====================================================
 function calcExtElig(p) {
@@ -708,6 +750,9 @@ function renderTable() {
             endHtml += `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">CH: ${fmtS(ch.hold)}</span>`;
           }
         }
+        const fa = calcFAStatus(p, ey);
+        const qoTitle = fa.qo ? `${fa.detail} · Qualifying Offer: ${fmtFull(fa.qo)}` : (fa.detail || fa.status);
+        endHtml += `<span class="fa-badge ${fa.status.toLowerCase()}" title="${qoTitle}">${fa.status}${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
       }
     } else {
       // Multiple scenarios
@@ -724,9 +769,13 @@ function renderTable() {
             chHtml = `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">CH: ${fmtS(ch.hold)}</span>`;
           }
         }
+        const fa = calcFAStatus(p, ey);
+        const qoTitle = fa.qo ? `${fa.detail} · Qualifying Offer: ${fmtFull(fa.qo)}` : (fa.detail || fa.status);
+        const faHtml = `<span class="fa-badge ${fa.status.toLowerCase()}" title="${qoTitle}">${fa.status}${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
         endHtml += `<div class="end-scenario ${sc.cls}">`;
         endHtml += `<span class="end-sc-year">${ey}</span>`;
         endHtml += chHtml;
+        endHtml += faHtml;
         endHtml += `</div>`;
       }
       endHtml += '</div>';
