@@ -85,13 +85,13 @@
   .end-ch { display: block; font-size: 0.55rem; color: #667eea; font-weight: 600; margin-top: 2px; white-space: nowrap; }
 
   /* End column scenario cells */
-  .end-scenarios { display: flex; flex-direction: column; gap: 3px; }
-  .end-scenario { padding: 3px 5px; border-radius: 3px; border: 1px solid #333; background: #1a1a2e; }
-  .end-scenario:first-child:not(:last-child) { border-color: #c62828; background: rgba(198,40,40,0.08); }
-  .end-scenario:last-child:not(:first-child) { border-color: #2e7d32; background: rgba(46,125,50,0.08); }
-  .end-scenario:not(:first-child):not(:last-child) { border-color: #f57f17; background: rgba(245,127,23,0.08); }
-  .end-sc-label { display: block; font-size: 0.5rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.3px; }
-  .end-sc-year { display: block; font-weight: 700; font-size: 0.75rem; }
+  .end-scenarios { display: flex; gap: 3px; align-items: flex-start; }
+  .end-scenario { padding: 2px 5px; border-radius: 3px; border: 1px solid #333; background: #1a1a2e; text-align: center; min-width: 38px; }
+  .end-scenario.sc-first { border-color: #c62828; background: rgba(198,40,40,0.08); }
+  .end-scenario.sc-last { border-color: #2e7d32; background: rgba(46,125,50,0.08); }
+  .end-scenario.sc-mid { border-color: #f57f17; background: rgba(245,127,23,0.08); }
+  .end-sc-label { display: block; font-size: 0.45rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.3px; line-height: 1.1; }
+  .end-sc-year { display: block; font-weight: 700; font-size: 0.7rem; line-height: 1.2; }
 
   /* Tags */
   .tag { display: inline-block; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.6rem; font-weight: 600; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
@@ -360,36 +360,27 @@ function getEndScenarios(p) {
   }
 
   if (optYears.length === 0) {
-    // No options — single scenario
-    return [{ endYr: endYear, label: null, type: null }];
+    return [{ endYr: endYear, label: null, cls: '' }];
   }
 
-  // Build scenarios from earliest decline to full exercise
   const scenarios = [];
   const isTO = (t) => t === 'TEAM OPT';
 
   if (optYears.length === 1) {
     const opt = optYears[0];
     const declinedEnd = 2025 + opt.idx;
-    const decLabel = isTO(opt.type) ? 'TO declined' : 'PO opts out';
-    const exLabel = isTO(opt.type) ? 'TO exercised' : 'PO opts in';
-    scenarios.push({ endYr: declinedEnd, label: decLabel });
-    scenarios.push({ endYr: endYear, label: exLabel });
+    const tag = isTO(opt.type) ? 'TO' : 'PO';
+    scenarios.push({ endYr: declinedEnd, label: `${tag} ✗`, cls: 'sc-first' });
+    scenarios.push({ endYr: endYear, label: `${tag} ✓`, cls: 'sc-last' });
   } else {
-    // Multiple options — label by which option is the decision point
     for (let o = 0; o < optYears.length; o++) {
       const opt = optYears[o];
       const declinedEnd = 2025 + opt.idx;
-      const yr = 2026 + opt.idx; // the option season end year
-      const short = isTO(opt.type) ? 'TO' : 'PO';
-      const verb = isTO(opt.type) ? 'declined' : 'opts out';
-      scenarios.push({ endYr: declinedEnd, label: `${yr} ${short} ${verb}` });
+      const tag = isTO(opt.type) ? 'TO' : 'PO';
+      const cls = o === 0 ? 'sc-first' : 'sc-mid';
+      scenarios.push({ endYr: declinedEnd, label: `${tag}${o+1} ✗`, cls });
     }
-    // Last scenario: all exercised
-    const lastOpt = optYears[optYears.length - 1];
-    const allLabel = optYears.every(o => o.type === 'TEAM OPT') ? 'All TOs exercised' :
-                     optYears.every(o => o.type === 'PLAYER OPT') ? 'All POs opted in' : 'All options exercised';
-    scenarios.push({ endYr: endYear, label: allLabel });
+    scenarios.push({ endYr: endYear, label: 'All ✓', cls: 'sc-last' });
   }
 
   return scenarios;
@@ -712,10 +703,10 @@ function renderTable() {
         if (lastSal || isTW || isMin) {
           const ch = calcCapHold(lastSal, p, chYrIdx, ey);
           if (ch !== null) {
-            chHtml = `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">Cap Hold: ${fmtS(ch.hold)}</span>`;
+            chHtml = `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">CH: ${fmtS(ch.hold)}</span>`;
           }
         }
-        endHtml += `<div class="end-scenario">`;
+        endHtml += `<div class="end-scenario ${sc.cls}">`;
         endHtml += `<span class="end-sc-label">${sc.label}</span>`;
         endHtml += `<span class="end-sc-year">${ey}</span>`;
         endHtml += chHtml;
