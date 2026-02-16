@@ -735,22 +735,15 @@ async function loadData() {
         const dRows = parseCSV(await dR.text());
         if (dRows.length > 1) {
           const hdr = dRows[0].map(h => (h||'').trim().toUpperCase());
-          // Find player name column
-          let ni = hdr.findIndex(h => h === 'PLAYER');
-          if (ni < 0) ni = hdr.findIndex(h => h === 'NAME');
-          if (ni < 0) ni = hdr.findIndex(h => h === 'PLAYER NAME');
-          if (ni < 0) ni = hdr.findIndex(h => h.includes('PLAYER'));
-          if (ni < 0) ni = hdr.findIndex(h => h.includes('NAME'));
-          // Find draft position column
-          let di = hdr.findIndex(h => h === 'DRAFT POS');
-          if (di < 0) di = hdr.findIndex(h => h.includes('DRAFT') && h.includes('POS'));
-          if (di < 0) di = hdr.findIndex(h => h === 'PICK');
-          if (di < 0) di = hdr.findIndex(h => h.includes('OVERALL'));
-          console.log('Draft sheet headers [0-10]:', hdr.slice(0, 10));
+          // This sheet has multiple sections; the player+draft data is at col 50 (PLAYER) + col 62 (DRAFT POS)
+          // Use lastIndexOf to get the rightmost DRAFT POS column
+          let di = hdr.lastIndexOf('DRAFT POS');
+          // Find the PLAYER column nearest (before) the draft pos column
+          let ni = -1;
+          for (let k = di - 1; k >= 0; k--) {
+            if (hdr[k] === 'PLAYER') { ni = k; break; }
+          }
           console.log('Draft sheet: name col=', ni, 'draft col=', di);
-          if (ni < 0) console.log('Draft: name col NOT FOUND. All headers:', hdr.filter(h => h !== ''));
-          // Sample first data row
-          if (dRows.length > 1) console.log('Draft row 1:', dRows[1].slice(0, 5), '...col62:', dRows[1][62]);
           if (ni >= 0 && di >= 0) {
             const draftMap = {};
             for (let j = 1; j < dRows.length; j++) {
