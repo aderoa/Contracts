@@ -283,8 +283,13 @@ const PROJ_CAP = [154647000, 166000000, 174300000, 183015000, 192166000, 2017740
 function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWTH, yi)); }
 function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CH_2627 / MIN_GROWTH) : Math.round(MIN_CH_2627 * Math.pow(MIN_GROWTH, yi - 1)); }
 function twowayCapHoldForYear(yi) { return Math.round(TWOWAY_CH_2526 * Math.pow(MIN_GROWTH, yi)); }
-// Max cap hold = 35% of projected cap (CBA 4(d)(5))
-function maxCapHold(yi) { const cap = yi >= 0 && yi < PROJ_CAP.length ? PROJ_CAP[yi] : PROJ_CAP[PROJ_CAP.length-1]; return Math.round(cap * 0.35); }
+// Max cap hold = max salary % of projected cap based on YOS (CBA 4(d)(5))
+// 0-6 YOS: 25%, 7-9 YOS: 30%, 10+ YOS: 35%
+function maxCapHold(yi, yos) {
+  const cap = yi >= 0 && yi < PROJ_CAP.length ? PROJ_CAP[yi] : PROJ_CAP[PROJ_CAP.length-1];
+  const pct = yos >= 10 ? 0.35 : yos >= 7 ? 0.30 : 0.25;
+  return Math.round(cap * pct);
+}
 
 function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
   const e = (p.exc || '').toLowerCase();
@@ -300,12 +305,16 @@ function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
   if (isMinimum) {
     return { hold: minCapHoldForYear(yearIndex), rights: 'Minimum (2 YOS min)' };
   }
+
+  // Project YOS to free agency year (yearIndex = seasons after 2025-26)
+  const faYOS = p.yos + yearIndex;
+
   // Rookie Scale Contracts only (first-round picks) → 300%/250%
   if (e.includes('rookie') && !e.includes('second')) {
     const avg = avgSalForYear(yearIndex);
     const pct = prevSal < avg ? 3.0 : 2.5;
     let hold = Math.round(prevSal * pct);
-    const cap = maxCapHold(yearIndex);
+    const cap = maxCapHold(yearIndex, faYOS);
     let rights = `Rookie Scale (${pct*100}%)`;
     if (hold > cap) { rights += ' → capped'; hold = cap; }
     return { hold, rights };
@@ -351,7 +360,7 @@ function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
   }
 
   let hold = Math.round(prevSal * pct);
-  const cap = maxCapHold(yearIndex);
+  const cap = maxCapHold(yearIndex, faYOS);
   if (hold > cap) { rights += ' → capped'; hold = cap; }
   return { hold, rights };
 }
@@ -533,6 +542,7 @@ async function loadData() {
         sigDate: (r[29]||'').trim(), sigTeam: (r[30]||'').trim(),
         exc: (r[31]||'').trim(), notes: (r[32]||'').trim(),
         tk: (r[33]||'').trim(), lb: (r[34]||'').trim(), ub: (r[35]||'').trim(),
+        yos: parseInt((r[38]||'').trim()) || 0,
       });
     }
 
