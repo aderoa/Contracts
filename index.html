@@ -634,6 +634,46 @@ function calcExtElig(p) {
   }
 }
 
+async function loadStarterCriteria() {
+  const scMap = {};
+  const seasons = ['2025-26', '2024-25'];
+  for (const ssn of seasons) {
+    const url = `https://stats.nba.com/stats/leaguedashplayerstats?Season=${ssn}&SeasonType=Regular+Season&PerMode=Totals&MeasureType=Base&LeagueID=00`;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000); // 5s timeout
+    try {
+      const resp = await fetch(url, {
+        headers: { 'Referer': 'https://stats.nba.com/', 'Accept': 'application/json' },
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      if (resp.ok) {
+        const json = await resp.json();
+        const hdr = json.resultSets[0].headers;
+        const gi = hdr.indexOf('PLAYER_NAME'), gsi = hdr.indexOf('GS'), mi = hdr.indexOf('MIN');
+        if (gi >= 0 && gsi >= 0 && mi >= 0) {
+          for (const row of json.resultSets[0].rowSet) {
+            const name = row[gi];
+            if (!scMap[name]) scMap[name] = {};
+            if (ssn === '2025-26') { scMap[name].gs4 = row[gsi]; scMap[name].min4 = row[mi]; }
+            else { scMap[name].gs3 = row[gsi]; scMap[name].min3 = row[mi]; }
+          }
+        }
+      }
+    } catch(e) { clearTimeout(timer); }
+  }
+  allPlayers.forEach(p => {
+    const sc = scMap[p.name];
+    if (!sc) { p.starterCriteria = null; return; }
+    const gs4 = sc.gs4 || 0, gs3 = sc.gs3 || 0;
+    const min4 = sc.min4 || 0, min3 = sc.min3 || 0;
+    const avgGS = (gs4 + gs3) / 2;
+    const avgMIN = (min4 + min3) / 2;
+    p.starterCriteria = (gs4 >= 41 || avgGS >= 41 || min4 >= 2000 || avgMIN >= 2000);
+    p.scStats = { gs4, gs3, min4, min3 };
+  });
+}
+
 async function loadData() {
   try {
     const csvR = await fetch(CSV_URL);
@@ -705,43 +745,6 @@ async function loadData() {
       }
     } catch(e) { console.warn('Draft sheet fetch failed:', e); }
 
-    // Games started + minutes for starter criteria (from NBA stats API)
-    // Fetches current + prior season stats for all players
-    try {
-      const scMap = {}; // name → { gs4, gs3, min4, min3 }
-      const seasons = ['2025-26', '2024-25'];
-      for (const ssn of seasons) {
-        const url = `https://stats.nba.com/stats/leaguedashplayerstats?Season=${ssn}&SeasonType=Regular+Season&PerMode=Totals&MeasureType=Base&LeagueID=00`;
-        const resp = await fetch(url, {
-          headers: { 'Referer': 'https://stats.nba.com/', 'Accept': 'application/json' }
-        });
-        if (resp.ok) {
-          const json = await resp.json();
-          const hdr = json.resultSets[0].headers;
-          const gi = hdr.indexOf('PLAYER_NAME'), gsi = hdr.indexOf('GS'), mi = hdr.indexOf('MIN');
-          if (gi >= 0 && gsi >= 0 && mi >= 0) {
-            for (const row of json.resultSets[0].rowSet) {
-              const name = row[gi];
-              if (!scMap[name]) scMap[name] = {};
-              if (ssn === '2025-26') { scMap[name].gs4 = row[gsi]; scMap[name].min4 = row[mi]; }
-              else { scMap[name].gs3 = row[gsi]; scMap[name].min3 = row[mi]; }
-            }
-          }
-        }
-      }
-      // Evaluate starter criteria for each player
-      allPlayers.forEach(p => {
-        const sc = scMap[p.name];
-        if (!sc) { p.starterCriteria = null; return; }
-        const gs4 = sc.gs4 || 0, gs3 = sc.gs3 || 0;
-        const min4 = sc.min4 || 0, min3 = sc.min3 || 0;
-        const avgGS = (gs4 + gs3) / 2;
-        const avgMIN = (min4 + min3) / 2;
-        p.starterCriteria = (gs4 >= 41 || avgGS >= 41 || min4 >= 2000 || avgMIN >= 2000);
-        p.scStats = { gs4, gs3, min4, min3 };
-      });
-    } catch(e) { console.warn('NBA stats fetch failed (CORS likely):', e); }
-
     // Populate team filter
     const teams = [...new Set(allPlayers.filter(p=>p.team).map(p=>p.team))].sort();
     const sel = document.getElementById('filterTeam');
@@ -752,6 +755,9 @@ async function loadData() {
     document.getElementById('legend').style.display = 'flex';
     document.getElementById('tableArea').style.display = 'block';
     applyFilters();
+
+    // Fire-and-forget: load starter criteria in background, re-render when done
+    loadStarterCriteria().then(() => applyFilters()).catch(() => {});
 
   } catch(err) {
     document.getElementById('loading').style.display = 'none';
