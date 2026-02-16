@@ -287,11 +287,11 @@ function calcCapHold(prevSal, p, yearIndex) {
   if (isMinimum) {
     return { hold: minCapHoldForYear(yearIndex), rights: 'Minimum (2 YOS min)' };
   }
-  // Rookie / 2nd Round → special percentages
-  if (e.includes('rookie') || e.includes('second round')) {
+  // Rookie Scale Contracts only (first-round picks) → 300%/250%
+  if (e.includes('rookie') && !e.includes('second')) {
     const avg = avgSalForYear(yearIndex);
     const pct = prevSal < avg ? 3.0 : 2.5;
-    return { hold: Math.round(prevSal * pct), rights: `Rookie (${pct*100}%)` };
+    return { hold: Math.round(prevSal * pct), rights: `Rookie Scale (${pct*100}%)` };
   }
 
   // Derive contract length from signing date + end year
