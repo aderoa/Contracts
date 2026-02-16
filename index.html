@@ -728,19 +728,33 @@ async function loadData() {
       }
     } catch(e) {}
 
-    // Draft position from draft sheet (gid 1889032294, col BK = index 62)
+    // Draft position from draft sheet (gid 1889032294)
     try {
       const dR = await fetch(DRAFT_CSV_URL);
       if (dR.ok) {
         const dRows = parseCSV(await dR.text());
         if (dRows.length > 1) {
-          const draftMap = {};
-          for (let j = 1; j < dRows.length; j++) {
-            const n = (dRows[j][1]||'').trim(); // col B = player name
-            const dp = parseInt((dRows[j][62]||'').trim()); // col BK = index 62
-            if (n && dp > 0) draftMap[n] = dp;
+          const hdr = dRows[0].map(h => (h||'').trim().toUpperCase());
+          // Find player name column (try PLAYER, NAME, etc.)
+          let ni = hdr.findIndex(h => h === 'PLAYER');
+          if (ni < 0) ni = hdr.findIndex(h => h === 'NAME');
+          if (ni < 0) ni = hdr.findIndex(h => h.includes('PLAYER'));
+          // Find draft position column
+          let di = hdr.findIndex(h => h === 'DRAFT POS');
+          if (di < 0) di = hdr.findIndex(h => h.includes('DRAFT') && h.includes('POS'));
+          if (di < 0) di = hdr.findIndex(h => h === 'PICK');
+          if (di < 0) di = hdr.findIndex(h => h.includes('OVERALL'));
+          console.log('Draft sheet: name col=', ni, 'draft col=', di, 'headers sample:', hdr.slice(0, 5), '...', hdr.slice(60, 65));
+          if (ni >= 0 && di >= 0) {
+            const draftMap = {};
+            for (let j = 1; j < dRows.length; j++) {
+              const n = (dRows[j][ni]||'').trim();
+              const dp = parseInt((dRows[j][di]||'').trim());
+              if (n && dp > 0) draftMap[n] = dp;
+            }
+            allPlayers.forEach(p => { p.draftPick = draftMap[p.name] || 0; });
+            console.log('Draft picks loaded:', Object.keys(draftMap).length, 'Sample:', Object.entries(draftMap).slice(0, 3));
           }
-          allPlayers.forEach(p => { p.draftPick = draftMap[p.name] || 0; });
         }
       }
     } catch(e) { console.warn('Draft sheet fetch failed:', e); }
