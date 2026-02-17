@@ -725,6 +725,47 @@ async function loadStarterCriteria() {
   console.log(`SC: matched ${matched} players from JSON`);
 }
 
+async function loadTenureData() {
+  const urls = [
+    './tenure_data.json',
+    'https://aderoa.github.io/Contracts/tenure_data.json',
+  ];
+  let tenureJson = null;
+  for (const url of urls) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 5000);
+      const resp = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (resp.ok) {
+        tenureJson = await resp.json();
+        console.log(`Tenure: loaded from ${url}, updated ${tenureJson.updated}`);
+        break;
+      }
+    } catch(e) { console.warn(`Tenure: ${url} failed`, e.message); }
+  }
+  if (!tenureJson || !tenureJson.players) {
+    console.warn('Tenure: no data available');
+    return;
+  }
+
+  const norm = s => s.replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase();
+  const tenByNorm = {};
+  for (const [name, data] of Object.entries(tenureJson.players)) {
+    tenByNorm[norm(name)] = data;
+  }
+
+  let matched = 0;
+  allPlayers.forEach(p => {
+    const t = tenByNorm[norm(p.name)];
+    if (!t) return;
+    p.joinedSeason = t.joined_season;
+    p.continuousSeasons = t.continuous_seasons;
+    matched++;
+  });
+  console.log(`Tenure: matched ${matched} players from JSON`);
+}
+
 async function loadData() {
   try {
     const csvR = await fetch(CSV_URL);
@@ -750,6 +791,7 @@ async function loadData() {
         tk: (r[33]||'').trim(), lb: (r[34]||'').trim(), ub: (r[35]||'').trim(),
         yos: parseInt((r[38]||'').trim()) || 0,
         draftPick: 0, starterCriteria: null, scStats: null,
+        joinedSeason: null, continuousSeasons: 0,
       });
     }
 
@@ -823,8 +865,11 @@ async function loadData() {
     document.getElementById('tableArea').style.display = 'block';
     applyFilters();
 
-    // Fire-and-forget: load starter criteria in background, re-render when done
-    loadStarterCriteria().then(() => applyFilters()).catch(() => {});
+    // Fire-and-forget: load starter criteria and tenure data in background, re-render when done
+    Promise.all([
+      loadStarterCriteria(),
+      loadTenureData(),
+    ]).then(() => applyFilters()).catch(() => {});
 
   } catch(err) {
     document.getElementById('loading').style.display = 'none';
@@ -870,6 +915,7 @@ function doSort() {
       vb = b.sigDate ? new Date(b.sigDate).getTime() || 0 : 0;
     }
     else if (sortCol === 'sigTeam') { va = a.sigTeam; vb = b.sigTeam; }
+    else if (sortCol === 'tenure') { va = a.continuousSeasons || 0; vb = b.continuousSeasons || 0; }
     else if (sortCol === 'option') { va = a.option; vb = b.option; }
     else if (sortCol === 'tk') { va = parseFloat(a.tk) || 0; vb = parseFloat(b.tk) || 0; }
     else if (sortCol === 'lb') { va = parseSal(a.lb); vb = parseSal(b.lb); }
@@ -912,9 +958,10 @@ function renderTable() {
   html += thS('Type / Notes', 'notes', 'meta-col');
   html += thS('Signed', 'sigDate', 'meta-col');
   html += thS('Sign. Team', 'sigTeam', 'meta-col');
-  html += thS('TK', 'tk', 'meta-col');
-  html += thS('LB', 'lb', 'meta-col');
-  html += thS('UB', 'ub', 'meta-col');
+  html += thS('Since', 'tenure', 'meta-col');
+  html += thS('Trade Kicker', 'tk', 'meta-col');
+  html += thS('Likely Bonus', 'lb', 'meta-col');
+  html += thS('Unlikely Bonus', 'ub', 'meta-col');
   html += thS('Ext. Eligible', 'ext', 'meta-col');
   html += '</tr></thead><tbody>';
 
@@ -1010,6 +1057,9 @@ function renderTable() {
     // Signing team (highlight if different from current)
     const traded = p.sigTeam && p.team && p.sigTeam !== p.team;
     html += `<td class="meta-val"${traded ? ' style="color:#e65100;font-weight:600;"' : ''}>${p.sigTeam || ''}</td>`;
+
+    // Tenure (since season)
+    html += `<td class="meta-val">${p.joinedSeason || ''}</td>`;
 
     // Trade Kicker
     html += `<td>${p.tk ? `<span class="tag tag-tk">${p.tk}</span>` : ''}</td>`;
