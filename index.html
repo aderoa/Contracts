@@ -92,7 +92,6 @@
   .end-scenario.sc-mid { border-color: #f57f17; background: rgba(245,127,23,0.08); }
   .fa-badge { font-size: 0.6rem; font-weight: 700; padding: 1px 3px; border-radius: 2px; display: inline-block; margin-top: 1px; }
   .fa-badge.rfa { background: #e65100; color: #fff; }
-  .fa-badge.ufa { background: #455a64; color: #ccc; }
   .end-sc-year { display: block; font-weight: 700; font-size: 0.7rem; line-height: 1.2; }
 
   /* Tags */
@@ -951,8 +950,10 @@ function renderTable() {
           }
         }
         const fa = calcFAStatus(p, ey);
-        const qoTitle = qoTooltip(fa, p);
-        endHtml += `<span class="fa-badge ${fa.status.toLowerCase()}" title="${qoTitle}">${fa.status}${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
+        if (fa.status === 'RFA') {
+          const qoTitle = qoTooltip(fa, p);
+          endHtml += `<span class="fa-badge rfa" title="${qoTitle}">RFA${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
+        }
       }
     } else {
       // Multiple scenarios
@@ -970,8 +971,11 @@ function renderTable() {
           }
         }
         const fa = calcFAStatus(p, ey, sc.optDeclined);
-        const qoTitle = qoTooltip(fa, p);
-        const faHtml = `<span class="fa-badge ${fa.status.toLowerCase()}" title="${qoTitle}">${fa.status}${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
+        let faHtml = '';
+        if (fa.status === 'RFA') {
+          const qoTitle = qoTooltip(fa, p);
+          faHtml = `<span class="fa-badge rfa" title="${qoTitle}">RFA${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
+        }
         endHtml += `<div class="end-scenario ${sc.cls}">`;
         endHtml += `<span class="end-sc-year">${ey}</span>`;
         endHtml += chHtml;
