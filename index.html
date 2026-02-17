@@ -776,10 +776,22 @@ async function loadTenureData() {
   allPlayers.forEach(p => {
     const n = norm(p.name);
     const t = tenByNorm[n] || tenByNorm[TENURE_ALIASES[n]];
-    if (!t) { unmatched.push(p.name); return; }
-    p.joinedSeason = t.joined_season;
-    p.continuousSeasons = t.continuous_seasons;
-    matched++;
+    if (t) {
+      p.joinedSeason = t.joined_season;
+      p.continuousSeasons = t.continuous_seasons;
+      matched++;
+    } else if (p.sigDate) {
+      // Fallback: derive season from signing date (M/D/YYYY)
+      const parts = p.sigDate.split('/');
+      if (parts.length === 3) {
+        const m = parseInt(parts[0]), y = parseInt(parts[2]);
+        const startYr = m >= 7 ? y : y - 1;
+        const curSeason = tenureJson ? tenureJson.season : '2025-26';
+        p.joinedSeason = `${startYr}-${String(startYr + 1).slice(-2)}`;
+        p.continuousSeasons = parseInt(curSeason.split('-')[0]) - startYr + 1;
+        matched++;
+      } else { unmatched.push(p.name); }
+    } else { unmatched.push(p.name); }
   });
   console.log(`Tenure: matched ${matched} players from JSON`);
   if (unmatched.length) console.log('Tenure: unmatched players:', unmatched);
