@@ -1,0 +1,3730 @@
+{
+  "updated": "2026-02-17T20:17:25Z",
+  "season": "2025-26",
+  "players": {
+    "Onyeka Okongwu": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1630168,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Jalen Johnson": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1630552,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Mouhamed Gueye": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1631243,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Dyson Daniels": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1630700,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jacob Toppin": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1631210,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Keaton Wallace": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1630811,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Zaccharie Risacher": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1642258,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Asa Newell": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1642854,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Buddy Hield": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1627741,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "CJ McCollum": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 203468,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Caleb Houstan": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1631216,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Christian Koloko": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1631132,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Corey Kispert": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1630557,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Gabe Vincent": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1629216,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jock Landale": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1629111,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jonathan Kuminga": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1630228,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "N'Faly Dante": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1642368,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nickeil Alexander-Walker": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1629638,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "RayJ Dennis": {
+      "team": "ATL",
+      "team_id": 1610612737,
+      "player_id": 1642484,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nic Claxton": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1629651,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Day'Ron Sharpe": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1630549,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Jalen Wilson": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1630592,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Noah Clowney": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1641730,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Tyrese Martin": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1631213,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Tyson Etienne": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1630623,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Ziaire Williams": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1630533,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Ben Saraf": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1642879,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Danny Wolf": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1642874,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Drake Powell": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1642962,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "E.J. Liddell": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1630604,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Egor D\u00ebmin": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1642856,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Josh Minott": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1631169,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Michael Porter Jr.": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1629008,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nolan Traore": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1642849,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Ochai Agbaji": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1630534,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Terance Mann": {
+      "team": "BKN",
+      "team_id": 1610612751,
+      "player_id": 1629611,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jaylen Brown": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1627759,
+      "joined_season": "2016-17",
+      "continuous_seasons": 10
+    },
+    "Payton Pritchard": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1630202,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Derrick White": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1628401,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Sam Hauser": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1630573,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Jordan Walsh": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1641775,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Neemias Queta": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1629674,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Baylor Scheierman": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1631248,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Amari Williams": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1642873,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Chris Boucher": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1628449,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Hugo Gonz\u00e1lez": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1642864,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Luka Garza": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1630568,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Max Shulga": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1642917,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nikola Vu\u010devi\u0107": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 202696,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Ron Harper Jr.": {
+      "team": "BOS",
+      "team_id": 1610612738,
+      "player_id": 1631199,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "LaMelo Ball": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1630163,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Brandon Miller": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1641706,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Grant Williams": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1629684,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Miles Bridges": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1628970,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Tre Mann": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1630544,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Josh Green": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1630182,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "KJ Simpson": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1642354,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Moussa Diabat\u00e9": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1631217,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Tidjane Sala\u00fcn": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1642275,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Antonio Reeves": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1641810,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Coby White": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1629632,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Drew Peterson": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1641809,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kon Knueppel": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1642851,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Liam McNeeley": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1642862,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Mason Plumlee": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 203486,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "PJ Hall": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1641790,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Pat Connaughton": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1626192,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Ryan Kalkbrenner": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1641750,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Sion James": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1642883,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Tosan Evbuomwan": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1641787,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Xavier Tillman": {
+      "team": "CHA",
+      "team_id": 1610612766,
+      "player_id": 1630214,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Patrick Williams": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1630172,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Jalen Smith": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1630188,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Josh Giddey": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1630581,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Matas Buzelis": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1641824,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Tre Jones": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1630200,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Zach Collins": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1628380,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Anfernee Simons": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1629014,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Collin Sexton": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1629012,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Guerschon Yabusele": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1627824,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Isaac Okoro": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1630171,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jaden Ivey": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1631093,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Lachlan Olbrich": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1642950,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Leonard Miller": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1631159,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Mac McClung": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1630644,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nick Richards": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1630208,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Noa Essengue": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1642855,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Rob Dillingham": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1642265,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Trentyn Flowers": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1642280,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Yuki Kawamura": {
+      "team": "CHI",
+      "team_id": 1610612741,
+      "player_id": 1642530,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dean Wade": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1629731,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Jarrett Allen": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1628386,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Evan Mobley": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1630596,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Donovan Mitchell": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1628378,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Sam Merrill": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1630241,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Craig Porter Jr.": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1641854,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Jaylon Tyson": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1642281,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Luke Travers": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1631247,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Nae'Qwan Tomlin": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1641772,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Chris Livingston": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1641753,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dennis Schr\u00f6der": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 203471,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Emanuel Miller": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1641801,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "James Harden": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 201935,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Keon Ellis": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1631165,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Larry Nance Jr.": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1626204,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Lonzo Ball": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1628366,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Thomas Bryant": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1628418,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Tristan Enaruna": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1642400,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Tyrese Proctor": {
+      "team": "CLE",
+      "team_id": 1610612739,
+      "player_id": 1642878,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dwight Powell": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 203939,
+      "joined_season": "2014-15",
+      "continuous_seasons": 12
+    },
+    "Brandon Williams": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1630314,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Daniel Gafford": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1629655,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Dereck Lively II": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1641726,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "P.J. Washington": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1629023,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Caleb Martin": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1628997,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Klay Thompson": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 202691,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Max Christie": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1631108,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Naji Marshall": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1630230,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "AJ Johnson": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1642358,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Cooper Flagg": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1642843,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jeremiah Robinson-Earl": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1630526,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Khris Middleton": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 203114,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Marvin Bagley III": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1628963,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Miles Kelly": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1642939,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Moussa Cisse": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1630619,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Ryan Nembhard": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1642948,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Tyus Jones": {
+      "team": "DAL",
+      "team_id": 1610612742,
+      "player_id": 1626145,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nikola Joki\u0107": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 203999,
+      "joined_season": "2015-16",
+      "continuous_seasons": 11
+    },
+    "Aaron Gordon": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 203932,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Zeke Nnaji": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1630192,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Christian Braun": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1631128,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Jamal Murray": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1627750,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Peyton Watson": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1631212,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Hunter Tyson": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1641816,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Jalen Pickett": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1629618,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Julian Strawther": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1631124,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Spencer Jones": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1642461,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Bruce Brown": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1628971,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Cameron Johnson": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1629661,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Curtis Jones": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1642938,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "DaRon Holmes II": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 1641747,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jonas Valan\u010di\u016bnas": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 202685,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Tim Hardaway Jr.": {
+      "team": "DEN",
+      "team_id": 1610612743,
+      "player_id": 203501,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Isaiah Stewart": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1630191,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Cade Cunningham": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1630595,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Jalen Duren": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1631105,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Ausar Thompson": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1641709,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Marcus Sasser": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1631204,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Bobi Klintman": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1641752,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Daniss Jenkins": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1642450,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Paul Reed": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1630194,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Ronald Holland II": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1641842,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Tobias Harris": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 202699,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Tolu Smith": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1642449,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Caris LeVert": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1627747,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Chaz Lanier": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1642404,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Colby Jones": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1641732,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Duncan Robinson": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1629130,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Isaac Jones": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1642403,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Javonte Green": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1629750,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kevin Huerter": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1628989,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Wendell Moore Jr.": {
+      "team": "DET",
+      "team_id": 1610612765,
+      "player_id": 1631111,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Stephen Curry": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 201939,
+      "joined_season": "2009-10",
+      "continuous_seasons": 17
+    },
+    "Draymond Green": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 203110,
+      "joined_season": "2012-13",
+      "continuous_seasons": 14
+    },
+    "Gary Payton II": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1627780,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Moses Moody": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1630541,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Brandin Podziemski": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1641764,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Gui Santos": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1630611,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Pat Spencer": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1630311,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Jimmy Butler III": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 202710,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Quinten Post": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1642366,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Al Horford": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 201143,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "De'Anthony Melton": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1629001,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kristaps Porzi\u0146\u0123is": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 204001,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "LJ Cryer": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1643018,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Malevy Leons": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1642502,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Seth Curry": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 203552,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Will Richard": {
+      "team": "GSW",
+      "team_id": 1610612744,
+      "player_id": 1642954,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jae'Sean Tate": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1630256,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Alperen Sengun": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1630578,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Jabari Smith Jr.": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1631095,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Tari Eason": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1631106,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Aaron Holiday": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1628988,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Amen Thompson": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1641708,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Jeff Green": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 201145,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Reed Sheppard": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1642263,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Steven Adams": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 203500,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Clint Capela": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 203991,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dorian Finney-Smith": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1627827,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Isaiah Crawford": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1642384,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "JD Davison": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1631120,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Josh Okogie": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 1629006,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kevin Durant": {
+      "team": "HOU",
+      "team_id": 1610612745,
+      "player_id": 201142,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "T.J. McConnell": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 204456,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Aaron Nesmith": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1630174,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Andrew Nembhard": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1629614,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Ben Sheppard": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1641767,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Jarace Walker": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1641716,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Obi Toppin": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1630167,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Pascal Siakam": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1627783,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Quenton Jackson": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1631245,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "James Wiseman": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1630164,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Johnny Furphy": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1642277,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Tony Bradley": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1628396,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Cody Martin": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1628998,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Ethan Thompson": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1630679,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Garrison Mathews": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1629726,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Ivica Zubac": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1627826,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jay Huff": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1630643,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kam Jones": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1642880,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kobe Brown": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1641738,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Micah Potter": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1630695,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Monte Morris": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1628420,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Taelon Peter": {
+      "team": "IND",
+      "team_id": 1610612754,
+      "player_id": 1643007,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kawhi Leonard": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 202695,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Jordan Miller": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1641757,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Bogdan Bogdanovi\u0107": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 203992,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Cam Christie": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1642353,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Derrick Jones Jr.": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1627884,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Kris Dunn": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1627739,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Nicolas Batum": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 201587,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Bennedict Mathurin": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1631097,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Bradley Beal": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 203078,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Brook Lopez": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 201572,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dalano Banton": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1630625,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Darius Garland": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1629636,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Isaiah Jackson": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1630543,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jahmyl Telfort": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1643141,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "John Collins": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1628381,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kobe Sanders": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1642920,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "TyTy Washington Jr.": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1631102,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Yanic Konan Niederh\u00e4user": {
+      "team": "LAC",
+      "team_id": 1610612746,
+      "player_id": 1642949,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "LeBron James": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 2544,
+      "joined_season": "2018-19",
+      "continuous_seasons": 8
+    },
+    "Austin Reaves": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1630559,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Jarred Vanderbilt": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1629020,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Rui Hachimura": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1629060,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Jaxson Hayes": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1629637,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Bronny James": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1642355,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Dalton Knecht": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1642261,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Luka Don\u010di\u0107": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1629029,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Maxi Kleber": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1628467,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Adou Thiero": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1642876,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Chris Ma\u00f1on": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1643024,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Deandre Ayton": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1629028,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Drew Timme": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1631166,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jake LaRavia": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1631222,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kobe Bufkin": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1641723,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Luke Kennard": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1628379,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Marcus Smart": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 203935,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nick Smith Jr.": {
+      "team": "LAL",
+      "team_id": 1610612747,
+      "player_id": 1641733,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Brandon Clarke": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1629634,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Ja Morant": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1629630,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Santi Aldama": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1630583,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "GG Jackson": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1641713,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Scotty Pippen Jr.": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1630590,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Cam Spencer": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1642285,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jaylen Wells": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1642377,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Kentavious Caldwell-Pope": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 203484,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Zach Edey": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1641744,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Cedric Coward": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1642907,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jahmai Mashack": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1642942,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Javon Small": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1642914,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kyle Anderson": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 203937,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Lawson Lovering": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1643133,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Olivier-Maxence Prosper": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1641765,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Taylor Hendricks": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1641707,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Ty Jerome": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1629660,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Walter Clayton Jr.": {
+      "team": "MEM",
+      "team_id": 1610612763,
+      "player_id": 1642383,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Bam Adebayo": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1628389,
+      "joined_season": "2017-18",
+      "continuous_seasons": 9
+    },
+    "Tyler Herro": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1629639,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Nikola Jovi\u0107": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1631107,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Dru Smith": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1630696,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Jaime Jaquez Jr.": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1631170,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Andrew Wiggins": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 203952,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Davion Mitchell": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1630558,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Kel'el Ware": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1642276,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Keshad Johnson": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1642352,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Pelle Larsson": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1641796,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jahmir Young": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1642443,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kasparas Jaku\u010dionis": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1642857,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Myron Gardner": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1642066,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Norman Powell": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1626181,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Simone Fontecchio": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1631323,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Vladislav Goldin": {
+      "team": "MIA",
+      "team_id": 1610612748,
+      "player_id": 1642884,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Giannis Antetokounmpo": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 203507,
+      "joined_season": "2013-14",
+      "continuous_seasons": 13
+    },
+    "Bobby Portis": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1626171,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "AJ Green": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1631260,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Andre Jackson Jr.": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1641748,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Ryan Rollins": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1631157,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Gary Trent Jr.": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1629018,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jericho Sims": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1630579,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Kevin Porter Jr.": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1629645,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Kyle Kuzma": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1628398,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Pete Nance": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1631250,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Taurean Prince": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1627752,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Cam Thomas": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1630560,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Gary Harris": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 203914,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Mark Sears": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1641813,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Myles Turner": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1626167,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Ousmane Dieng": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 1631172,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Thanasis Antetokounmpo": {
+      "team": "MIL",
+      "team_id": 1610612749,
+      "player_id": 203648,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Naz Reid": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1629675,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Anthony Edwards": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1630162,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Jaden McDaniels": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1630183,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Mike Conley": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 201144,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Rudy Gobert": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 203497,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Bones Hyland": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1630538,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Donte DiVincenzo": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1628978,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jaylen Clark": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1641740,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Joe Ingles": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 204060,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Julius Randle": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 203944,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Terrence Shannon Jr.": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1630545,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Ayo Dosunmu": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1630245,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Enrique Freeman": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1642402,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Joan Beringer": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1642866,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Johnny Juzang": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1630548,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Julian Phillips": {
+      "team": "MIN",
+      "team_id": 1610612750,
+      "player_id": 1641763,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Herbert Jones": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1630529,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Trey Murphy III": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1630530,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Zion Williamson": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1629627,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Jordan Hawkins": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1641722,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Karlo Matkovi\u0107": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1631255,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Yves Missi": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1642274,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Bryce McGowens": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1631121,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "DeAndre Jordan": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 201599,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Derik Queen": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1642852,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Hunter Dickinson": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1630621,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jeremiah Fears": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1642847,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jordan Poole": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1629673,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kevon Looney": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1626172,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Micah Peavy": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1642877,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Saddiq Bey": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1630180,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Trey Alexander": {
+      "team": "NOP",
+      "team_id": 1610612740,
+      "player_id": 1641725,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Mitchell Robinson": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1629011,
+      "joined_season": "2018-19",
+      "continuous_seasons": 8
+    },
+    "Miles McBride": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1630540,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Jalen Brunson": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1628973,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Josh Hart": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1628404,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "OG Anunoby": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1628384,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Ariel Hukporti": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1630574,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Karl-Anthony Towns": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1626157,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Kevin McCullar Jr.": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1641755,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Landry Shamet": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1629013,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Mikal Bridges": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1628969,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Pac\u00f4me Dadiet": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1642359,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Tyler Kolek": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1642278,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Dillon Jones": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1641794,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jordan Clarkson": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 203903,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jose Alvarado": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1630631,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Mohamed Diawara": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1642885,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Trey Jemison III": {
+      "team": "NYK",
+      "team_id": 1610612752,
+      "player_id": 1641998,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Luguentz Dort": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1629652,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Shai Gilgeous-Alexander": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1628983,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Kenrich Williams": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1629026,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Aaron Wiggins": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1630598,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Isaiah Joe": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1630198,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Jalen Williams": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1631114,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Jaylin Williams": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1631119,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Cason Wallace": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1641717,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Chet Holmgren": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1631096,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Ajay Mitchell": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1642349,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Alex Caruso": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1627936,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Branden Carlson": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1642382,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Isaiah Hartenstein": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1628392,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Brooks Barnhizer": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1642964,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Buddy Boeheim": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1631205,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Chris Youngblood": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1642959,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jared McCain": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1642272,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nikola Topi\u0107": {
+      "team": "OKC",
+      "team_id": 1610612760,
+      "player_id": 1642260,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Moritz Wagner": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1629021,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Wendell Carter Jr.": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1628976,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Franz Wagner": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1630532,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Jalen Suggs": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1630591,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Goga Bitadze": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1629048,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Jonathan Isaac": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1628371,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Paolo Banchero": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1631094,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Anthony Black": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1641710,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Jett Howard": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1641724,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Desmond Bane": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1630217,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Tristan da Silva": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1641783,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jamal Cain": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1631288,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jase Richardson": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1642859,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jevon Carter": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1628975,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Noah Penda": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1642869,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Orlando Robinson": {
+      "team": "ORL",
+      "team_id": 1610612753,
+      "player_id": 1631115,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Joel Embiid": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 203954,
+      "joined_season": "2016-17",
+      "continuous_seasons": 10
+    },
+    "Tyrese Maxey": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1630178,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Kelly Oubre Jr.": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1626162,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Kyle Lowry": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 200768,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Adem Bona": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1641737,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Andre Drummond": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 203083,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Eric Gordon": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 201569,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Justin Edwards": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1642348,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Paul George": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 202331,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Quentin Grimes": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1629656,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Charles Bassey": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1629646,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dalen Terry": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1631207,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dominick Barlow": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1631230,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Hunter Sallis": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1642282,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jabari Walker": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1631133,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Johni Broome": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1641780,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "MarJon Beauchamp": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1630699,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Patrick Baldwin Jr.": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1631116,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Trendon Watford": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1630570,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "VJ Edgecombe": {
+      "team": "PHI",
+      "team_id": 1610612755,
+      "player_id": 1642845,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Devin Booker": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1626164,
+      "joined_season": "2015-16",
+      "continuous_seasons": 11
+    },
+    "Grayson Allen": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1628960,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Royce O'Neale": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1626220,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Collin Gillespie": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1631221,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Oso Ighodaro": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1642345,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Ryan Dunn": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1642346,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Amir Coffey": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1629599,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Cole Anthony": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1630175,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dillon Brooks": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1628415,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Isaiah Livers": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1630587,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jalen Green": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1630224,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jamaree Bouyea": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1631123,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jordan Goodwin": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1630692,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Khaman Maluach": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1642863,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Koby Brea": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1642886,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Mark Williams": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1631109,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nigel Hayes-Davis": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1628502,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Rasheer Fleming": {
+      "team": "PHX",
+      "team_id": 1610612756,
+      "player_id": 1642853,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jerami Grant": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 203924,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Matisse Thybulle": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1629680,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Shaedon Sharpe": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1631101,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Duop Reath": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1641871,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Kris Murray": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1631200,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Rayan Rupert": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1641712,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Robert Williams III": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1629057,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Scoot Henderson": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1630703,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Toumani Camara": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1641739,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Deni Avdija": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1630166,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Donovan Clingan": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1642270,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Sidy Cissoko": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1631321,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Blake Wesley": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1631104,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Caleb Love": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1631126,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Javonte Cooke": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1631451,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jrue Holiday": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 201950,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "V\u00edt Krej\u010d\u00ed": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1630249,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Yang Hansen": {
+      "team": "POR",
+      "team_id": 1610612757,
+      "player_id": 1642905,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Domantas Sabonis": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1627734,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Keegan Murray": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1631099,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Malik Monk": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1628370,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "DeMar DeRozan": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 201942,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Devin Carter": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1642269,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Doug McDermott": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 203926,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Zach LaVine": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 203897,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Daeqwon Plowden": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1631342,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dario Saric": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 203967,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "De'Andre Hunter": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1629631,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Drew Eubanks": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1629234,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dylan Cardwell": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1642928,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Isaiah Stevens": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1641815,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Maxime Raynaud": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1642875,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Nique Clifford": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1642363,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Precious Achiuwa": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 1630173,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Russell Westbrook": {
+      "team": "SAC",
+      "team_id": 1610612758,
+      "player_id": 201566,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Keldon Johnson": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1629640,
+      "joined_season": "2019-20",
+      "continuous_seasons": 7
+    },
+    "Devin Vassell": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1630170,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Jeremy Sochan": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1631110,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Julian Champagnie": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1630577,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Victor Wembanyama": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1641705,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Bismack Biyombo": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 202687,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "De'Aaron Fox": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1628368,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Harrison Barnes": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 203084,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Harrison Ingram": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1631127,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jordan McLaughlin": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1629162,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Riley Minix": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1642434,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Stephon Castle": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1642264,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Carter Bryant": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1642868,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "David Jones Garcia": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1642357,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Dylan Harper": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1642844,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kelly Olynyk": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 203482,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Lindy Waters III": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1630322,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Luke Kornet": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1628436,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Stanley Umude": {
+      "team": "SAS",
+      "team_id": 1610612759,
+      "player_id": 1630649,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Scottie Barnes": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1630567,
+      "joined_season": "2021-22",
+      "continuous_seasons": 5
+    },
+    "Jakob Poeltl": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1627751,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Garrett Temple": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 202066,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Gradey Dick": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1641711,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Immanuel Quickley": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1630193,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "RJ Barrett": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1629628,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "A.J. Lawson": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1630639,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Brandon Ingram": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1627742,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Ja'Kobe Walter": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1642266,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jamal Shead": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1642347,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jamison Battle": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1642419,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Jonathan Mogbo": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1642367,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Alijah Martin": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1642918,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Chris Paul": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 101108,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Chucky Hepburn": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1642935,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Collin Murray-Boyles": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1642867,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Mo Bamba": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1628964,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Sandro Mamukelashvili": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1630572,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Trayce Jackson-Davis": {
+      "team": "TOR",
+      "team_id": 1610612761,
+      "player_id": 1631218,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Lauri Markkanen": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1628374,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Walker Kessler": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1631117,
+      "joined_season": "2022-23",
+      "continuous_seasons": 4
+    },
+    "Brice Sensabaugh": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1641729,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Keyonte George": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1641718,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Cody Williams": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1642262,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Elijah Harkless": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1641989,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Isaiah Collier": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1642268,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Kyle Filipowski": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1642271,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Oscar Tshiebwe": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1631131,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Svi Mykhailiuk": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1629004,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Ace Bailey": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1642846,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Blake Hinson": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1642396,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jaren Jackson Jr.": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1628991,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "John Konchar": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1629723,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jusuf Nurki\u0107": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 203994,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kevin Love": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 201567,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Vince Williams Jr.": {
+      "team": "UTA",
+      "team_id": 1610612762,
+      "player_id": 1631246,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Anthony Gill": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1630264,
+      "joined_season": "2020-21",
+      "continuous_seasons": 6
+    },
+    "Bilal Coulibaly": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1641731,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Justin Champagnie": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1630551,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Tristan Vukcevic": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1641774,
+      "joined_season": "2023-24",
+      "continuous_seasons": 3
+    },
+    "Alex Sarr": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1642259,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Bub Carrington": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1642267,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Kyshawn George": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1642273,
+      "joined_season": "2024-25",
+      "continuous_seasons": 2
+    },
+    "Anthony Davis": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 203076,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Cam Whitmore": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1641715,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "D'Angelo Russell": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1626156,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jaden Hardy": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1630702,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Jamir Watkins": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1642364,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Kadary Richmond": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1642955,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Keshon Gilbert": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1642933,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Malaki Branham": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1631103,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Sharife Cooper": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1630536,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Skal Labissiere": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1627746,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Trae Young": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1629027,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Tre Johnson": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1642848,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    },
+    "Will Riley": {
+      "team": "WAS",
+      "team_id": 1610612764,
+      "player_id": 1642860,
+      "joined_season": "2025-26",
+      "continuous_seasons": 1
+    }
+  }
+}
