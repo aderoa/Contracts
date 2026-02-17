@@ -101,6 +101,8 @@
   .tag-opt-to { background: #e3f2fd; color: #1565c0; }
   .tag-opt-po { background: #f3e5f5; color: #7b1fa2; }
   .tag-tk { background: #fff3e0; color: #e65100; }
+  .tag-lb { background: #e8f5e9; color: #2e7d32; }
+  .tag-ub { background: #fce4ec; color: #c62828; }
   .tag-ext-elig { background: #e8f5e9; color: #2e7d32; }
   .tag-ext-date { background: #e3f2fd; color: #1565c0; }
   .tag-ext-inelig { background: #fce4ec; color: #c62828; }
@@ -870,6 +872,8 @@ function doSort() {
     else if (sortCol === 'sigTeam') { va = a.sigTeam; vb = b.sigTeam; }
     else if (sortCol === 'option') { va = a.option; vb = b.option; }
     else if (sortCol === 'tk') { va = parseFloat(a.tk) || 0; vb = parseFloat(b.tk) || 0; }
+    else if (sortCol === 'lb') { va = parseSal(a.lb); vb = parseSal(b.lb); }
+    else if (sortCol === 'ub') { va = parseSal(a.ub); vb = parseSal(b.ub); }
     else if (sortCol === 'ext') {
       // Sort by status priority first, then by date for eligible/future
       va = a.ext.sortVal * 1e15 + (a.ext.dateVal || 0);
@@ -909,6 +913,8 @@ function renderTable() {
   html += thS('Signed', 'sigDate', 'meta-col');
   html += thS('Sign. Team', 'sigTeam', 'meta-col');
   html += thS('TK', 'tk', 'meta-col');
+  html += thS('LB', 'lb', 'meta-col');
+  html += thS('UB', 'ub', 'meta-col');
   html += thS('Ext. Eligible', 'ext', 'meta-col');
   html += '</tr></thead><tbody>';
 
@@ -1007,6 +1013,12 @@ function renderTable() {
 
     // Trade Kicker
     html += `<td>${p.tk ? `<span class="tag tag-tk">${p.tk}</span>` : ''}</td>`;
+
+    // Likely Bonus
+    html += `<td>${p.lb ? `<span class="tag tag-lb">${p.lb}</span>` : ''}</td>`;
+
+    // Unlikely Bonus
+    html += `<td>${p.ub ? `<span class="tag tag-ub">${p.ub}</span>` : ''}</td>`;
 
     // Extension Eligibility
     html += '<td>' + extTag(p.ext) + '</td>';
