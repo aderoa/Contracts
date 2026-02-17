@@ -103,6 +103,7 @@
   .tag-tk { background: #fff3e0; color: #e65100; }
   .tag-lb { background: #e8f5e9; color: #2e7d32; }
   .tag-ub { background: #fce4ec; color: #c62828; }
+  .tag-dv { background: #fff8e1; color: #f57f17; font-weight: 700; font-size: 0.65rem; margin-left: 4px; }
   .tag-ext-elig { background: #e8f5e9; color: #2e7d32; }
   .tag-ext-date { background: #e3f2fd; color: #1565c0; }
   .tag-ext-inelig { background: #fce4ec; color: #c62828; }
@@ -562,36 +563,46 @@ function calcFAStatus(p, endYear, optDeclined) {
 // =====================================================
 // EXTENSION ELIGIBILITY
 // =====================================================
+function dvLabel(p) {
+  if (!p.dvEligible || !p.dvAwards || !p.dvAwards.length) return '';
+  const short = { 'Most Valuable Player': 'MVP', 'Defensive Player of the Year': 'DPOY',
+    'All-NBA First Team': 'All-NBA 1st', 'All-NBA Second Team': 'All-NBA 2nd', 'All-NBA Third Team': 'All-NBA 3rd' };
+  const items = p.dvAwards.map(a => `${short[a.award]||a.award} '${String(a.year).slice(-2)}`).join(', ');
+  return ` · DV Eligible (${items})`;
+}
+
 function calcExtElig(p) {
+  const dv = dvLabel(p);
+
   // No team = free agent
-  if (!p.team) return { status: 'na', text: 'Free Agent', sortVal: 9 };
+  if (!p.team) return { status: 'na', text: 'Free Agent', sortVal: 9, dv: p.dvEligible };
 
   // Two-Way / 10-Day
   const notes_lc = (p.notes||'').toLowerCase();
   if (notes_lc.includes('two-way') || p.yrs.every(y => y.st === 'TWO-WAY' || !y.st))
-    return { status: 'na', text: 'N/A', detail: 'Two-Way', sortVal: 8 };
+    return { status: 'na', text: 'N/A', detail: 'Two-Way', sortVal: 8, dv: p.dvEligible };
   if (notes_lc.includes('10-day') || p.yrs.every(y => y.st === '10-DAY' || !y.st))
-    return { status: 'na', text: 'N/A', detail: '10-Day', sortVal: 8 };
+    return { status: 'na', text: 'N/A', detail: '10-Day', sortVal: 8, dv: p.dvEligible };
 
   // Already extended — calculate next eligibility from the extension signing date
   if (notes_lc.includes('extension')) {
-    if (!p.sigDate || !p.end) return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+    if (!p.sigDate || !p.end) return { status: 'extended', text: 'Extended', detail: p.notes + dv, sortVal: 6, dv: p.dvEligible };
 
     const parts = p.sigDate.split('/');
-    if (parts.length !== 3) return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+    if (parts.length !== 3) return { status: 'extended', text: 'Extended', detail: p.notes + dv, sortVal: 6, dv: p.dvEligible };
     let eMonth = parseInt(parts[0]), eDay = parseInt(parts[1]), eYear = parseInt(parts[2]);
-    if (isNaN(eMonth) || isNaN(eDay) || isNaN(eYear)) return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+    if (isNaN(eMonth) || isNaN(eDay) || isNaN(eYear)) return { status: 'extended', text: 'Extended', detail: p.notes + dv, sortVal: 6, dv: p.dvEligible };
 
     // Oct 1 rule
     if (eMonth === 10 && eDay >= 2) eDay = 1;
 
     const eFirstEnd = eMonth >= 7 ? eYear + 1 : eYear;
     const eEndYear = parseInt(p.end);
-    if (isNaN(eEndYear)) return { status: 'extended', text: 'Extended', detail: p.notes, sortVal: 6 };
+    if (isNaN(eEndYear)) return { status: 'extended', text: 'Extended', detail: p.notes + dv, sortVal: 6, dv: p.dvEligible };
     const eTotalLen = eEndYear - eFirstEnd + 1;
 
     // Extension resulted in 1-2 years total — shouldn't happen, but handle it
-    if (eTotalLen <= 2) return { status: 'extended', text: 'Extended', detail: `${p.notes} · ${eTotalLen}-yr total, next ext. ineligible`, sortVal: 6 };
+    if (eTotalLen <= 2) return { status: 'extended', text: 'Extended', detail: `${p.notes} · ${eTotalLen}-yr total, next ext. ineligible` + dv, sortVal: 6, dv: p.dvEligible };
 
     const eWait = eTotalLen <= 4 ? 2 : 3;
     const eAnniv = new Date(eYear + eWait, eMonth - 1, eDay);
@@ -602,33 +613,33 @@ function calcExtElig(p) {
     if (eAnniv <= today) {
       return {
         status: 'eligible', text: 'Eligible',
-        detail: `Extended (${p.notes}) · Re-eligible since ${eFmt}` + (traded ? ' · Trade restriction may apply' : ''),
-        sortVal: 1, dateVal: eAnniv.getTime()
+        detail: `Extended (${p.notes}) · Re-eligible since ${eFmt}` + (traded ? ' · Trade restriction may apply' : '') + dv,
+        sortVal: 1, dateVal: eAnniv.getTime(), dv: p.dvEligible
       };
     } else {
       return {
         status: 'future', text: eFmt,
-        detail: `Extended (${p.notes}) · ${eTotalLen}-yr total, ${eWait === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Trade restriction may apply' : ''),
-        sortVal: 2, dateVal: eAnniv.getTime()
+        detail: `Extended (${p.notes}) · ${eTotalLen}-yr total, ${eWait === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Trade restriction may apply' : '') + dv,
+        sortVal: 2, dateVal: eAnniv.getTime(), dv: p.dvEligible
       };
     }
   }
 
   // Rookie Scale Contract — different rules (eligible between 3rd-4th year)
   if (notes_lc.includes('rookie scale')) {
-    return { status: 'rookie', text: 'Rookie Scale', detail: 'Different rules apply', sortVal: 5 };
+    return { status: 'rookie', text: 'Rookie Scale', detail: 'Different rules apply' + dv, sortVal: 5, dv: p.dvEligible };
   }
 
   // No signing date → unknown
-  if (!p.sigDate || !p.end) return { status: 'unknown', text: '—', sortVal: 10 };
+  if (!p.sigDate || !p.end) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
 
   // Parse signing date (M/D/YYYY)
   const parts = p.sigDate.split('/');
-  if (parts.length !== 3) return { status: 'unknown', text: '—', sortVal: 10 };
+  if (parts.length !== 3) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
   let sigMonth = parseInt(parts[0]);
   let sigDay = parseInt(parts[1]);
   const sigYear = parseInt(parts[2]);
-  if (isNaN(sigMonth) || isNaN(sigDay) || isNaN(sigYear)) return { status: 'unknown', text: '—', sortVal: 10 };
+  if (isNaN(sigMonth) || isNaN(sigDay) || isNaN(sigYear)) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
 
   // Oct 1 rule: signings Oct 2 through end of Oct count as Oct 1 for anniversary
   if (sigMonth === 10 && sigDay >= 2) { sigDay = 1; }
@@ -638,11 +649,11 @@ function calcExtElig(p) {
 
   // Contract length
   const endYear = parseInt(p.end);
-  if (isNaN(endYear)) return { status: 'unknown', text: '—', sortVal: 10 };
+  if (isNaN(endYear)) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
   const length = endYear - firstSeasonEnd + 1;
 
   // 1-2 year deals cannot be extended
-  if (length <= 2) return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal`, sortVal: 7 };
+  if (length <= 2) return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal` + dv, sortVal: 7, dv: p.dvEligible };
 
   // Waiting period: 3-4yr → 2nd anniversary, 5-6yr → 3rd anniversary
   const waitYears = length <= 4 ? 2 : 3;
@@ -663,14 +674,14 @@ function calcExtElig(p) {
   if (annivDate <= today) {
     return {
       status: 'eligible', text: 'Eligible',
-      detail: `Since ${fmtDate}` + (traded ? ' · Trade restriction may apply' : ''),
-      sortVal: 1, dateVal: annivDate.getTime()
+      detail: `Since ${fmtDate}` + (traded ? ' · Trade restriction may apply' : '') + dv,
+      sortVal: 1, dateVal: annivDate.getTime(), dv: p.dvEligible
     };
   } else {
     return {
       status: 'future', text: fmtDate,
-      detail: `${length}-year deal, ${waitYears === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Trade restriction may apply' : ''),
-      sortVal: 2, dateVal: annivDate.getTime()
+      detail: `${length}-year deal, ${waitYears === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Trade restriction may apply' : '') + dv,
+      sortVal: 2, dateVal: annivDate.getTime(), dv: p.dvEligible
     };
   }
 }
@@ -805,9 +816,17 @@ async function loadData() {
     if (rows.length < 2) throw new Error('No data');
 
     allPlayers = [];
+    const awardsRaw = []; // Collect awards from columns AO(40), AP(41), AQ(42)
     for (let i = 1; i < rows.length; i++) {
       const r = rows[i];
       const name = (r[0]||'').trim();
+
+      // Parse awards data (separate table in same sheet)
+      const awPlayer = (r[40]||'').trim();
+      const awAward = (r[41]||'').trim();
+      const awYear = parseInt((r[42]||'').trim()) || 0;
+      if (awPlayer && awAward && awYear) awardsRaw.push({ player: awPlayer, award: awAward, year: awYear });
+
       if (!name) continue;
       const team = (r[2]||'').trim() || null;
       const yrs = YEARS.map(yr => ({ sal: parseSal(r[yr.sc]), ch: parseSal(r[yr.cc]), st: normSt(r[yr.tc]) }));
@@ -825,6 +844,33 @@ async function loadData() {
         joinedSeason: null, continuousSeasons: 0,
       });
     }
+
+    // Build awards map (normalized name → array of {award, year})
+    const normAw = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
+      .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+    const awardsMap = {};
+    awardsRaw.forEach(a => {
+      const n = normAw(a.player);
+      if (!awardsMap[n]) awardsMap[n] = [];
+      awardsMap[n].push({ award: a.award, year: a.year });
+    });
+    console.log(`Awards: loaded ${awardsRaw.length} entries for ${Object.keys(awardsMap).length} players`);
+
+    // Attach DV eligibility to each player
+    const DV_AWARDS = ['Most Valuable Player', 'Defensive Player of the Year', 'All-NBA First Team', 'All-NBA Second Team', 'All-NBA Third Team'];
+    const CURRENT_YEAR = 2025; // 2025 = 2024-25 season (most recent completed)
+    const DV_WINDOW = [CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2]; // last 3 seasons
+
+    allPlayers.forEach(p => {
+      const pAwards = awardsMap[normAw(p.name)] || [];
+      const dvAwards = pAwards.filter(a => DV_AWARDS.includes(a.award) && DV_WINDOW.includes(a.year));
+      // DV criteria: earned in most recent season OR 2 of last 3
+      const inMostRecent = dvAwards.some(a => a.year === CURRENT_YEAR);
+      const countIn3 = dvAwards.length;
+      p.dvEligible = inMostRecent || countIn3 >= 2;
+      p.dvAwards = dvAwards;
+      p.allAwards = pAwards;
+    });
 
     // Compute extension eligibility for all players
     allPlayers.forEach(p => { p.ext = calcExtElig(p); });
@@ -1164,6 +1210,9 @@ function extTag(ext) {
   let html = `<span class="tag ${cls}"${title}>${ext.text}</span>`;
   if (ext.detail && (ext.status === 'eligible' || ext.status === 'future') && ext.detail.includes('Trade restriction')) {
     html += '<span class="ext-note">⚠ traded</span>';
+  }
+  if (ext.dv) {
+    html += '<span class="tag tag-dv">DV</span>';
   }
   return html;
 }
