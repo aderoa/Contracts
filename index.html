@@ -35,7 +35,7 @@
   .table-wrap { background: rgba(255,255,255,0.95); border-radius: 12px; overflow: auto; box-shadow: 0 4px 24px rgba(0,0,0,0.3); max-height: calc(100vh - 200px); }
 
   /* Table */
-  table { width: 100%; border-collapse: collapse; color: #1a1a2e; font-size: 0.75rem; }
+  table { border-collapse: collapse; color: #1a1a2e; font-size: 0.75rem; }
   thead { position: sticky; top: 0; z-index: 20; }
   th { background: #1a1a2e; color: white; padding: 0.5rem 0.4rem; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; text-align: center; border-bottom: 3px solid #667eea; cursor: pointer; user-select: none; transition: background 0.15s; }
   th:hover { background: #2a2a5e; }
@@ -702,7 +702,7 @@ async function loadStarterCriteria() {
   }
 
   // Populate SC_OVERRIDE and SC_STATS globals
-  const norm = s => s.replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase();
+  const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase();
   const scByNorm = {};
   for (const [name, data] of Object.entries(scJson.players)) {
     scByNorm[norm(name)] = { name, ...data };
@@ -749,7 +749,7 @@ async function loadTenureData() {
     return;
   }
 
-  const norm = s => s.replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase();
+  const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase();
   const tenByNorm = {};
   for (const [name, data] of Object.entries(tenureJson.players)) {
     tenByNorm[norm(name)] = data;
@@ -838,7 +838,7 @@ async function loadData() {
           }
           console.log('Draft sheet: name col=', ni, 'draft col=', di);
           if (ni >= 0 && di >= 0) {
-            const norm = s => s.replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase();
+            const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase();
             const draftMap = {};
             for (let j = 1; j < dRows.length; j++) {
               const n = (dRows[j][ni]||'').trim();
