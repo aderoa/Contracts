@@ -32,10 +32,14 @@
   .error { text-align: center; padding: 2rem; color: #f87171; }
 
   /* Table wrapper */
-  .table-wrap { background: rgba(255,255,255,0.95); border-radius: 12px; overflow: auto; box-shadow: 0 4px 24px rgba(0,0,0,0.3); max-height: calc(100vh - 200px); }
+  .table-wrap { background: rgba(255,255,255,0.95); border-radius: 12px; overflow-x: scroll; overflow-y: auto; box-shadow: 0 4px 24px rgba(0,0,0,0.3); max-height: calc(100vh - 200px); }
+  .table-wrap::-webkit-scrollbar { height: 12px; width: 10px; }
+  .table-wrap::-webkit-scrollbar-track { background: #e0e0e0; border-radius: 6px; }
+  .table-wrap::-webkit-scrollbar-thumb { background: #888; border-radius: 6px; }
+  .table-wrap::-webkit-scrollbar-thumb:hover { background: #666; }
 
   /* Table */
-  table { border-collapse: collapse; color: #1a1a2e; font-size: 0.75rem; }
+  table { border-collapse: collapse; color: #1a1a2e; font-size: 0.75rem; min-width: 2200px; }
   thead { position: sticky; top: 0; z-index: 20; }
   th { background: #1a1a2e; color: white; padding: 0.5rem 0.4rem; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; text-align: center; border-bottom: 3px solid #667eea; cursor: pointer; user-select: none; transition: background 0.15s; }
   th:hover { background: #2a2a5e; }
@@ -756,14 +760,16 @@ async function loadTenureData() {
   }
 
   let matched = 0;
+  const unmatched = [];
   allPlayers.forEach(p => {
     const t = tenByNorm[norm(p.name)];
-    if (!t) return;
+    if (!t) { unmatched.push(p.name); return; }
     p.joinedSeason = t.joined_season;
     p.continuousSeasons = t.continuous_seasons;
     matched++;
   });
   console.log(`Tenure: matched ${matched} players from JSON`);
+  if (unmatched.length) console.log('Tenure: unmatched players:', unmatched);
 }
 
 async function loadData() {
