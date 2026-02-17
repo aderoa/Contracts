@@ -1,0 +1,32 @@
+name: Update Player Tenure Data
+
+on:
+  schedule:
+    # Weekly on Mondays at 11:00 UTC (after potential weekend trades settle)
+    - cron: '0 11 * * 1'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  update-tenure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run tenure updater
+        run: python update_tenure.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tenure_data.json
+          git diff --cached --quiet || git commit -m "Update tenure data $(date +%Y-%m-%d)"
+          git push
