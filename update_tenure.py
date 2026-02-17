@@ -2,44 +2,34 @@
 """
 update_tenure.py — Fetch date each player joined their current NBA team.
 
-Strategy:
-  1) Raw commonteamroster API for all 30 teams → check for HOW_ACQUIRED field
-  2) For each player, playercareerstats → find first season of current continuous stint
-  3) For players who joined mid-season (traded), playergamelog → find exact first game date
+FAST VERSION: Uses bulk leaguedashplayerstats (1 call per season) instead of
+per-player career stats (~600 calls). Total: ~20 API calls, runs in ~2 minutes.
 
-Outputs tenure_data.json:
-{
-  "updated": "2026-02-17T10:00:00Z",
-  "players": {
-    "LeBron James": {
-      "team": "LAL",
-      "team_id": 1610612747,
-      "player_id": 2544,
-      "joined_season": "2025-26",
-      "joined_date": "2025-10-22",
-      "how_acquired": "Free Agent",
-      "continuous_seasons": 3
-    },
-    ...
-  }
-}
+Strategy:
+  1. Fetch current season stats → all active players + their current team
+  2. Walk backwards season by season (bulk call each) to find when each
+     player first appeared on their current team continuously
+  3. Output tenure_data.json
+
 """
 
 import json, time, requests, sys
 from datetime import datetime, timezone
 
 # --- CONFIG ---
-SEASON = '2025-26'
-SEASON_START_YEAR = 2025
+CURRENT_SEASON = '2025-26'
+MAX_LOOKBACK = 22  # LeBron's been in the league 23 seasons, cover edge cases
 OUTPUT = 'tenure_data.json'
 
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0',
-    'Accept': 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'en-US,en;q=0.9',
     'Referer': 'https://www.nba.com/',
     'x-nba-stats-origin': 'stats',
     'x-nba-stats-token': 'true',
     'Origin': 'https://www.nba.com',
+    'Connection': 'keep-alive',
 }
 
 NBA_TEAMS = {
@@ -53,262 +43,235 @@ NBA_TEAMS = {
     1610612762: 'UTA', 1610612764: 'WAS',
 }
 
-def api_get(url, params=None):
+
+def season_str(start_year):
+    """Convert start year to season string: 2025 → '2025-26'"""
+    return f"{start_year}-{str(start_year + 1)[-2:]}"
+
+
+def prev_season(s):
+    """'2025-26' → '2024-25'"""
+    yr = int(s.split('-')[0])
+    return season_str(yr - 1)
+
+
+def api_get(url, params):
     """Make NBA stats API request with retry."""
     for attempt in range(3):
         try:
-            r = requests.get(url, headers=HEADERS, params=params, timeout=30)
-            r.raise_for_status()
-            return r.json()
+            r = requests.get(url, headers=HEADERS, params=params, timeout=45)
+            if r.status_code == 200:
+                return r.json()
+            print(f"  HTTP {r.status_code}, retry {attempt+1}/3...")
         except Exception as e:
-            print(f"  Retry {attempt+1}/3: {e}")
-            time.sleep(3 * (attempt + 1))
+            print(f"  Error: {e}, retry {attempt+1}/3...")
+        time.sleep(3 * (attempt + 1))
     return None
 
 
-# ============================================================
-# PHASE 1: Fetch all rosters via commonteamroster (raw API)
-# ============================================================
-def fetch_all_rosters():
-    """Fetch roster for all 30 teams, capturing ALL returned fields."""
-    all_players = {}
-    extra_fields_found = set()
-
-    for team_id, abbr in sorted(NBA_TEAMS.items(), key=lambda x: x[1]):
-        print(f"Fetching roster: {abbr}...")
-        data = api_get(
-            'https://stats.nba.com/stats/commonteamroster',
-            params={'TeamID': team_id, 'Season': SEASON, 'LeagueID': '00'}
-        )
-        if not data:
-            print(f"  FAILED for {abbr}")
-            continue
-
-        for rs in data.get('resultSets', []):
-            if rs['name'] != 'CommonTeamRoster':
-                continue
-            headers = rs['headers']
-            # Track any fields beyond the standard set
-            standard = {'TeamID','SEASON','LeagueID','PLAYER','PLAYER_SLUG','NUM',
-                        'POSITION','HEIGHT','WEIGHT','BIRTH_DATE','AGE','EXP',
-                        'SCHOOL','PLAYER_ID'}
-            extra = set(headers) - standard
-            if extra:
-                extra_fields_found.update(extra)
-
-            for row in rs['rowSet']:
-                rec = dict(zip(headers, row))
-                name = rec.get('PLAYER', '')
-                pid = rec.get('PLAYER_ID', 0)
-                all_players[pid] = {
-                    'name': name,
-                    'team': abbr,
-                    'team_id': team_id,
-                    'player_id': pid,
-                    'exp': rec.get('EXP', ''),
-                    'birth_date': rec.get('BIRTH_DATE', ''),
-                    # Capture any extra fields (HOW_ACQUIRED, NICKNAME, etc.)
-                    **{k: rec.get(k) for k in extra}
-                }
-
-        time.sleep(0.8)
-
-    if extra_fields_found:
-        print(f"\n*** Extra fields found in API: {extra_fields_found} ***\n")
-    else:
-        print("\nNo extra fields beyond standard roster data.\n")
-
-    return all_players
-
-
-# ============================================================
-# PHASE 2: Determine tenure via playercareerstats
-# ============================================================
-def fetch_career_tenure(player_id, current_team_id):
+def fetch_season_players(season):
     """
-    Get career stats and find first season of current continuous stint.
-    Returns (first_season_str, num_continuous_seasons) e.g. ('2023-24', 3)
+    Fetch all players for a season via leaguedashplayerstats.
+    Returns:
+      - player_teams: dict player_id → set of team_ids they played for
+      - player_names: dict player_id → name
+    
+    Players traded mid-season appear once per team.
     """
+    print(f"  Fetching {season}...", end='', flush=True)
     data = api_get(
-        'https://stats.nba.com/stats/playercareerstats',
-        params={'PlayerID': player_id, 'PerMode': 'Totals', 'LeagueID': '00'}
-    )
-    if not data:
-        return None, 0
-
-    # Find SeasonTotalsRegularSeason
-    for rs in data.get('resultSets', []):
-        if rs['name'] != 'SeasonTotalsRegularSeason':
-            continue
-        headers = rs['headers']
-        rows = rs['rowSet']
-
-        # Build list of (season, team_id) in chronological order
-        season_teams = []
-        for row in rows:
-            rec = dict(zip(headers, row))
-            sid = rec.get('SEASON_ID', '')
-            tid = rec.get('TEAM_ID', 0)
-            lid = rec.get('LEAGUE_ID', '00')
-            if lid != '00':
-                continue  # Skip non-NBA
-            season_teams.append((sid, tid))
-
-        if not season_teams:
-            return None, 0
-
-        # Walk backwards to find first season of continuous stint with current team
-        # A player can appear multiple times in same season (traded mid-season)
-        # We need: current team appears in a season → check previous season, etc.
-        # Group by season
-        from collections import OrderedDict
-        seasons_with_team = OrderedDict()
-        for sid, tid in season_teams:
-            if sid not in seasons_with_team:
-                seasons_with_team[sid] = set()
-            seasons_with_team[sid].add(tid)
-
-        season_list = list(seasons_with_team.keys())  # chronological
-        # Find continuous streak from most recent going backwards
-        first_season = None
-        count = 0
-        for sid in reversed(season_list):
-            if current_team_id in seasons_with_team[sid]:
-                first_season = sid
-                count += 1
-            else:
-                break
-
-        return first_season, count
-
-    return None, 0
-
-
-# ============================================================
-# PHASE 3: For mid-season joins, find exact first game date
-# ============================================================
-def fetch_first_game_date(player_id, team_id, season):
-    """Find the date of the player's first game with this team in given season."""
-    data = api_get(
-        'https://stats.nba.com/stats/playergamelog',
+        'https://stats.nba.com/stats/leaguedashplayerstats',
         params={
-            'PlayerID': player_id,
             'Season': season,
             'SeasonType': 'Regular Season',
-            'LeagueID': '00'
+            'PerMode': 'Totals',
+            'MeasureType': 'Base',
+            'LeagueID': '00',
         }
     )
     if not data:
-        return None
+        print(" FAILED")
+        return None, None
+
+    player_teams = {}
+    player_names = {}
 
     for rs in data.get('resultSets', []):
-        if rs['name'] != 'PlayerGameLog':
+        if rs['name'] != 'LeagueDashPlayerStats':
             continue
-        headers = rs['headers']
-        rows = rs['rowSet']
-        if not rows:
-            return None
+        hdrs = rs['headers']
+        pid_i = hdrs.index('PLAYER_ID')
+        name_i = hdrs.index('PLAYER_NAME')
+        tid_i = hdrs.index('TEAM_ID')
 
-        # Rows are newest-first; find last (earliest) game with this team
-        team_games = []
-        for row in rows:
-            rec = dict(zip(headers, row))
-            # MATCHUP contains team abbreviation
-            matchup = rec.get('MATCHUP', '')
-            game_date = rec.get('GAME_DATE', '')
-            # The matchup format is like "LAL vs. GSW" or "LAL @ GSW"
-            # Just check if game is associated (all games in log are for this player's team at that time)
-            team_games.append(game_date)
+        for row in rs['rowSet']:
+            pid = row[pid_i]
+            tid = row[tid_i]
+            name = row[name_i]
+            if pid not in player_teams:
+                player_teams[pid] = set()
+            player_teams[pid].add(tid)
+            player_names[pid] = name
 
-        if team_games:
-            # Last entry = earliest game
-            return team_games[-1]
-
-    return None
+    print(f" → {len(player_teams)} players")
+    return player_teams, player_names
 
 
-# ============================================================
-# MAIN
-# ============================================================
+def fetch_current_roster():
+    """
+    Fetch current season player stats.
+    Returns dict: player_id → {name, team, team_id, gp}
+    """
+    print(f"Fetching current season ({CURRENT_SEASON})...")
+    data = api_get(
+        'https://stats.nba.com/stats/leaguedashplayerstats',
+        params={
+            'Season': CURRENT_SEASON,
+            'SeasonType': 'Regular Season',
+            'PerMode': 'Totals',
+            'MeasureType': 'Base',
+            'LeagueID': '00',
+        }
+    )
+    if not data:
+        print("FATAL: Cannot fetch current season data")
+        sys.exit(1)
+
+    players = {}
+    for rs in data.get('resultSets', []):
+        if rs['name'] != 'LeagueDashPlayerStats':
+            continue
+        hdrs = rs['headers']
+        pid_i = hdrs.index('PLAYER_ID')
+        name_i = hdrs.index('PLAYER_NAME')
+        tid_i = hdrs.index('TEAM_ID')
+        abbr_i = hdrs.index('TEAM_ABBREVIATION')
+        gp_i = hdrs.index('GP')
+
+        for row in rs['rowSet']:
+            pid = row[pid_i]
+            tid = row[tid_i]
+            name = row[name_i]
+            abbr = row[abbr_i]
+            gp = row[gp_i]
+
+            # If player appears multiple times (traded mid-season),
+            # keep entry with more GP (= primary/current team)
+            if pid not in players or gp > players[pid]['gp']:
+                players[pid] = {
+                    'name': name,
+                    'team': abbr,
+                    'team_id': tid,
+                    'gp': gp,
+                }
+
+    return players
+
+
 def main():
     print("=" * 60)
-    print("NBA Player Tenure Data Fetcher")
+    print("NBA Player Tenure Data Fetcher (Fast Bulk Version)")
     print("=" * 60)
 
-    # Phase 1: Get all current rosters
-    print("\n--- Phase 1: Fetching all team rosters ---")
-    all_players = fetch_all_rosters()
-    print(f"Found {len(all_players)} players across 30 teams.")
+    # Step 1: Get current rosters
+    players = fetch_current_roster()
+    print(f"Found {len(players)} active players.\n")
 
-    # Phase 2: Get career tenure for each player
-    print("\n--- Phase 2: Fetching career stats for tenure ---")
-    total = len(all_players)
-    for i, (pid, info) in enumerate(all_players.items()):
-        print(f"  [{i+1}/{total}] {info['name']} ({info['team']})...", end='')
-        first_season, count = fetch_career_tenure(pid, info['team_id'])
-        info['joined_season'] = first_season
-        info['continuous_seasons'] = count
+    # Initialize: everyone's tenure starts at current season
+    tenure = {pid: CURRENT_SEASON for pid in players}
+    # Unresolved = players we still need to check further back
+    unresolved = set(players.keys())
 
-        # Determine if they joined this season (potential mid-season acquisition)
-        current_season_str = SEASON  # '2025-26'
-        info['joined_this_season'] = (first_season == current_season_str and count == 1)
+    # Step 2: Walk backwards season by season
+    print("Walking backwards through seasons...")
+    season = CURRENT_SEASON
+    seasons_checked = 0
 
-        print(f" → since {first_season} ({count} seasons)")
-        time.sleep(0.6)
+    for i in range(MAX_LOOKBACK):
+        if not unresolved:
+            print("  All players resolved!")
+            break
 
-    # Phase 3: For players who joined this season, get exact first game date
-    print("\n--- Phase 3: Finding exact join dates for new acquisitions ---")
-    new_players = {pid: info for pid, info in all_players.items() if info.get('joined_this_season')}
-    print(f"  {len(new_players)} players joined their current team this season.")
+        season = prev_season(season)
+        seasons_checked += 1
 
-    for i, (pid, info) in enumerate(new_players.items()):
-        print(f"  [{i+1}/{len(new_players)}] {info['name']}...", end='')
-        first_date = fetch_first_game_date(pid, info['team_id'], SEASON)
-        if first_date:
-            info['joined_date'] = first_date
-            print(f" → {first_date}")
-        else:
-            print(" → no games found")
-        time.sleep(0.6)
+        past_teams, past_names = fetch_season_players(season)
+        if past_teams is None:
+            print(f"  Could not fetch {season}, stopping lookback.")
+            break
 
-    # For players who've been with team multiple seasons, set joined_date to season start
-    for pid, info in all_players.items():
-        if 'joined_date' not in info and info.get('joined_season'):
-            # Approximate: start of first season
-            try:
-                start_yr = int(info['joined_season'].split('-')[0])
-                info['joined_date'] = f"{start_yr}-10-01"  # Approx season start
-            except:
-                info['joined_date'] = None
+        newly_resolved = set()
 
-    # Build output
+        for pid in unresolved:
+            current_team_id = players[pid]['team_id']
+
+            if pid not in past_teams:
+                # Player wasn't in the league → tenure starts next season
+                newly_resolved.add(pid)
+            elif current_team_id not in past_teams[pid]:
+                # Player was on a DIFFERENT team → tenure starts next season
+                newly_resolved.add(pid)
+            else:
+                # Player was on same team → extend tenure back
+                tenure[pid] = season
+
+        unresolved -= newly_resolved
+        if newly_resolved:
+            print(f"    Resolved {len(newly_resolved)} players, {len(unresolved)} remaining")
+
+        time.sleep(1.5)
+
+    if unresolved:
+        print(f"\n  {len(unresolved)} players with {MAX_LOOKBACK}+ year tenure:")
+        for pid in unresolved:
+            print(f"    - {players[pid]['name']}")
+
+    # Step 3: Build output
+    print(f"\n{'='*60}")
+    print("Building tenure_data.json...")
+
     output = {
         'updated': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'season': SEASON,
+        'season': CURRENT_SEASON,
+        'seasons_checked': seasons_checked,
         'players': {}
     }
 
-    for pid, info in all_players.items():
-        name = info['name']
-        output['players'][name] = {
+    for pid, info in players.items():
+        joined = tenure[pid]
+        joined_yr = int(joined.split('-')[0])
+        current_yr = int(CURRENT_SEASON.split('-')[0])
+        continuous = current_yr - joined_yr + 1
+
+        output['players'][info['name']] = {
             'team': info['team'],
             'team_id': info['team_id'],
-            'player_id': info['player_id'],
-            'joined_season': info.get('joined_season'),
-            'joined_date': info.get('joined_date'),
-            'continuous_seasons': info.get('continuous_seasons', 0),
-            'joined_this_season': info.get('joined_this_season', False),
+            'player_id': pid,
+            'joined_season': joined,
+            'joined_date': f"{joined_yr}-10-01",
+            'continuous_seasons': continuous,
+            'joined_this_season': (joined == CURRENT_SEASON),
         }
-        # Include any extra fields from Phase 1 (like HOW_ACQUIRED)
-        for k in ['HOW_ACQUIRED', 'NICKNAME', 'how_acquired']:
-            if k in info and info[k]:
-                output['players'][name][k.lower()] = info[k]
+
+    # Sort by team, then tenure (longest first)
+    output['players'] = dict(sorted(
+        output['players'].items(),
+        key=lambda x: (x[1]['team'], -x[1]['continuous_seasons'], x[0])
+    ))
 
     with open(OUTPUT, 'w') as f:
         json.dump(output, f, indent=2)
 
+    print(f"Wrote {len(output['players'])} players to {OUTPUT}")
+
+    # Summary
+    print(f"\nTop 10 longest-tenured players:")
+    by_tenure = sorted(output['players'].items(), key=lambda x: -x[1]['continuous_seasons'])
+    for name, info in by_tenure[:10]:
+        print(f"  {name} ({info['team']}) — since {info['joined_season']} ({info['continuous_seasons']} seasons)")
+
     print(f"\n{'='*60}")
-    print(f"Done! Wrote {len(output['players'])} players to {OUTPUT}")
+    print(f"Done! Total API calls: {seasons_checked + 1}")
     print(f"{'='*60}")
 
 
