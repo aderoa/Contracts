@@ -1,0 +1,13 @@
+{
+  "updated": "2026-02-16T10:00:00Z",
+  "current_season": "2025-26",
+  "previous_season": "2024-25",
+  "players": {
+    "Jalen Duren": {"met": true, "gs4": 42, "min4": 1320, "gs3": 55, "min3": 1573, "reason": "Avg GS=48.5≥41"},
+    "Keegan Murray": {"met": true, "gs4": 50, "min4": 1650, "gs3": 82, "min3": 2772, "reason": "S4 GS=50≥41; Avg MIN=2211≥2000"},
+    "Jaden Ivey": {"met": true, "gs4": 44, "min4": 1400, "gs3": 69, "min3": 2132, "reason": "S4 GS=44≥41"},
+    "Bennedict Mathurin": {"met": true, "gs4": 48, "min4": 1500, "gs3": 73, "min3": 2217, "reason": "S4 GS=48≥41"},
+    "Tari Eason": {"met": true, "gs4": 45, "min4": 1350, "gs3": 54, "min3": 1620, "reason": "Avg GS=49.5≥41"},
+    "Walker Kessler": {"met": true, "gs4": 43, "min4": 1200, "gs3": 57, "min3": 1542, "reason": "Avg GS=50≥41"}
+  }
+}
