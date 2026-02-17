@@ -752,6 +752,20 @@ async function loadTenureData() {
 
   const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
     .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+
+  // Alias map: sheet name (normed) → API name (normed)
+  const TENURE_ALIASES = {
+    'nicolas claxton': 'nic claxton',
+    'santiago aldama': 'santi aldama',
+    'herb jones': 'herbert jones',
+    'cameron payne': 'cam payne',
+    'sviatoslav mykhailiuk': 'svi mykhailiuk',
+    'carlton carrington': 'bub carrington',
+    'jeenathan williams': 'nate williams',
+    'dennis schroeder': 'dennis schroder',
+    'david jones': 'david jones-garcia',
+  };
+
   const tenByNorm = {};
   for (const [name, data] of Object.entries(tenureJson.players)) {
     tenByNorm[norm(name)] = data;
@@ -760,7 +774,8 @@ async function loadTenureData() {
   let matched = 0;
   const unmatched = [];
   allPlayers.forEach(p => {
-    const t = tenByNorm[norm(p.name)];
+    const n = norm(p.name);
+    const t = tenByNorm[n] || tenByNorm[TENURE_ALIASES[n]];
     if (!t) { unmatched.push(p.name); return; }
     p.joinedSeason = t.joined_season;
     p.continuousSeasons = t.continuous_seasons;
