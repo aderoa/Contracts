@@ -1109,7 +1109,7 @@ function doSort() {
     else if (sortCol === 'option') { va = a.option; vb = b.option; }
     else if (sortCol === 'tk') { va = parseFloat(a.tk) || 0; vb = parseFloat(b.tk) || 0; }
     else if (sortCol === 'tradeRes') {
-      const trs = p => { const t = tradeStatus(p); if (!t) return 9e15; if (t.type === 'ntc') return 0; return 1; };
+      const trs = p => { const t = tradeStatus(p); if (!t) return 9e15; return t.sortVal * 1e15 + (t.dateVal || 0); };
       va = trs(a); vb = trs(b);
     }
     else if (sortCol === 'lb') { va = parseSal(a.lb); vb = parseSal(b.lb); }
@@ -1321,10 +1321,12 @@ function optTag(opt) {
 function tradeStatus(p) {
   const today = new Date(); today.setHours(0,0,0,0);
   const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  // Restrictions expiring before Apr 20 are irrelevant (no trades during season)
+  const seasonCutoff = new Date(today.getFullYear(), 3, 20); // Apr 20
 
   // No-Trade Clause (from roster sheet column M)
   if (p.ntc) {
-    return { type: 'ntc', text: 'No-Trade Clause', detail: `No-Trade Clause`, cls: 'trade-ntc' };
+    return { type: 'ntc', text: 'No-Trade Clause', detail: `No-Trade Clause`, cls: 'trade-ntc', sortVal: 0 };
   }
 
   // Explicit restriction date from roster sheet column N (e.g. Shai's extension restriction)
@@ -1332,8 +1334,8 @@ function tradeStatus(p) {
     const rd = new Date(p.tradeRestriction);
     if (!isNaN(rd.getTime())) {
       rd.setHours(0,0,0,0);
-      if (rd > today) {
-        return { type: 'restricted', text: fmt(rd), detail: `Cannot be traded until ${fmt(rd)}`, cls: 'trade-restricted' };
+      if (rd > today && rd > seasonCutoff) {
+        return { type: 'restricted', text: fmt(rd), detail: `Cannot be traded until ${fmt(rd)}`, cls: 'trade-restricted', sortVal: 1, dateVal: rd.getTime() };
       }
     }
   }
@@ -1344,12 +1346,11 @@ function tradeStatus(p) {
     if (parts.length === 3) {
       const sm = parseInt(parts[0]), sd = parseInt(parts[1]), sy = parseInt(parts[2]);
       if (!isNaN(sm) && !isNaN(sd) && !isNaN(sy)) {
-        const sigDt = new Date(sy, sm - 1, sd);
         const restrict = new Date(sy, sm - 1 + 3, sd);
         restrict.setHours(0,0,0,0);
-        // Only relevant if signing was during the season (Oct–Jun) and restriction is still active
-        if (restrict > today && sm !== 7 && sm !== 8 && sm !== 9) {
-          return { type: 'restricted', text: fmt(restrict), detail: `3-mo restriction from signing · Tradeable ${fmt(restrict)}`, cls: 'trade-restricted' };
+        // Only relevant if signing was during the season (Oct–Jun) and restriction is still active and after cutoff
+        if (restrict > today && restrict > seasonCutoff && sm !== 7 && sm !== 8 && sm !== 9) {
+          return { type: 'restricted', text: fmt(restrict), detail: `3-mo restriction from signing · Tradeable ${fmt(restrict)}`, cls: 'trade-restricted', sortVal: 1, dateVal: restrict.getTime() };
         }
       }
     }
