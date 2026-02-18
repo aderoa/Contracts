@@ -612,11 +612,18 @@ function calcExtElig(p) {
   const pctLabel = ` · Max ${pct}%`;
   const traded = p.sigTeam && p.team && p.sigTeam !== p.team;
 
+  // Traded rookie scale player with expiring contract — no extension possible, will be RFA
+  const notes_lc = (p.notes||'').toLowerCase();
+  const now = new Date();
+  const currentSeasonEnd = now.getMonth() >= 6 ? now.getFullYear() + 1 : now.getFullYear();
+  if (traded && notes_lc.includes('rookie scale') && parseInt(p.end) === currentSeasonEnd) {
+    return { status: 'ineligible', text: 'Ineligible', detail: `Expiring rookie scale (RFA ${currentSeasonEnd})`, sortVal: 7, dv: p.dvEligible };
+  }
+
   // No team = free agent
   if (!p.team) return { status: 'na', text: 'Free Agent', sortVal: 9, dv: p.dvEligible };
 
   // Two-Way / 10-Day
-  const notes_lc = (p.notes||'').toLowerCase();
   if (notes_lc.includes('two-way') || p.yrs.every(y => y.st === 'TWO-WAY' || !y.st))
     return { status: 'na', text: 'N/A', detail: 'Two-Way', sortVal: 8, dv: p.dvEligible };
   if (notes_lc.includes('10-day') || p.yrs.every(y => y.st === '10-DAY' || !y.st))
