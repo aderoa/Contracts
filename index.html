@@ -107,6 +107,7 @@
   .tag-ub { background: #fce4ec; color: #c62828; }
   .trade-ntc { background: #ffcdd2; color: #b71c1c; font-weight: 700; }
   .trade-restricted { background: #fff3e0; color: #e65100; font-size: 0.6rem; }
+  .trade-expiring { background: #e0e0e0; color: #616161; }
   .tag-dv { background: #fff8e1; color: #f57f17; font-weight: 700; font-size: 0.65rem; margin-left: 4px; }
   .tag-ext-elig { background: #e8f5e9; color: #2e7d32; }
   .tag-ext-date { background: #e3f2fd; color: #1565c0; }
@@ -1324,10 +1325,21 @@ function tradeStatus(p) {
   const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   // Restrictions expiring before Apr 20 are irrelevant (no trades during season)
   const seasonCutoff = new Date(today.getFullYear(), 3, 20); // Apr 20
+  const currentSeasonEnd = today.getMonth() >= 6 ? today.getFullYear() + 1 : today.getFullYear();
+
+  // Check if contract is expiring with no available options
+  const endYr = parseInt(p.end);
+  const hasOptions = p.yrs && p.yrs.some(y => y.sal && (y.st === 'PLAYER OPT' || y.st === 'TEAM OPT'));
+  const isExpiring = endYr === currentSeasonEnd && !hasOptions;
 
   // No-Trade Clause (from roster sheet column M)
   if (p.ntc) {
     return { type: 'ntc', text: 'No-Trade Clause', detail: `No-Trade Clause`, cls: 'trade-ntc', sortVal: 0 };
+  }
+
+  // Expiring contract with no options — will be FA, not tradeable in any meaningful sense
+  if (isExpiring) {
+    return { type: 'expiring', text: 'Expiring', detail: `Expiring contract (FA ${currentSeasonEnd})`, cls: 'trade-expiring', sortVal: 3 };
   }
 
   // Explicit restriction date from roster sheet column N (e.g. Shai's extension restriction)
