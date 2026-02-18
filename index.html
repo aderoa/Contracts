@@ -611,14 +611,7 @@ function calcExtElig(p) {
   const pct = maxPct(p);
   const pctLabel = ` · Max ${pct}%`;
   const traded = p.sigTeam && p.team && p.sigTeam !== p.team;
-
-  // Traded rookie scale player with expiring contract — no extension possible, will be RFA
   const notes_lc = (p.notes||'').toLowerCase();
-  const now = new Date();
-  const currentSeasonEnd = now.getMonth() >= 6 ? now.getFullYear() + 1 : now.getFullYear();
-  if (traded && notes_lc.includes('rookie scale') && parseInt(p.end) === currentSeasonEnd) {
-    return { status: 'ineligible', text: 'Ineligible', detail: `Expiring rookie scale (RFA ${currentSeasonEnd})`, sortVal: 7, dv: p.dvEligible };
-  }
 
   // No team = free agent
   if (!p.team) return { status: 'na', text: 'Free Agent', sortVal: 9, dv: p.dvEligible };
@@ -664,6 +657,12 @@ function calcExtElig(p) {
 
   // Rookie Scale Contract
   if (notes_lc.includes('rookie scale')) {
+    // Expiring rookie scale — player will be RFA, no extension possible
+    const now = new Date();
+    const currentSeasonEnd = now.getMonth() >= 6 ? now.getFullYear() + 1 : now.getFullYear();
+    if (parseInt(p.end) === currentSeasonEnd) {
+      return { status: 'ineligible', text: 'Ineligible', detail: `Expiring rookie scale (RFA ${currentSeasonEnd})` + dv, sortVal: 7, dv: p.dvEligible };
+    }
     const isDRE = rookieDesignated(p);
     const dreLabel = isDRE ? 'Des. Rookie Scale Ext. / Max (30%)' : 'Rookie Scale Ext. / Max (25%)';
     if (p.draftYear > 0) {
