@@ -622,11 +622,6 @@ function calcExtElig(p) {
   if (notes_lc.includes('10-day') || p.yrs.every(y => y.st === '10-DAY' || !y.st))
     return { status: 'na', text: 'N/A', detail: '10-Day', sortVal: 8, dv: p.dvEligible };
 
-  // Minimum salary
-  if (notes_lc.includes('minimum')) {
-    return { status: 'ineligible', text: 'Ineligible', detail: 'Minimum salary' + dv, sortVal: 7, dv: p.dvEligible };
-  }
-
   // Already extended
   if (notes_lc.includes('extension')) {
     if (!p.sigDate || !p.end) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
