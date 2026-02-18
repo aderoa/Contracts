@@ -82,6 +82,8 @@
   .guar-line { display: block; font-size: 0.55rem; margin-top: 2px; font-weight: 600; white-space: nowrap; }
   .guar-line.partial { color: #f57f17; }
   .guar-line.non-g { color: #c62828; }
+  .guar-line.po { color: #7b1fa2; }
+  .guar-line.to { color: #1565c0; }
   .end-ch { display: block; font-size: 0.55rem; color: #667eea; font-weight: 600; margin-top: 2px; white-space: nowrap; }
 
   /* End column scenario cells */
@@ -103,6 +105,8 @@
   .tag-tk { background: #fff3e0; color: #e65100; }
   .tag-lb { background: #e8f5e9; color: #2e7d32; }
   .tag-ub { background: #fce4ec; color: #c62828; }
+  .trade-ntc { background: #ffcdd2; color: #b71c1c; font-weight: 700; }
+  .trade-restricted { background: #fff3e0; color: #e65100; font-size: 0.6rem; }
   .tag-dv { background: #fff8e1; color: #f57f17; font-weight: 700; font-size: 0.65rem; margin-left: 4px; }
   .tag-ext-elig { background: #e8f5e9; color: #2e7d32; }
   .tag-ext-date { background: #e3f2fd; color: #1565c0; }
@@ -917,6 +921,7 @@ async function loadData() {
         yos: parseInt((r[38]||'').trim()) || 0,
         draftPick: 0, draftYear: 0, starterCriteria: null, scStats: null,
         joinedSeason: null, continuousSeasons: 0,
+        ntc: '', tradeRestriction: '',
       });
     }
 
@@ -952,7 +957,7 @@ async function loadData() {
     // Remove free agents (no current team)
     allPlayers = allPlayers.filter(p => p.team);
 
-    // Headshots
+    // Headshots + Trade restrictions from roster sheet (gid=0)
     try {
       const rR = await fetch(ROSTER_CSV_URL);
       if (rR.ok) {
@@ -961,12 +966,33 @@ async function loadData() {
           const hdr = rRows[0];
           const pi = hdr.findIndex(h => h.toUpperCase() === 'PLAYER');
           const hi = hdr.findIndex(h => h.toUpperCase() === 'HEADSHOT');
+          const ntci = hdr.findIndex(h => h.toUpperCase() === 'NO TRADE');
+          const resi = hdr.findIndex(h => h.toUpperCase() === 'RESTRICTIONS');
           if (pi >= 0 && hi >= 0) {
             for (let j = 1; j < rRows.length; j++) {
               const n = (rRows[j][pi]||'').trim();
               const hs = (rRows[j][hi]||'').trim();
               if (n && hs) headshots[n] = hs;
             }
+          }
+          // Build NTC and restrictions maps
+          if (pi >= 0) {
+            const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
+              .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+            const ntcMap = {}, resMap = {};
+            for (let j = 1; j < rRows.length; j++) {
+              const n = (rRows[j][pi]||'').trim();
+              if (!n) continue;
+              const nk = norm(n);
+              if (ntci >= 0) { const v = (rRows[j][ntci]||'').trim(); if (v) ntcMap[nk] = v; }
+              if (resi >= 0) { const v = (rRows[j][resi]||'').trim(); if (v) resMap[nk] = v; }
+            }
+            allPlayers.forEach(p => {
+              const nk = norm(p.name);
+              p.ntc = ntcMap[nk] || '';
+              p.tradeRestriction = resMap[nk] || '';
+            });
+            console.log('NTC:', Object.keys(ntcMap).length, 'Restrictions:', Object.keys(resMap).length);
           }
         }
       }
@@ -1129,6 +1155,7 @@ function renderTable() {
   html += thS('Sign. Team', 'sigTeam', 'meta-col');
   html += thS('Since', 'tenure', 'meta-col');
   html += thS('Trade Kicker', 'tk', 'meta-col');
+  html += '<th class="meta-col">Trade Status</th>';
   html += thS('Likely Bonus', 'lb', 'meta-col');
   html += thS('Unlikely Bonus', 'ub', 'meta-col');
   html += thS('Ext. Eligible', 'ext', 'meta-col');
@@ -1233,6 +1260,14 @@ function renderTable() {
     // Trade Kicker
     html += `<td>${p.tk ? `<span class="tag tag-tk">${p.tk}</span>` : ''}</td>`;
 
+    // Trade Status (NTC / Restrictions)
+    const ts = tradeStatus(p);
+    if (ts) {
+      html += `<td><span class="tag ${ts.cls}" title="${ts.detail}">${ts.text}</span></td>`;
+    } else {
+      html += '<td></td>';
+    }
+
     // Likely Bonus
     html += `<td>${p.lb ? `<span class="tag tag-lb">${p.lb}</span>` : ''}</td>`;
 
@@ -1266,6 +1301,10 @@ function salCell(p, yi) {
     html += `<span class="guar-line partial">G: ${fmtS(y.ch)}</span>`;
   } else if (y.st === 'NOT G') {
     html += `<span class="guar-line non-g">G: ${y.ch ? fmtS(y.ch) : '$0'}</span>`;
+  } else if (y.st === 'PLAYER OPT') {
+    html += `<span class="guar-line po">PO</span>`;
+  } else if (y.st === 'TEAM OPT') {
+    html += `<span class="guar-line to">TO</span>`;
   }
 
   return html;
@@ -1275,6 +1314,46 @@ function optTag(opt) {
   if (opt === 'TEAM OPT') return '<span class="tag tag-opt-to">Team Opt</span>';
   if (opt === 'PLAYER OPT') return '<span class="tag tag-opt-po">Player Opt</span>';
   return '';
+}
+
+function tradeStatus(p) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  // No-Trade Clause (from roster sheet column M)
+  if (p.ntc) {
+    return { type: 'ntc', text: 'NTC', detail: `No-Trade Clause`, cls: 'trade-ntc' };
+  }
+
+  // Explicit restriction date from roster sheet column N (e.g. Shai's extension restriction)
+  if (p.tradeRestriction) {
+    const rd = new Date(p.tradeRestriction);
+    if (!isNaN(rd.getTime())) {
+      rd.setHours(0,0,0,0);
+      if (rd > today) {
+        return { type: 'restricted', text: fmt(rd), detail: `Cannot be traded until ${fmt(rd)}`, cls: 'trade-restricted' };
+      }
+    }
+  }
+
+  // Mid-season signing: 3-month restriction from signing date
+  if (p.sigDate) {
+    const parts = p.sigDate.split('/');
+    if (parts.length === 3) {
+      const sm = parseInt(parts[0]), sd = parseInt(parts[1]), sy = parseInt(parts[2]);
+      if (!isNaN(sm) && !isNaN(sd) && !isNaN(sy)) {
+        const sigDt = new Date(sy, sm - 1, sd);
+        const restrict = new Date(sy, sm - 1 + 3, sd);
+        restrict.setHours(0,0,0,0);
+        // Only relevant if signing was during the season (Oct–Jun) and restriction is still active
+        if (restrict > today && sm !== 7 && sm !== 8 && sm !== 9) {
+          return { type: 'restricted', text: fmt(restrict), detail: `3-mo restriction from signing · Tradeable ${fmt(restrict)}`, cls: 'trade-restricted' };
+        }
+      }
+    }
+  }
+
+  return null;
 }
 
 function shortExc(exc) {
