@@ -614,7 +614,6 @@ function calcExtElig(p) {
   const dv = dvLabel(p);
   const pct = maxPct(p);
   const pctLabel = ` · Max ${pct}%`;
-  const traded = p.sigTeam && p.team && p.sigTeam !== p.team;
   const notes_lc = (p.notes||'').toLowerCase();
 
   // No team = free agent
@@ -645,11 +644,11 @@ function calcExtElig(p) {
     const eFmt = eAnniv.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     if (eAnniv <= today) {
       return { status: 'eligible', text: 'Eligible',
-        detail: `Extended (${p.notes}) · Re-eligible since ${eFmt}` + (traded ? ' · Traded (6-mo restriction may apply)' : '') + dv + pctLabel,
+        detail: `Extended (${p.notes}) · Re-eligible since ${eFmt}` + dv + pctLabel,
         sortVal: 1, dateVal: eAnniv.getTime(), dv: p.dvEligible };
     } else {
       return { status: 'future', text: eFmt,
-        detail: `Extended (${p.notes}) · ${eTotalLen}-yr total, ${eWait === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Traded (6-mo restriction may apply)' : '') + dv + pctLabel,
+        detail: `Extended (${p.notes}) · ${eTotalLen}-yr total, ${eWait === 2 ? '2nd' : '3rd'} anniv.` + dv + pctLabel,
         sortVal: 2, dateVal: eAnniv.getTime(), dv: p.dvEligible };
     }
   }
@@ -674,7 +673,7 @@ function calcExtElig(p) {
         return { status: 'ineligible', text: 'Ineligible', detail: `Rookie scale window closed (${deadFmt})` + dv, sortVal: 7, dv: p.dvEligible };
       } else if (today >= eligDate) {
         return { status: 'eligible', text: dreLabel,
-          detail: `Eligible since ${eligFmt} · Deadline: ${deadFmt}` + (traded ? ' · Traded (6-mo restriction may apply)' : '') + dv,
+          detail: `Eligible since ${eligFmt} · Deadline: ${deadFmt}` + dv,
           sortVal: 1, dateVal: eligDate.getTime(), dv: p.dvEligible };
       } else {
         return { status: 'future', text: eligFmt,
@@ -720,16 +719,15 @@ function calcExtElig(p) {
   }
 
   const full = calcForLength(length);
-  const tradedNote = traded ? ' · Traded (6-mo restriction may apply)' : '';
 
   // No options — simple case
   if (!hasOptions) {
     if (full.elig === false) {
       return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal` + dv, sortVal: 7, dv: p.dvEligible };
     } else if (full.elig === true) {
-      return { status: 'eligible', text: 'Eligible', detail: `Since ${full.fmt}` + tradedNote + dv + pctLabel, sortVal: 1, dateVal: full.date.getTime(), dv: p.dvEligible };
+      return { status: 'eligible', text: 'Eligible', detail: `Since ${full.fmt}` + dv + pctLabel, sortVal: 1, dateVal: full.date.getTime(), dv: p.dvEligible };
     } else {
-      return { status: 'future', text: full.fmt, detail: `${length}-year deal, ${full.wait === 2 ? '2nd' : '3rd'} anniv.` + tradedNote + dv + pctLabel, sortVal: 2, dateVal: full.date.getTime(), dv: p.dvEligible };
+      return { status: 'future', text: full.fmt, detail: `${length}-year deal, ${full.wait === 2 ? '2nd' : '3rd'} anniv.` + dv + pctLabel, sortVal: 2, dateVal: full.date.getTime(), dv: p.dvEligible };
     }
   }
 
@@ -743,25 +741,25 @@ function calcExtElig(p) {
       return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal · Also ineligible if ${optType} declined` + dv, sortVal: 7, dv: p.dvEligible };
     } else if (decl.elig === true) {
       return { status: 'eligible', text: 'Eligible',
-        detail: `Ineligible if ${optType} exercised (${length}-yr) · Eligible if declined (${guarLength}-yr, since ${decl.fmt})` + tradedNote + dv + pctLabel,
+        detail: `Ineligible if ${optType} exercised (${length}-yr) · Eligible if declined (${guarLength}-yr, since ${decl.fmt})` + dv + pctLabel,
         sortVal: 1, dateVal: decl.date.getTime(), dv: p.dvEligible };
     } else {
       return { status: 'future', text: decl.fmt,
-        detail: `Ineligible if ${optType} exercised (${length}-yr) · If declined: ${guarLength}-yr, eligible ${decl.fmt}` + tradedNote + dv + pctLabel,
+        detail: `Ineligible if ${optType} exercised (${length}-yr) · If declined: ${guarLength}-yr, eligible ${decl.fmt}` + dv + pctLabel,
         sortVal: 2, dateVal: decl.date.getTime(), dv: p.dvEligible };
     }
   } else if (full.elig === true) {
     let optNote = '';
     if (decl.elig === true && decl.date < full.date) optNote = ` · Earlier if ${optType} declined`;
     else if (decl.elig === false) optNote = ` · Ineligible if ${optType} declined`;
-    return { status: 'eligible', text: 'Eligible', detail: `Since ${full.fmt}` + optNote + tradedNote + dv + pctLabel, sortVal: 1, dateVal: full.date.getTime(), dv: p.dvEligible };
+    return { status: 'eligible', text: 'Eligible', detail: `Since ${full.fmt}` + optNote + dv + pctLabel, sortVal: 1, dateVal: full.date.getTime(), dv: p.dvEligible };
   } else {
     let optNote = '';
     if (decl.elig === true) optNote = ` · Already eligible if ${optType} declined`;
     else if (decl.elig !== false && decl.date && decl.date < full.date) {
       optNote = ` · Earlier (${decl.fmt}) if ${optType} declined`;
     } else if (decl.elig === false) optNote = ` · Ineligible if ${optType} declined`;
-    return { status: 'future', text: full.fmt, detail: `${length}-year deal, ${full.wait === 2 ? '2nd' : '3rd'} anniv.` + optNote + tradedNote + dv + pctLabel, sortVal: 2, dateVal: full.date.getTime(), dv: p.dvEligible };
+    return { status: 'future', text: full.fmt, detail: `${length}-year deal, ${full.wait === 2 ? '2nd' : '3rd'} anniv.` + optNote + dv + pctLabel, sortVal: 2, dateVal: full.date.getTime(), dv: p.dvEligible };
   }
 }
 
@@ -1110,6 +1108,10 @@ function doSort() {
     else if (sortCol === 'tenure') { va = a.continuousSeasons || 0; vb = b.continuousSeasons || 0; }
     else if (sortCol === 'option') { va = a.option; vb = b.option; }
     else if (sortCol === 'tk') { va = parseFloat(a.tk) || 0; vb = parseFloat(b.tk) || 0; }
+    else if (sortCol === 'tradeRes') {
+      const trs = p => { const t = tradeStatus(p); if (!t) return 9e15; if (t.type === 'ntc') return 0; return 1; };
+      va = trs(a); vb = trs(b);
+    }
     else if (sortCol === 'lb') { va = parseSal(a.lb); vb = parseSal(b.lb); }
     else if (sortCol === 'ub') { va = parseSal(a.ub); vb = parseSal(b.ub); }
     else if (sortCol === 'ext') {
@@ -1155,7 +1157,7 @@ function renderTable() {
   html += thS('Sign. Team', 'sigTeam', 'meta-col');
   html += thS('Since', 'tenure', 'meta-col');
   html += thS('Trade Kicker', 'tk', 'meta-col');
-  html += '<th class="meta-col">Trade Status</th>';
+  html += thS('Trade Restriction', 'tradeRes', 'meta-col');
   html += thS('Likely Bonus', 'lb', 'meta-col');
   html += thS('Unlikely Bonus', 'ub', 'meta-col');
   html += thS('Ext. Eligible', 'ext', 'meta-col');
@@ -1260,7 +1262,7 @@ function renderTable() {
     // Trade Kicker
     html += `<td>${p.tk ? `<span class="tag tag-tk">${p.tk}</span>` : ''}</td>`;
 
-    // Trade Status (NTC / Restrictions)
+    // Trade Restriction (NTC / Restrictions)
     const ts = tradeStatus(p);
     if (ts) {
       html += `<td><span class="tag ${ts.cls}" title="${ts.detail}">${ts.text}</span></td>`;
@@ -1322,7 +1324,7 @@ function tradeStatus(p) {
 
   // No-Trade Clause (from roster sheet column M)
   if (p.ntc) {
-    return { type: 'ntc', text: 'NTC', detail: `No-Trade Clause`, cls: 'trade-ntc' };
+    return { type: 'ntc', text: 'No-Trade Clause', detail: `No-Trade Clause`, cls: 'trade-ntc' };
   }
 
   // Explicit restriction date from roster sheet column N (e.g. Shai's extension restriction)
@@ -1378,9 +1380,6 @@ function extTag(ext) {
 
   const title = ext.detail ? ` title="${ext.detail}"` : '';
   let html = `<span class="tag ${cls}"${title}>${ext.text}</span>`;
-  if (ext.detail && (ext.status === 'eligible' || ext.status === 'future') && ext.detail.includes('Trade restriction')) {
-    html += '<span class="ext-note">⚠ traded</span>';
-  }
   if (ext.dv) {
     html += '<span class="tag tag-dv">DV</span>';
   }
