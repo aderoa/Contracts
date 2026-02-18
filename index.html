@@ -590,6 +590,22 @@ function rookieDesignated(p) {
   return p.allAwards.some(a => DRE_AWARDS.includes(a.award));
 }
 
+function guaranteedEnd(p) {
+  // Walk backwards through contract years to find last non-option year
+  // YEARS[0]=2026, YEARS[1]=2027, etc.
+  const END_YEARS = [2026, 2027, 2028, 2029, 2030, 2031];
+  let lastGuarIdx = -1;
+  for (let i = p.yrs.length - 1; i >= 0; i--) {
+    const y = p.yrs[i];
+    if (y.sal && y.st && y.st !== 'PLAYER OPT' && y.st !== 'TEAM OPT') {
+      lastGuarIdx = i;
+      break;
+    }
+  }
+  if (lastGuarIdx < 0) return null;
+  return END_YEARS[lastGuarIdx];
+}
+
 function calcExtElig(p) {
   const dv = dvLabel(p);
   const pct = maxPct(p);
@@ -606,86 +622,65 @@ function calcExtElig(p) {
   if (notes_lc.includes('10-day') || p.yrs.every(y => y.st === '10-DAY' || !y.st))
     return { status: 'na', text: 'N/A', detail: '10-Day', sortVal: 8, dv: p.dvEligible };
 
-  // Minimum salary — typically 1-year, ineligible
+  // Minimum salary
   if (notes_lc.includes('minimum')) {
     return { status: 'ineligible', text: 'Ineligible', detail: 'Minimum salary' + dv, sortVal: 7, dv: p.dvEligible };
   }
 
-  // Already extended — calculate next eligibility from the extension signing date
+  // Already extended
   if (notes_lc.includes('extension')) {
     if (!p.sigDate || !p.end) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
-
     const parts = p.sigDate.split('/');
     if (parts.length !== 3) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
     let eMonth = parseInt(parts[0]), eDay = parseInt(parts[1]), eYear = parseInt(parts[2]);
     if (isNaN(eMonth) || isNaN(eDay) || isNaN(eYear)) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
-
-    // Oct 1 rule
     if (eMonth === 10 && eDay >= 2) eDay = 1;
-
     const eFirstEnd = eMonth >= 7 ? eYear + 1 : eYear;
     const eEndYear = parseInt(p.end);
     if (isNaN(eEndYear)) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
     const eTotalLen = eEndYear - eFirstEnd + 1;
-
     if (eTotalLen <= 2) return { status: 'extended', text: 'Extended', detail: `${p.notes} · ${eTotalLen}-yr total, next ext. ineligible` + dv, sortVal: 6, dv: p.dvEligible };
-
     const eWait = eTotalLen <= 4 ? 2 : 3;
     const eAnniv = new Date(eYear + eWait, eMonth - 1, eDay);
     const today = new Date(); today.setHours(0,0,0,0);
     const eFmt = eAnniv.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
     if (eAnniv <= today) {
-      return {
-        status: 'eligible', text: 'Eligible',
+      return { status: 'eligible', text: 'Eligible',
         detail: `Extended (${p.notes}) · Re-eligible since ${eFmt}` + (traded ? ' · Traded (6-mo restriction may apply)' : '') + dv + pctLabel,
-        sortVal: 1, dateVal: eAnniv.getTime(), dv: p.dvEligible
-      };
+        sortVal: 1, dateVal: eAnniv.getTime(), dv: p.dvEligible };
     } else {
-      return {
-        status: 'future', text: eFmt,
+      return { status: 'future', text: eFmt,
         detail: `Extended (${p.notes}) · ${eTotalLen}-yr total, ${eWait === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Traded (6-mo restriction may apply)' : '') + dv + pctLabel,
-        sortVal: 2, dateVal: eAnniv.getTime(), dv: p.dvEligible
-      };
+        sortVal: 2, dateVal: eAnniv.getTime(), dv: p.dvEligible };
     }
   }
 
   // Rookie Scale Contract
   if (notes_lc.includes('rookie scale')) {
     const isDRE = rookieDesignated(p);
-    const rPct = isDRE ? 30 : 25;
     const dreLabel = isDRE ? 'Des. Rookie Scale Ext. / Max (30%)' : 'Rookie Scale Ext. / Max (25%)';
-
     if (p.draftYear > 0) {
-      // Eligible after 3rd season: July 1 of draftYear + 3
-      const eligDate = new Date(p.draftYear + 3, 6, 1); // July 1
-      // Must sign before start of 5th season: Oct 21 of draftYear + 4 (approx. season start)
-      const deadline = new Date(p.draftYear + 4, 9, 21); // Oct 21
+      const eligDate = new Date(p.draftYear + 3, 6, 1);
+      const deadline = new Date(p.draftYear + 4, 9, 21);
       const today = new Date(); today.setHours(0,0,0,0);
       const eligFmt = eligDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       const deadFmt = deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
       if (today >= deadline) {
         return { status: 'ineligible', text: 'Ineligible', detail: `Rookie scale window closed (${deadFmt})` + dv, sortVal: 7, dv: p.dvEligible };
       } else if (today >= eligDate) {
-        return {
-          status: 'eligible', text: dreLabel,
+        return { status: 'eligible', text: dreLabel,
           detail: `Eligible since ${eligFmt} · Deadline: ${deadFmt}` + (traded ? ' · Traded (6-mo restriction may apply)' : '') + dv,
-          sortVal: 1, dateVal: eligDate.getTime(), dv: p.dvEligible
-        };
+          sortVal: 1, dateVal: eligDate.getTime(), dv: p.dvEligible };
       } else {
-        return {
-          status: 'future', text: eligFmt,
+        return { status: 'future', text: eligFmt,
           detail: `Rookie scale · ${dreLabel} · Window: ${eligFmt} – ${deadFmt}` + dv,
-          sortVal: 2, dateVal: eligDate.getTime(), dv: p.dvEligible
-        };
+          sortVal: 2, dateVal: eligDate.getTime(), dv: p.dvEligible };
       }
     }
-    // No draft year available
     return { status: 'rookie', text: 'Rookie Scale', detail: dreLabel + dv, sortVal: 5, dv: p.dvEligible };
   }
 
-  // No signing date → unknown
+  // No signing date
   if (!p.sigDate || !p.end) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
 
   // Parse signing date (M/D/YYYY)
@@ -695,46 +690,73 @@ function calcExtElig(p) {
   let sigDay = parseInt(parts[1]);
   const sigYear = parseInt(parts[2]);
   if (isNaN(sigMonth) || isNaN(sigDay) || isNaN(sigYear)) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
-
-  // Oct 1 rule: signings Oct 2 through end of Oct count as Oct 1 for anniversary
   if (sigMonth === 10 && sigDay >= 2) { sigDay = 1; }
-
-  // First NBA season "end year": signed Jul+ → year+1, signed Jan-Jun → year
   const firstSeasonEnd = sigMonth >= 7 ? sigYear + 1 : sigYear;
 
-  // Contract length
+  // Contract length (full, including options)
   const endYear = parseInt(p.end);
   if (isNaN(endYear)) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
   const length = endYear - firstSeasonEnd + 1;
 
-  // 1-2 year deals cannot be extended
-  if (length <= 2) return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal` + dv, sortVal: 7, dv: p.dvEligible };
+  // Check for shorter "guaranteed end" (options declined)
+  const guarEnd = guaranteedEnd(p);
+  const hasOptions = guarEnd && guarEnd < endYear;
+  const guarLength = hasOptions ? guarEnd - firstSeasonEnd + 1 : length;
 
-  // Waiting period: 3-4yr → 2nd anniversary, 5-6yr → 3rd anniversary
-  const waitYears = length <= 4 ? 2 : 3;
+  // Helper: compute eligibility for a given contract length
+  function calcForLength(len) {
+    if (len <= 2) return { elig: false };
+    const wait = len <= 4 ? 2 : 3;
+    const anniv = new Date(sigYear + wait, sigMonth - 1, sigDay);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const fmt = anniv.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (anniv <= today) return { elig: true, fmt, date: anniv, wait, len };
+    else return { elig: null, fmt, date: anniv, wait, len };
+  }
 
-  // Anniversary date
-  const annivDate = new Date(sigYear + waitYears, sigMonth - 1, sigDay);
+  const full = calcForLength(length);
+  const tradedNote = traded ? ' · Traded (6-mo restriction may apply)' : '';
 
-  // Compare to today
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // No options — simple case
+  if (!hasOptions) {
+    if (full.elig === false) {
+      return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal` + dv, sortVal: 7, dv: p.dvEligible };
+    } else if (full.elig === true) {
+      return { status: 'eligible', text: 'Eligible', detail: `Since ${full.fmt}` + tradedNote + dv + pctLabel, sortVal: 1, dateVal: full.date.getTime(), dv: p.dvEligible };
+    } else {
+      return { status: 'future', text: full.fmt, detail: `${length}-year deal, ${full.wait === 2 ? '2nd' : '3rd'} anniv.` + tradedNote + dv + pctLabel, sortVal: 2, dateVal: full.date.getTime(), dv: p.dvEligible };
+    }
+  }
 
-  // Format the date
-  const fmtDate = annivDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  // Has options — compute both scenarios
+  const optType = p.yrs.some(y => y.st === 'PLAYER OPT') ? 'PO' : 'TO';
+  const decl = calcForLength(guarLength);
 
-  if (annivDate <= today) {
-    return {
-      status: 'eligible', text: 'Eligible',
-      detail: `Since ${fmtDate}` + (traded ? ' · Traded (6-mo restriction may apply)' : '') + dv + pctLabel,
-      sortVal: 1, dateVal: annivDate.getTime(), dv: p.dvEligible
-    };
+  if (full.elig === false) {
+    // Ineligible with full contract
+    if (decl.elig === false) {
+      return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal · Also ineligible if ${optType} declined` + dv, sortVal: 7, dv: p.dvEligible };
+    } else if (decl.elig === true) {
+      return { status: 'eligible', text: 'Eligible',
+        detail: `Ineligible if ${optType} exercised (${length}-yr) · Eligible if declined (${guarLength}-yr, since ${decl.fmt})` + tradedNote + dv + pctLabel,
+        sortVal: 1, dateVal: decl.date.getTime(), dv: p.dvEligible };
+    } else {
+      return { status: 'future', text: decl.fmt,
+        detail: `Ineligible if ${optType} exercised (${length}-yr) · If declined: ${guarLength}-yr, eligible ${decl.fmt}` + tradedNote + dv + pctLabel,
+        sortVal: 2, dateVal: decl.date.getTime(), dv: p.dvEligible };
+    }
+  } else if (full.elig === true) {
+    let optNote = '';
+    if (decl.elig === true && decl.date < full.date) optNote = ` · Earlier if ${optType} declined`;
+    else if (decl.elig === false) optNote = ` · Ineligible if ${optType} declined`;
+    return { status: 'eligible', text: 'Eligible', detail: `Since ${full.fmt}` + optNote + tradedNote + dv + pctLabel, sortVal: 1, dateVal: full.date.getTime(), dv: p.dvEligible };
   } else {
-    return {
-      status: 'future', text: fmtDate,
-      detail: `${length}-year deal, ${waitYears === 2 ? '2nd' : '3rd'} anniv.` + (traded ? ' · Traded (6-mo restriction may apply)' : '') + dv + pctLabel,
-      sortVal: 2, dateVal: annivDate.getTime(), dv: p.dvEligible
-    };
+    let optNote = '';
+    if (decl.elig === true) optNote = ` · Already eligible if ${optType} declined`;
+    else if (decl.elig !== false && decl.date && decl.date < full.date) {
+      optNote = ` · Earlier (${decl.fmt}) if ${optType} declined`;
+    } else if (decl.elig === false) optNote = ` · Ineligible if ${optType} declined`;
+    return { status: 'future', text: full.fmt, detail: `${length}-year deal, ${full.wait === 2 ? '2nd' : '3rd'} anniv.` + optNote + tradedNote + dv + pctLabel, sortVal: 2, dateVal: full.date.getTime(), dv: p.dvEligible };
   }
 }
 
