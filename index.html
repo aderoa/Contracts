@@ -85,7 +85,7 @@
   .end-ch { display: block; font-size: 0.55rem; color: #667eea; font-weight: 600; margin-top: 2px; white-space: nowrap; }
 
   /* End column scenario cells */
-  .end-scenarios { display: flex; gap: 3px; align-items: flex-start; }
+  .end-scenarios { display: flex; gap: 3px; align-items: flex-start; justify-content: flex-start; }
   .end-scenario { padding: 2px 5px; border-radius: 3px; border: 1px solid #333; background: #1a1a2e; text-align: center; min-width: 38px; }
   .end-scenario.sc-first { border-color: #c62828; background: rgba(198,40,40,0.08); }
   .end-scenario.sc-last { border-color: #2e7d32; background: rgba(46,125,50,0.08); }
@@ -229,8 +229,8 @@ const YEARS = [
 let allPlayers = [];
 let filteredPlayers = [];
 let headshots = {};
-let sortCol = 'sal0';
-let sortDir = 'desc';
+let sortCol = 'team';
+let sortDir = 'asc';
 
 function parseCSV(text) {
   const rows = []; let cur = '', inQ = false, row = [];
@@ -1097,7 +1097,10 @@ function doSort() {
 
     if (typeof va === 'string') {
       const c = va.localeCompare(vb);
-      return sortDir === 'asc' ? c : -c;
+      const r = sortDir === 'asc' ? c : -c;
+      // Secondary sort: by current salary (desc) when primary is team
+      if (r === 0 && sortCol === 'team') return (b.yrs[0]?.sal || 0) - (a.yrs[0]?.sal || 0);
+      return r;
     }
     return sortDir === 'asc' ? va - vb : vb - va;
   });
@@ -1202,7 +1205,7 @@ function renderTable() {
       }
       endHtml += '</div>';
     }
-    html += `<td>${endHtml}</td>`;
+    html += `<td style="text-align:left">${endHtml}</td>`;
 
     // Option
     html += '<td>' + optTag(p.option) + '</td>';
