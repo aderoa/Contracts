@@ -1247,7 +1247,8 @@ function renderTable() {
     html += `<td>${p.exc ? `<span class="tag tag-exc" title="${p.exc}">${shortExc(p.exc)}</span>` : ''}</td>`;
 
     // Notes
-    html += `<td>${p.notes ? `<span class="tag tag-type" title="${p.notes}">${shortNotes(p.notes)}</span>` : ''}</td>`;
+    const cn = cleanNotes(p.notes);
+    html += `<td>${cn ? `<span class="tag tag-type" title="${cn}">${shortNotes(p.notes)}</span>` : ''}</td>`;
 
     // Signing date
     html += `<td class="meta-val">${p.sigDate || ''}</td>`;
@@ -1363,8 +1364,18 @@ function shortExc(exc) {
   return { 'Bird Exception':'Bird','Early Bird Exception':'Early Bird','Non-Bird Exception':'Non-Bird','Mid-Level Exception':'MLE','Taxpayer Mid-Level Exception':'Tax MLE','Room Mid-Level Exception':'Room MLE','Biannual Exception':'BAE','Minimum Salary Exception':'Minimum','Rookie Exception':'Rookie','Second Round Exception':'2nd Rnd' }[exc] || exc;
 }
 
+function cleanNotes(notes) {
+  if (!notes) return '';
+  return notes
+    .replace(/No[- ]?Trade\s*Clause/gi, '')
+    .replace(/NTC/g, '')
+    .replace(/[·;,\s]*$/,'').replace(/^[·;,\s]*/,'')
+    .replace(/\s*[·;,]\s*[·;,]\s*/g,' · ')
+    .trim();
+}
+
 function shortNotes(notes) {
-  const n = notes.replace(/Designated /g,'Des. ').replace(/Extension/g,'Ext.').replace(/Contract/g,'').replace(/Maximum /g,'Max ');
+  const n = cleanNotes(notes).replace(/Designated /g,'Des. ').replace(/Extension/g,'Ext.').replace(/Contract/g,'').replace(/Maximum /g,'Max ');
   return n.length > 30 ? n.slice(0,28) + '…' : n;
 }
 
