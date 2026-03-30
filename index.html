@@ -93,7 +93,7 @@ body { min-width:fit-content; }
 
 
 /* Controls bar */
-.controls { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.75rem; padding:0.6rem 0.75rem; background:var(--surface); border:1px solid var(--border); border-radius:10px; max-width:none; }
+.controls { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.75rem; padding:0.6rem 0; max-width:none; }
 .search-box { flex:1; min-width:180px; padding:0.5rem 0.75rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.85rem; outline:none; transition:border-color .2s, box-shadow .2s; }
 .search-box::placeholder { color:var(--text-muted); }
 .search-box:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
@@ -230,15 +230,13 @@ footer a { color:var(--accent); text-decoration:none; font-weight:500; }
 </head>
 <body>
 
-<div class="header">
-  <div class="header-inner">
-    <h1>📋 NBA Contract Database</h1>
-    <span class="tag">2024-25 → 2030-31</span>
-    
-  </div>
-</div>
-
 <div class="container">
+  <div class="header" style="padding:1.5rem 0 0.75rem;">
+    <div class="header-inner" style="max-width:none;padding:0;">
+      <h1>📋 NBA Contract Database</h1>
+      <span class="tag">2024-25 → 2030-31</span>
+    </div>
+  </div>
   <div id="controls" class="controls" style="display:none;">
     <input type="text" class="search-box" id="searchBox" placeholder="Search player or team...">
     <select class="filter-select" id="filterTeam"><option value="">All Teams</option></select>
