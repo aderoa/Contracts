@@ -333,6 +333,18 @@ const TEAM_IDS = {
   'Toronto':1610612761,'Utah':1610612762,'Washington':1610612764
 };
 
+// Abbreviation ↔ internal team name (Contracts stores teams as "LA Lakers", etc.,
+// but URLs use "LAL" for cross-app consistency with Defense/Depth Charts/etc.)
+const TEAM_ABBR_TO_NAME = {
+  'ATL':'Atlanta','BOS':'Boston','BKN':'Brooklyn','CHA':'Charlotte','CHI':'Chicago',
+  'CLE':'Cleveland','DAL':'Dallas','DEN':'Denver','DET':'Detroit','GSW':'Golden State',
+  'HOU':'Houston','IND':'Indiana','LAC':'LA Clippers','LAL':'LA Lakers','MEM':'Memphis',
+  'MIA':'Miami','MIL':'Milwaukee','MIN':'Minnesota','NOP':'New Orleans','NYK':'New York',
+  'OKC':'Oklahoma City','ORL':'Orlando','PHI':'Philadelphia','PHX':'Phoenix','POR':'Portland',
+  'SAC':'Sacramento','SAS':'San Antonio','TOR':'Toronto','UTA':'Utah','WAS':'Washington'
+};
+const TEAM_NAME_TO_ABBR = Object.fromEntries(Object.entries(TEAM_ABBR_TO_NAME).map(([a,n]) => [n,a]));
+
 function teamLogo(t) { const id = TEAM_IDS[t]; return id ? `https://cdn.nba.com/logos/nba/${id}/primary/L/logo.svg` : ''; }
 function ini(n) { return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
 
@@ -1196,10 +1208,13 @@ async function loadData() {
     const sel = document.getElementById('filterTeam');
     teams.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
 
-    // Restore team filter from ?team= URL param (shareable links)
-    const urlTeam = new URLSearchParams(location.search).get('team');
-    if (urlTeam && [...sel.options].some(o => o.value === urlTeam)) {
-      sel.value = urlTeam;
+    // Restore team filter from ?team= URL param. URL uses abbreviations
+    // (LAL, BOS, …) for cross-app consistency; internal data uses city names
+    // (LA Lakers, Boston, …), so translate here.
+    const urlTeamAbbr = (new URLSearchParams(location.search).get('team') || '').toUpperCase();
+    const urlTeamName = TEAM_ABBR_TO_NAME[urlTeamAbbr];
+    if (urlTeamName && [...sel.options].some(o => o.value === urlTeamName)) {
+      sel.value = urlTeamName;
     }
 
     document.getElementById('loading').style.display = 'none';
@@ -1575,9 +1590,11 @@ function extTag(ext) {
 
 document.getElementById('searchBox').addEventListener('input', applyFilters);
 document.getElementById('filterTeam').addEventListener('change', function() {
-  const val = this.value;
+  const val = this.value; // internal name, e.g. "LA Lakers"
+  const abbr = TEAM_NAME_TO_ABBR[val]; // e.g. "LAL"
   const url = new URL(location.href);
-  if (val) url.searchParams.set('team', val); else url.searchParams.delete('team');
+  if (abbr) url.searchParams.set('team', abbr);
+  else url.searchParams.delete('team');
   history.replaceState(null, '', url);
   applyFilters();
 });
