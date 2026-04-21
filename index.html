@@ -293,7 +293,7 @@ footer a { color:var(--accent); text-decoration:none; font-weight:500; }
     <div class="legend-item" style="margin-left:auto;color:var(--text-muted);font-size:0.6rem;">Dotted underline = cap hold differs (hover for value)</div>
   </div>
 
-  <div id="loading" class="loading"><div class="loading-spinner"></div><p>Loading contract data...</p></div>
+  <div id="loading" class="loading"><div class="loading-spinner"></div><p>Loading contracts…</p></div>
   <div id="tableArea" style="display:none;"></div>
   <div id="error" class="error" style="display:none;"></div>
 
@@ -1196,6 +1196,12 @@ async function loadData() {
     const sel = document.getElementById('filterTeam');
     teams.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
 
+    // Restore team filter from ?team= URL param (shareable links)
+    const urlTeam = new URLSearchParams(location.search).get('team');
+    if (urlTeam && [...sel.options].some(o => o.value === urlTeam)) {
+      sel.value = urlTeam;
+    }
+
     document.getElementById('loading').style.display = 'none';
     document.getElementById('controls').style.display = 'flex';
     document.getElementById('legend').style.display = 'flex';
@@ -1221,8 +1227,9 @@ async function loadData() {
 
   } catch(err) {
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('error').textContent = 'Failed to load: ' + err.message;
+    document.getElementById('error').textContent = "Couldn't load contracts. Try refreshing — if this keeps happening, the data might be updating right now.";
     document.getElementById('error').style.display = 'block';
+    console.error('[Contracts]', err);
   }
 }
 
@@ -1306,18 +1313,18 @@ function renderTable() {
   html += thS('Player', 'name', 'col-player');
   html += thS('Team', 'team', 'col-team');
   YEARS.forEach((yr, i) => { html += thS(yr.label, 'sal' + i, 'yr-col' + (yr.current ? ' yr-current' : '')); });
-  html += thS('End', 'end', 'meta-col');
-  html += thS('Option', 'option', 'meta-col');
-  html += thS('Total G', 'totG', 'meta-col');
-  html += thS('Exception', 'exc', 'meta-col');
-  html += thS('Signed', 'sigDate', 'meta-col');
-  html += thS('Sign. Team', 'sigTeam', 'meta-col');
-  html += thS('Since', 'tenure', 'meta-col');
-  html += thS('Trade Kicker', 'tk', 'meta-col');
-  html += thS('Trade Restriction', 'tradeRes', 'meta-col');
-  html += thS('Likely Bonus', 'lb', 'meta-col');
-  html += thS('Unlikely Bonus', 'ub', 'meta-col');
-  html += thS('Ext. Eligible', 'ext', 'meta-col');
+  html += thS('End', 'end', 'meta-col', 'Contract end year');
+  html += thS('Option', 'option', 'meta-col', 'Team or player option in the final year (TO = team, PO = player)');
+  html += thS('Total G', 'totG', 'meta-col', 'Total guaranteed salary across all remaining years');
+  html += thS('Exception', 'exc', 'meta-col', 'Salary cap exception used to sign (MLE, BAE, Bird Rights, minimum, etc.)');
+  html += thS('Signed', 'sigDate', 'meta-col', 'Date the current contract was signed');
+  html += thS('Sign. Team', 'sigTeam', 'meta-col', 'Team that originally signed the player (matters for Bird Rights)');
+  html += thS('Since', 'tenure', 'meta-col', 'Years with current team (continuous tenure)');
+  html += thS('Trade Kicker', 'tk', 'meta-col', 'Bonus the player receives if traded (% of remaining salary)');
+  html += thS('Trade Restriction', 'tradeRes', 'meta-col', 'Restrictions that prevent or limit trading this player');
+  html += thS('Likely Bonus', 'lb', 'meta-col', 'Performance bonus deemed likely — counts against the cap');
+  html += thS('Unlikely Bonus', 'ub', 'meta-col', 'Performance bonus deemed unlikely — does NOT count against the cap');
+  html += thS('Ext. Eligible', 'ext', 'meta-col', 'When the player becomes eligible for a contract extension');
   html += '</tr></thead><tbody>';
 
   for (const p of filteredPlayers) {
@@ -1437,12 +1444,16 @@ function renderTable() {
   }
 
   html += '</tbody></table></div>';
+  if (filteredPlayers.length === 0) {
+    html = '<div class="table-wrap" style="text-align:center;padding:3rem 1rem;color:var(--text-muted);">No contracts match these filters. Try clearing the team or status selection.</div>';
+  }
   area.innerHTML = html;
 }
 
-function thS(label, col, cls) {
+function thS(label, col, cls, title) {
   const sc = sortCol === col ? (sortDir === 'asc' ? ' sorted-asc' : ' sorted-desc') : '';
-  return `<th class="${cls || ''}${sc}" onclick="setSort('${col}')">${label}</th>`;
+  const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+  return `<th class="${cls || ''}${sc}"${titleAttr} onclick="setSort('${col}')">${label}</th>`;
 }
 
 function salCell(p, yi) {
@@ -1563,7 +1574,13 @@ function extTag(ext) {
 }
 
 document.getElementById('searchBox').addEventListener('input', applyFilters);
-document.getElementById('filterTeam').addEventListener('change', applyFilters);
+document.getElementById('filterTeam').addEventListener('change', function() {
+  const val = this.value;
+  const url = new URL(location.href);
+  if (val) url.searchParams.set('team', val); else url.searchParams.delete('team');
+  history.replaceState(null, '', url);
+  applyFilters();
+});
 document.getElementById('filterStatus').addEventListener('change', applyFilters);
 document.getElementById('filterException').addEventListener('change', applyFilters);
 document.getElementById('filterEnd').addEventListener('change', applyFilters);
