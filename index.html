@@ -1109,6 +1109,9 @@ function attachAwards() {
     p.dvAwards = pAwards.filter(a => DV_AWARDS.includes(a.award) && win.includes(a.year));
     p.dvEligible = meetsHigherMaxCriteria(pAwards, MOST_RECENT_SEASON);
   });
+  // Extension eligibility embeds dvEligible/dvLabel, so it must be recomputed now
+  // that awards have arrived (otherwise DV candidates stay frozen as ineligible).
+  allPlayers.forEach(p => { p.ext = calcExtElig(p); });
 }
 
 console.log('%c📋 Contract DB — awards-sheet + CBA Higher-Max fix','color:#22c55e;font-weight:bold');
