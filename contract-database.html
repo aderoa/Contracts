@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NBA Contract Database — HoopsMatic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* === HOOPSMATIC DESIGN SYSTEM v1.0 === */
+:root {
+  --bg: #f8f9fa; --surface: #fff; --surface2: #f3f4f6;
+  --border: #e2e5e9; --text: #1a1a2e; --text2: #5a6070; --text-muted: #8892a6;
+  --accent: #3b82f6; --accent-dim: rgba(59,130,246,0.07);
+  --accent-gold: #f0b637; --accent-cyan: #0ea5e9;
+  --green: #16a34a; --red: #dc2626; --orange: #f59e0b;
+  --surplus-pos: #10b981; --surplus-neg: #ef4444; --surplus-neutral: #6b7280;
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5; }
+::-webkit-scrollbar{height:5px;width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+
+
+/* — Header — */
+.header { padding:1.5rem 2rem 0.75rem; }
+.header-inner { max-width:1400px; margin:0 auto; display:flex; align-items:baseline; gap:0.75rem; flex-wrap:wrap; }
+.header h1, .header-brand h1 { font-weight:800; font-size:1.5rem; letter-spacing:-0.02em; color:var(--text); }
+.header .tag { font-family:'JetBrains Mono','DM Mono',monospace; font-size:0.6rem; color:var(--accent); background:var(--accent-dim); padding:0.2em 0.6em; border-radius:4px; letter-spacing:0.04em; }
+.header-subtitle { color:var(--text2); font-size:0.85rem; }
+
+
+/* — Stat Cards — */
+.stats-bar { max-width:1400px; margin:1rem auto 0; padding:0 2rem; display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1rem 1.15rem; }
+.stat-card .label { font-family:'JetBrains Mono','DM Mono',monospace; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:0.2rem; }
+.stat-card .value { font-weight:700; font-size:1.35rem; color:var(--text); }
+.stat-card .value .unit { font-size:0.8rem; font-weight:400; color:var(--text2); }
+
+/* — Controls — */
+.controls { max-width:1400px; margin:1.25rem auto 0; padding:0 2rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center; }
+.search-box { flex:1; min-width:200px; position:relative; }
+.search-box input { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0.55rem 0.85rem 0.55rem 2.3rem; color:var(--text); font-family:inherit; font-size:0.85rem; outline:none; transition:border-color 0.2s; }
+.search-box input:focus { border-color:var(--accent); }
+.search-box input::placeholder { color:var(--text-muted); }
+.search-box .icon { position:absolute; left:0.8rem; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.85rem; }
+.filter-group { display:flex; gap:0.5rem; align-items:center; }
+.filter-group label { font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; }
+select { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0.55rem 0.85rem; color:var(--text); font-family:inherit; font-size:0.85rem; outline:none; cursor:pointer; }
+select:focus { border-color:var(--accent); }
+
+/* — Buttons — */
+.ctrl-btn { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0.5rem 1rem; color:var(--text); font-family:inherit; font-size:0.82rem; font-weight:500; cursor:pointer; transition:border-color 0.15s, background 0.15s; white-space:nowrap; }
+.ctrl-btn:hover:not(:disabled) { border-color:var(--accent); background:var(--accent-dim); }
+.ctrl-btn:disabled { opacity:0.4; cursor:default; }
+.ctrl-btn.active { border-color:var(--accent); background:var(--accent-dim); color:var(--accent); font-weight:600; }
+
+/* — Tables — */
+.table-container { max-width:1400px; margin:1.25rem auto 3rem; padding:0 2rem; overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+thead th { position:sticky; top:0; z-index:10; background:var(--surface2); font-family:'JetBrains Mono','DM Mono',monospace; font-size:0.62rem; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); padding:0.6rem 0.5rem; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; cursor:pointer; user-select:none; }
+thead th:hover { color:var(--accent); }
+tbody tr { border-bottom:1px solid var(--border); transition:background 0.12s; }
+tbody tr:hover { background:rgba(59,130,246,0.03); }
+tbody td { padding:0.55rem 0.5rem; vertical-align:middle; white-space:nowrap; }
+
+/* — Loading & Errors — */
+.loading-overlay, .loading-state { text-align:center; padding:4rem 2rem; color:var(--text2); }
+.loading-overlay .spinner, .loading-spinner { display:inline-block; width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:hmSpin 0.8s linear infinite; margin:0 auto 1rem; }
+@keyframes hmSpin { to { transform:rotate(360deg); } }
+.loading-overlay p { color:var(--text2); font-size:0.9rem; }
+.error-msg { color:var(--red); max-width:600px; margin:0 auto; text-align:center; }
+
+/* — Footer — */
+.footer { max-width:1400px; margin:0 auto; padding:1.5rem 2rem 2.5rem; text-align:center; font-size:0.75rem; color:var(--text-muted); border-top:1px solid var(--border); }
+.footer a, footer a { color:var(--accent); text-decoration:none; }
+
+/* — Responsive — */
+@media(max-width:900px) { .stats-bar{grid-template-columns:repeat(2,1fr);} .controls{flex-direction:column;} .search-box{min-width:100%;} }
+@media(max-width:600px) { .stats-bar{grid-template-columns:1fr 1fr;gap:0.5rem;} .stat-card{padding:0.75rem;} .stat-card .value{font-size:1.1rem;} .header{padding:1.25rem 1rem 1rem;} .header h1,.header-brand h1{font-size:1.25rem;} .table-container{padding:0 0.5rem;} td,th{padding:0.4rem 0.35rem;} }
+
+/* — Contracts specific — */
+--border-light: #eef0f2; --purple: #8b5cf6;
+}
+
+body { min-width:fit-content; }
+.container { max-width:100%; margin:0 auto; padding:0 1.25rem 1.25rem; }
+
+/* Header override for wider layout */
+.header { padding:1.5rem 2rem 0.75rem; }
+.header-inner { max-width:1400px; }
+.header h1 { font-size:1.5rem; letter-spacing:-0.03em; }
+.header .tag { font-family:'DM Mono',monospace; }
+
+
+
+/* Controls bar */
+.controls { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.75rem; padding:0.6rem 0; max-width:none; }
+.search-box { flex:1; min-width:180px; padding:0.5rem 0.75rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.85rem; outline:none; transition:border-color .2s, box-shadow .2s; }
+.search-box::placeholder { color:var(--text-muted); }
+.search-box:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+.filter-select { padding:0.5rem 1.8rem 0.5rem 0.65rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:inherit; font-size:0.8rem; cursor:pointer; outline:none; -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%238892a6'%3E%3Cpath d='M5 7L1 3h8z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 0.6rem center; transition:border-color .2s, box-shadow .2s; }
+.filter-select:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+.result-count { color:var(--text-muted); font-size:0.75rem; margin-left:auto; white-space:nowrap; font-weight:500; }
+
+/* Table wrapper */
+.table-wrap { background:var(--surface); border-radius:10px; overflow:visible; border:1px solid var(--border); }
+
+/* Table overrides for wide contract grid */
+table { font-size:0.75rem; min-width:2060px; }
+thead { position:sticky; top:0; z-index:20; }
+th { background:var(--surface2); color:var(--text2); padding:0.55rem 0.4rem; font-weight:600; font-size:0.6rem; text-transform:uppercase; letter-spacing:0.4px; white-space:nowrap; text-align:center; border-bottom:1px solid var(--border); cursor:pointer; user-select:none; transition:background 0.15s; }
+th:hover { background:var(--accent-dim); }
+th.sorted-asc::after { content:' ▲'; font-size:0.5rem; color:var(--accent); }
+th.sorted-desc::after { content:' ▼'; font-size:0.5rem; color:var(--accent); }
+th.col-player { text-align:left; min-width:150px; position:sticky; left:0; z-index:25; background:var(--surface2); }
+th.col-team { text-align:left; min-width:110px; position:sticky; left:150px; z-index:25; background:var(--surface2); }
+th.yr-col { min-width:85px; }
+th.yr-current { background:rgba(59,130,246,0.05); }
+
+td { padding:0.4rem; text-align:center; border-bottom:1px solid var(--border-light); vertical-align:middle; white-space:nowrap; }
+tr:hover td { background:rgba(59,130,246,0.03) !important; }
+td.col-player, td.col-team { position:sticky; z-index:5; }
+td.col-player { left:0; }
+td.col-team { left:150px; }
+tr:nth-child(odd) td { background:var(--surface); }
+tr:nth-child(even) td { background:#fafbfc; }
+tr:nth-child(odd) td.col-player, tr:nth-child(odd) td.col-team { background:var(--surface); }
+tr:nth-child(even) td.col-player, tr:nth-child(even) td.col-team { background:#fafbfc; }
+tr:hover td.col-player, tr:hover td.col-team { background:#f0f5ff !important; }
+
+@media(max-width:768px) { th.col-team{min-width:36px;} td.col-team{left:150px;} .tm span{display:none;} .tm img{width:22px;height:22px;} .header{padding:1rem 1rem .5rem;} .header h1{font-size:1.25rem;} .header-inner{flex-wrap:wrap;} .header-sub{width:100%;font-size:.7rem;} }
+
+/* Player cell */
+.pc { display:flex; align-items:center; gap:0.45rem; }
+.pc-hs { width:30px; height:22px; border-radius:4px; background:#f0f1f3; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.pc-hs img { width:100%; height:100%; object-fit:cover; }
+.pc-hs .ini { color:var(--text-muted); font-weight:700; font-size:0.5rem; }
+.pc-nm { font-weight:700; font-size:0.8rem; color:var(--text); }
+
+/* Team cell */
+.tm { display:flex; align-items:center; gap:0.35rem; }
+.tm img { width:20px; height:20px; }
+.tm span { font-weight:600; font-size:0.75rem; color:var(--text); }
+
+/* Salary cells */
+.sc { display:inline-block; border-radius:3px; padding:0.15rem 0.3rem; font-weight:600; font-size:0.7rem; min-width:62px; text-align:right; }
+.sc.g { background:rgba(22,163,74,0.1); color:#16a34a; }
+.sc.pg { background:rgba(245,158,11,0.1); color:#d97706; }
+.sc.ng { background:rgba(220,38,38,0.1); color:#dc2626; border:1px dashed rgba(220,38,38,0.3); }
+.sc.to { background:rgba(14,165,233,0.1); color:#0284c7; }
+.sc.po { background:rgba(139,92,246,0.1); color:#7c3aed; }
+.sc.tw { background:rgba(110,110,115,0.08); color:#6e6e73; font-size:0.6rem; }
+.sc.td { background:rgba(245,158,11,0.1); color:#d97706; font-size:0.6rem; }
+.empty { color:#d1d5db; }
+.guar-line { display:block; font-size:0.55rem; margin-top:2px; font-weight:600; white-space:nowrap; }
+.guar-line.partial { color:#d97706; } .guar-line.non-g { color:#dc2626; } .guar-line.po { color:#7c3aed; } .guar-line.to { color:#0284c7; }
+.end-ch { display:block; font-size:0.55rem; color:var(--red); font-weight:600; margin-top:2px; white-space:nowrap; }
+
+/* End column scenario cells */
+.end-scenarios { display:flex; gap:3px; align-items:flex-start; justify-content:flex-start; }
+.end-scenario { padding:2px 5px; border-radius:4px; border:1px solid var(--border); background:var(--surface); text-align:center; min-width:38px; }
+.end-scenario.sc-first { border-color:#fca5a5; background:rgba(220,38,38,0.04); }
+.end-scenario.sc-last { border-color:#86efac; background:rgba(22,163,74,0.04); }
+.end-scenario.sc-mid { border-color:#fcd34d; background:rgba(245,158,11,0.04); }
+.fa-badge { font-size:0.6rem; font-weight:700; padding:1px 3px; border-radius:2px; display:inline-block; margin-top:1px; }
+.fa-badge.rfa { background:#ea580c; color:#fff; }
+.end-sc-year { display:block; font-weight:700; font-size:0.7rem; line-height:1.2; color:var(--text); }
+
+/* Tags */
+.tag { display:inline-block; padding:0.1rem 0.35rem; border-radius:4px; font-size:0.6rem; font-weight:600; max-width:140px; overflow:hidden; text-overflow:ellipsis; }
+.tag-exc { background:#eff6ff; color:#2563eb; }
+.tag-type { background:#f5f3ff; color:#7c3aed; }
+.tag-opt-to { background:#f0f9ff; color:#0284c7; }
+.tag-opt-po { background:#f5f3ff; color:#7c3aed; }
+.tag-tk { background:#fffbeb; color:#d97706; }
+.tag-lb { background:#f0fdf4; color:#16a34a; }
+.tag-ub { background:#fef2f2; color:#dc2626; }
+.trade-ntc { background:#fef2f2; color:#dc2626; font-weight:700; }
+.trade-restricted { background:#fffbeb; color:#d97706; font-size:0.6rem; }
+.trade-expiring { background:#f3f4f6; color:#6b7280; }
+.tag-dv { background:#fffbeb; color:#d97706; font-weight:700; font-size:0.65rem; margin-left:4px; }
+.tag-ext-elig { background:#f0fdf4; color:#16a34a; }
+.tag-ext-date { background:#f0f9ff; color:#0284c7; }
+.tag-ext-inelig { background:#fef2f2; color:#dc2626; }
+.tag-ext-rookie { background:#f5f3ff; color:#7c3aed; }
+.tag-ext-done { background:#f3f4f6; color:#6b7280; }
+.tag-ext-na { background:transparent; color:#d1d5db; }
+.ext-note { font-size:0.55rem; color:var(--text-muted); display:block; margin-top:1px; }
+td.meta-val { font-size:0.7rem; color:var(--text2); }
+
+/* Legend */
+.legend { display:flex; flex-wrap:wrap; gap:0.4rem 0.75rem; margin-bottom:0.6rem; padding:0.45rem 0.75rem; background:var(--surface); border:1px solid var(--border); border-radius:8px; }
+.legend-item { display:flex; align-items:center; gap:0.25rem; font-size:0.7rem; color:var(--text2); }
+.legend-sw { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+
+footer { text-align:center; margin-top:1.5rem; padding:0.75rem; color:var(--text-muted); font-size:0.8rem; border-top:1px solid var(--border); }
+footer a { color:var(--accent); text-decoration:none; font-weight:500; }
+
+/* Player Detail Overlay */
+.pp-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:10000;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.pp-overlay.open{display:flex;justify-content:center;padding:2rem 1rem;}
+.pp-card{background:var(--surface);border-radius:12px;max-width:720px;width:100%;border:1px solid var(--border);position:relative;align-self:flex-start;animation:ppIn .2s ease;}
+@keyframes ppIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.pp-close{position:absolute;top:.75rem;right:.75rem;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);line-height:1;padding:.25rem;}
+.pp-close:hover{color:var(--text);}
+.pp-hdr{display:flex;align-items:center;gap:1rem;padding:1.25rem 1.25rem .75rem;cursor:grab;user-select:none;}
+.pp-hdr:active{cursor:grabbing;}
+.pp-card.dragging{box-shadow:0 12px 40px rgba(0,0,0,.2);opacity:.95;position:relative;}
+.pp-hs{width:64px;height:48px;border-radius:6px;background:#f0f1f3;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pp-hs img{width:100%;height:100%;object-fit:cover;}
+.pp-hs .ini{font-size:1rem;font-weight:700;color:var(--text-muted);}
+.pp-name{font-size:1.25rem;font-weight:800;color:var(--text);letter-spacing:-.02em;}
+.pp-team{display:flex;align-items:center;gap:.35rem;font-size:.8rem;color:var(--text2);margin-top:.1rem;}
+.pp-team img{width:18px;height:18px;}
+.pp-badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.3rem;}
+.pp-badge{font-size:.6rem;font-weight:600;padding:.15rem .4rem;border-radius:4px;}
+.pp-section{padding:.75rem 1.25rem;border-top:1px solid var(--border-light);}
+.pp-section-title{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--text);margin-bottom:.5rem;}
+.pp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;}
+.pp-field{font-size:.75rem;}
+.pp-field-label{font-size:.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+.pp-field-value{font-weight:600;color:var(--text);margin-top:.1rem;}
+.pp-sal-table{width:100%;border-collapse:collapse;font-size:.75rem;min-width:0 !important;}
+.pp-sal-table th{background:var(--surface2);font-size:.6rem;text-transform:uppercase;letter-spacing:.3px;padding:.35rem .5rem;text-align:center;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);}
+.pp-sal-table td{padding:.35rem .5rem;text-align:center;border-bottom:1px solid var(--border-light);}
+.pp-link{color:var(--accent);cursor:pointer;text-decoration:none;}
+.pp-link:hover{text-decoration:underline;}
+@media(max-width:600px){.pp-overlay.open{padding:.5rem;}.pp-hdr{flex-direction:column;align-items:flex-start;gap:.5rem;}.pp-grid{grid-template-columns:1fr 1fr;}}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header" style="padding:1.5rem 0 0.75rem;">
+    <div class="header-inner" style="max-width:none;padding:0;">
+      <h1>📋 NBA Contract Database</h1>
+      <span class="tag">2024-25 → 2030-31</span>
+    </div>
+  </div>
+  <div id="controls" class="controls" style="display:none;">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search player or team...">
+    <select class="filter-select" id="filterTeam"><option value="">All Teams</option></select>
+    <select class="filter-select" id="filterStatus">
+      <option value="">All Statuses</option>
+      <option value="GUARANTEED">Guaranteed</option>
+      <option value="PARTIAL G">Partial G</option>
+      <option value="NOT G">Non-Guaranteed</option>
+      <option value="TEAM OPT">Team Option</option>
+      <option value="PLAYER OPT">Player Option</option>
+      <option value="TWO-WAY">Two-Way</option>
+      <option value="10-DAY">10-Day</option>
+    </select>
+    <select class="filter-select" id="filterException">
+      <option value="">All Exceptions</option>
+      <option value="Bird Exception">Bird</option>
+      <option value="Early Bird Exception">Early Bird</option>
+      <option value="Non-Bird Exception">Non-Bird</option>
+      <option value="Mid-Level Exception">MLE</option>
+      <option value="Taxpayer Mid-Level Exception">Taxpayer MLE</option>
+      <option value="Room Mid-Level Exception">Room MLE</option>
+      <option value="Biannual Exception">BAE</option>
+      <option value="Minimum Salary Exception">Minimum</option>
+      <option value="Rookie Exception">Rookie</option>
+      <option value="Second Round Exception">2nd Round</option>
+    </select>
+    <select class="filter-select" id="filterEnd">
+      <option value="">All End Years</option>
+      <option value="2026">2026</option>
+      <option value="2027">2027</option>
+      <option value="2028">2028</option>
+      <option value="2029">2029</option>
+      <option value="2030">2030</option>
+      <option value="2031">2031</option>
+    </select>
+    <select class="filter-select" id="filterExt">
+      <option value="">Extension Elig.</option>
+      <option value="eligible">Eligible Now</option>
+      <option value="future">Future Date</option>
+      <option value="ineligible">Ineligible (1-2yr)</option>
+      <option value="rookie">Rookie Scale</option>
+    </select>
+    <span class="result-count" id="resultCount"></span>
+  </div>
+
+  <div class="legend" id="legend" style="display:none;">
+    <div class="legend-item"><div class="legend-sw" style="background:rgba(22,163,74,0.12);border:1px solid rgba(22,163,74,0.35);"></div>Guaranteed</div>
+    <div class="legend-item"><div class="legend-sw" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);"></div>Partial G</div>
+    <div class="legend-item"><div class="legend-sw" style="background:rgba(220,38,38,0.12);border:1px dashed rgba(220,38,38,0.35);"></div>Non-G</div>
+    <div class="legend-item"><div class="legend-sw" style="background:rgba(14,165,233,0.12);border:1px solid rgba(14,165,233,0.35);"></div>Team Opt</div>
+    <div class="legend-item"><div class="legend-sw" style="background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.35);"></div>Player Opt</div>
+    <div class="legend-item"><div class="legend-sw" style="background:rgba(110,110,115,0.08);border:1px solid rgba(110,110,115,0.25);"></div>Two-Way</div>
+    <div class="legend-item"><div class="legend-sw" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);"></div>10-Day</div>
+    <div class="legend-item" style="margin-left:auto;color:var(--text-muted);font-size:0.6rem;">Dotted underline = cap hold differs (hover for value)</div>
+  </div>
+
+  <div id="loading" class="loading"><div class="loading-spinner"></div><p>Loading contracts…</p></div>
+  <div id="tableArea" style="display:none;"></div>
+  <div id="error" class="error" style="display:none;"></div>
+
+  <div id="playerOverlay" class="pp-overlay" onclick="if(event.target===this)closePlayer()"></div>
+
+  <footer>Data compiled by <a href="https://hoopsmatic.com" target="_blank">HoopsMatic</a> · <a href="https://hoopsmatic.com" target="_blank">Trade Machine</a></footer>
+</div>
+
+<script>
+const API_BASE = 'https://hoopsmatic.com';
+const CSV_URL = `${API_BASE}/api/contracts`;
+const ROSTER_CSV_URL = `${API_BASE}/api/roster`;
+const DRAFT_CSV_URL = `${API_BASE}/api/draft`;
+
+// Use server-injected data if available (skips network round trips)
+function _injectedOrFetch(url, globalKey) {
+  if (window[globalKey]) {
+    try {
+      const text = decodeURIComponent(escape(atob(window[globalKey])));
+      delete window[globalKey]; // free memory
+      return Promise.resolve({ ok: true, text: () => Promise.resolve(text) });
+    } catch(e) {}
+  }
+  return fetch(url);
+}
+
+const TEAM_IDS = {
+  'Atlanta':1610612737,'Boston':1610612738,'Brooklyn':1610612751,
+  'Charlotte':1610612766,'Chicago':1610612741,'Cleveland':1610612739,
+  'Dallas':1610612742,'Denver':1610612743,'Detroit':1610612765,
+  'Golden State':1610612744,'Houston':1610612745,'Indiana':1610612754,
+  'LA Clippers':1610612746,'LA Lakers':1610612747,'Memphis':1610612763,
+  'Miami':1610612748,'Milwaukee':1610612749,'Minnesota':1610612750,
+  'New Orleans':1610612740,'New York':1610612752,'Oklahoma City':1610612760,
+  'Orlando':1610612753,'Philadelphia':1610612755,'Phoenix':1610612756,
+  'Portland':1610612757,'Sacramento':1610612758,'San Antonio':1610612759,
+  'Toronto':1610612761,'Utah':1610612762,'Washington':1610612764
+};
+
+// Abbreviation ↔ internal team name (Contracts stores teams as "LA Lakers", etc.,
+// but URLs use "LAL" for cross-app consistency with Defense/Depth Charts/etc.)
+const TEAM_ABBR_TO_NAME = {
+  'ATL':'Atlanta','BOS':'Boston','BKN':'Brooklyn','CHA':'Charlotte','CHI':'Chicago',
+  'CLE':'Cleveland','DAL':'Dallas','DEN':'Denver','DET':'Detroit','GSW':'Golden State',
+  'HOU':'Houston','IND':'Indiana','LAC':'LA Clippers','LAL':'LA Lakers','MEM':'Memphis',
+  'MIA':'Miami','MIL':'Milwaukee','MIN':'Minnesota','NOP':'New Orleans','NYK':'New York',
+  'OKC':'Oklahoma City','ORL':'Orlando','PHI':'Philadelphia','PHX':'Phoenix','POR':'Portland',
+  'SAC':'Sacramento','SAS':'San Antonio','TOR':'Toronto','UTA':'Utah','WAS':'Washington'
+};
+const TEAM_NAME_TO_ABBR = Object.fromEntries(Object.entries(TEAM_ABBR_TO_NAME).map(([a,n]) => [n,a]));
+
+function teamLogo(t) { const id = TEAM_IDS[t]; return id ? `https://cdn.nba.com/logos/nba/${id}/primary/L/logo.svg` : ''; }
+function ini(n) { return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+const YEARS = [
+  { label: "'25-26", sc: 7, cc: 8, tc: 9, current: true },
+  { label: "'26-27", sc: 10, cc: 11, tc: 12 },
+  { label: "'27-28", sc: 13, cc: 14, tc: 15 },
+  { label: "'28-29", sc: 16, cc: 17, tc: 18 },
+  { label: "'29-30", sc: 19, cc: 20, tc: 21 },
+  { label: "'30-31", sc: 22, cc: 23, tc: 24 },
+];
+
+let allPlayers = [];
+let filteredPlayers = [];
+let headshots = {};
+let playerStats = {}; // name → { gp, mpg, ppg, rpg, apg }
+let awardsMap = {}; // normalized name → [{award, year}] (from /api/awards)
+let AWARD_NORM = s => s; // set to the normalizer once loadData runs
+let sortCol = 'team';
+let sortDir = 'asc';
+
+function parseCSV(text) {
+  const rows = []; let cur = '', inQ = false, row = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { if (inQ && text[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+    else if (c === ',' && !inQ) { row.push(cur); cur = ''; }
+    else if ((c === '\n' || c === '\r') && !inQ) {
+      if (c === '\r' && text[i+1] === '\n') i++;
+      row.push(cur); cur = '';
+      if (row.some(v => v.trim())) rows.push(row);
+      row = [];
+    } else cur += c;
+  }
+  row.push(cur);
+  if (row.some(v => v.trim())) rows.push(row);
+  return rows;
+}
+
+function parseSal(v) {
+  const s = (v||'').trim().replace(/[$,]/g, '');
+  return s && /^\d+$/.test(s) ? parseInt(s) : 0;
+}
+
+function normSt(v) {
+  const s = (v||'').trim().toUpperCase();
+  if (s.startsWith('GUAR') || s === 'GIUARANTEED' || s === 'GUARANTEEED') return 'GUARANTEED';
+  if (s === 'PARTIAL G') return 'PARTIAL G';
+  if (s === 'NOT G') return 'NOT G';
+  if (s === 'TEAM OPT') return 'TEAM OPT';
+  if (s === 'PLAYER OPT') return 'PLAYER OPT';
+  if (s === 'TWO-WAY') return 'TWO-WAY';
+  if (s === '10-DAY') return '10-DAY';
+  return s;
+}
+
+function fmtS(n) {
+  if (!n) return '';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(0) + 'K';
+  return '$' + n.toLocaleString();
+}
+function fmtFull(n) { return (n !== null && n !== undefined) ? '$' + n.toLocaleString() : ''; }
+
+// =====================================================
+// CAP HOLD CALCULATIONS
+// =====================================================
+const AVG_SAL_2526 = 12930000; // Estimated Average Player Salary 2025-26
+const AVG_GROWTH = 1.045;       // CBA: 104.5% of prior year's average
+const MIN_GROWTH = 1.07;        // Minimum salaries grow ~7% (NBA projected cap growth 26-27)
+// Cap hold for minimum salary players = 2-yr vet minimum (non-reimbursed portion)
+const MIN_CH_2627 = 2464849;  // projected 2026-27
+// Cap hold for two-way players = 1 YOS minimum
+const TWOWAY_CH_2526 = 2048494; // 1 YOS minimum 2025-26
+// Projected salary cap by season (RealGM) — index 0 = 2025-26
+const PROJ_CAP = [154647000, 166000000, 174300000, 183015000, 192166000, 201774000, 211863000, 222456000, 233579000, 245258000];
+function avgSalForYear(yi) { return Math.round(AVG_SAL_2526 * Math.pow(AVG_GROWTH, yi)); }
+function minCapHoldForYear(yi) { return yi <= 0 ? Math.round(MIN_CH_2627 / MIN_GROWTH) : Math.round(MIN_CH_2627 * Math.pow(MIN_GROWTH, yi - 1)); }
+function twowayCapHoldForYear(yi) { return Math.round(TWOWAY_CH_2526 * Math.pow(MIN_GROWTH, yi)); }
+// Max cap hold = max salary % of projected cap based on YOS (CBA 4(d)(5))
+// 0-6 YOS: 25%, 7-9 YOS: 30%, 10+ YOS: 35%
+function maxCapHold(yi, yos) {
+  const cap = yi >= 0 && yi < PROJ_CAP.length ? PROJ_CAP[yi] : PROJ_CAP[PROJ_CAP.length-1];
+  const pct = yos >= 10 ? 0.35 : yos >= 7 ? 0.30 : 0.25;
+  return Math.round(cap * pct);
+}
+
+function calcCapHold(prevSal, p, yearIndex, endYearOverride) {
+  const e = (p.exc || '').toLowerCase();
+  const notes_lc = (p.notes || '').toLowerCase();
+  const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
+  const isMinimum = e.includes('minimum') || e.includes('two-way') || notes_lc.includes('minimum salary');
+
+  // Two-Way → 1 YOS minimum cap hold
+  if (isTwoWay) {
+    return { hold: twowayCapHoldForYear(yearIndex), rights: 'Two-Way (1 YOS min)' };
+  }
+  // Minimum salary → 2-yr vet minimum cap hold (CBA 4(d)(4))
+  if (isMinimum) {
+    return { hold: minCapHoldForYear(yearIndex), rights: 'Minimum (2 YOS min)' };
+  }
+
+  // Project YOS to free agency year (yearIndex = seasons after 2025-26)
+  const faYOS = p.yos + yearIndex;
+
+  // Rookie Scale Contracts only (first-round picks) → 300%/250%
+  if (e.includes('rookie') && !e.includes('second')) {
+    const avg = avgSalForYear(yearIndex);
+    const pct = prevSal < avg ? 3.0 : 2.5;
+    let hold = Math.round(prevSal * pct);
+    const cap = maxCapHold(yearIndex, faYOS);
+    let rights = `Rookie Scale (${pct*100}%)`;
+    if (hold > cap) { rights += ' → capped'; hold = cap; }
+    return { hold, rights };
+  }
+
+  // Derive contract length from signing date + effective end year
+  const effectiveEnd = endYearOverride || parseInt(p.end);
+  let contractLen = null;
+  if (p.sigDate && effectiveEnd) {
+    const parts = p.sigDate.split('/');
+    if (parts.length === 3) {
+      const sigMonth = parseInt(parts[0]), sigYear = parseInt(parts[2]);
+      const firstSeasonEnd = sigMonth >= 7 ? sigYear + 1 : sigYear;
+      if (!isNaN(firstSeasonEnd) && !isNaN(effectiveEnd)) contractLen = effectiveEnd - firstSeasonEnd + 1;
+    }
+  }
+
+  // Determine Bird rights combining exception + contract length
+  let totalService;
+  if (e.includes('bird') && !e.includes('early') && !e.includes('non-bird')) {
+    totalService = 99;
+  } else if (e.includes('early bird')) {
+    totalService = 2 + (contractLen || 0);
+  } else if (e.includes('non-bird')) {
+    totalService = 1 + (contractLen || 0);
+  } else {
+    totalService = contractLen;
+  }
+
+  if (totalService === null) return null;
+
+  const avg = avgSalForYear(yearIndex);
+  let pct, rights;
+  if (totalService >= 3) {
+    pct = prevSal < avg ? 1.9 : 1.5;
+    rights = `Full Bird (${Math.round(pct*100)}%)`;
+  } else if (totalService >= 2) {
+    pct = 1.3;
+    rights = 'Early Bird (130%)';
+  } else {
+    pct = 1.2;
+    rights = 'Non-Bird (120%)';
+  }
+
+  let hold = Math.round(prevSal * pct);
+  const cap = maxCapHold(yearIndex, faYOS);
+  if (hold > cap) { rights += ' → capped'; hold = cap; }
+  return { hold, rights };
+}
+
+// Build end-year scenarios based on option years
+function getEndScenarios(p) {
+  const endYear = parseInt(p.end);
+  if (!endYear) return [];
+
+  // Find option year indices (sorted)
+  const optYears = [];
+  for (let i = 0; i < YEARS.length; i++) {
+    const st = p.yrs[i].st;
+    if (st === 'TEAM OPT' || st === 'PLAYER OPT') {
+      optYears.push({ idx: i, type: st });
+    }
+  }
+
+  if (optYears.length === 0) {
+    return [{ endYr: endYear, cls: '' }];
+  }
+
+  const scenarios = [];
+
+  if (optYears.length === 1) {
+    const opt = optYears[0];
+    const declinedEnd = 2025 + opt.idx;
+    scenarios.push({ endYr: declinedEnd, cls: 'sc-first', optDeclined: opt.type });
+    scenarios.push({ endYr: endYear, cls: 'sc-last', optDeclined: null });
+  } else {
+    for (let o = 0; o < optYears.length; o++) {
+      const opt = optYears[o];
+      const declinedEnd = 2025 + opt.idx;
+      const cls = o === 0 ? 'sc-first' : 'sc-mid';
+      scenarios.push({ endYr: declinedEnd, cls, optDeclined: opt.type });
+    }
+    scenarios.push({ endYr: endYear, cls: 'sc-last', optDeclined: null });
+  }
+
+  return scenarios;
+}
+
+// =====================================================
+// QUALIFYING OFFER — pick-specific percentages
+// =====================================================
+// Old CBA (drafts ≤2022, RFA ≤2026): raise over 4th year salary
+const QO_PCT_OLD = [30.0,30.5,31.2,31.9,32.6,33.4,34.1,34.8,35.5,36.2,36.9,37.6,38.3,39.1,39.8,40.5,41.2,41.9,42.6,43.3,44.1,44.8,45.5,46.2,46.9,47.6,48.3,49.0,50.0,50.0];
+// New CBA (drafts ≥2023, RFA ≥2027): +10% across the board
+const QO_PCT_NEW = [40.0,40.5,41.2,41.9,42.6,43.4,44.1,44.8,45.5,46.2,46.9,47.6,48.3,49.1,49.8,50.5,51.2,51.9,52.6,53.3,54.1,54.8,55.5,56.2,56.9,57.6,58.3,59.0,60.0,60.0];
+
+// =====================================================
+// STARTER CRITERIA OVERRIDES & REFERENCE QO AMOUNTS
+// =====================================================
+// SC override: loaded from sc_data.json (updated daily by GitHub Action)
+// Fallback to empty object if fetch fails — QO will use base pick percentage
+let SC_OVERRIDE = {};
+let SC_STATS = {};  // { playerName: { gs4, min4, gs3, min3, reason } }
+
+// Manual starter-criteria corrections — AUTHORITATIVE official rulings that
+// override the auto-generated sc_data.json. The daily scrape can be wrong
+// (e.g. mid-season-traded players whose games-started come through inflated),
+// so a confirmed league ruling belongs here. Keyed by exact roster name;
+// true = SC met, false = SC not met. Takes priority everywhere sc is resolved,
+// even if sc_data.json fails to load.
+const MANUAL_SC = {
+  'Bennedict Mathurin': false, // Officially ruled NOT met (Mar 2026) → QO drops to pick-15 ref (~$8.8M)
+};
+
+// Reference QO dollar amounts per draft class year (used when SC triggers)
+// Calculated as: 120% of scale 4th-year salary × (1 + QO pct)
+// For pick 21 (non-rookie SC): 100% of scale × (1 + QO pct)
+const REF_QO = {
+  2026: { // 2022 draft class becoming RFA in 2026 (old CBA percentages)
+    // Pick 9 (Sochan): 4th yr $7,096,231 × 1.355 = $9,615,393
+    pick9: 9615393,
+    // Pick 15 (M. Williams): 4th yr $6,276,531 × 1.398 = $8,778,695
+    pick15: 8778695,
+    // Pick 21 (Braun): 100% of scale = $4,921,797/1.2 = $4,101,498 × 1.441 = $5,910,258
+    pick21: 5910258,
+  },
+  // 2027: { pick9: ..., pick15: ..., pick21: ... },  // 2023 draft class (new CBA pcts)
+};
+
+// Starter criteria bump/cap pick references:
+// Picks 10-30 who MEET SC → use pick 9's QO dollar amount
+// Picks 1-14 who FAIL SC → capped at lesser of (own QO, pick 15's QO dollar amount)
+// Non-rookie ≤3 YOS who MEET SC → bumped to pick 21's QO dollar amount (if higher)
+
+function qoTooltip(fa, p) {
+  let tip = fa.detail || fa.status;
+  if (fa.qo) tip += ` · QO: ${fmtFull(fa.qo)}`;
+  const manualSC = (p.name in MANUAL_SC);
+  const sc = (p.name in MANUAL_SC) ? MANUAL_SC[p.name] : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
+  const stats = SC_STATS[p.name] || p.scStats;
+  if (stats) {
+    tip += ` · GS: ${stats.gs_curr}/${stats.gs_prev} (S4/S3) · MIN: ${stats.min_curr}/${stats.min_prev}`;
+    tip += ` · SC: ${sc ? 'MET' : 'NOT MET'}${manualSC ? ' (official ruling)' : ''}`;
+    if (stats.reason && !manualSC) tip += ` (${stats.reason})`;
+  } else if (sc !== null && sc !== undefined) {
+    tip += ` · SC: ${sc ? 'MET' : 'NOT MET'}${manualSC ? ' (official ruling)' : ''}`;
+  } else if (p.draftPick > 0) {
+    tip += ' · SC: data unavailable';
+  }
+  return tip;
+}
+
+// =====================================================
+// RESTRICTED FREE AGENCY & QUALIFYING OFFER
+// =====================================================
+// RFA: Rookie Scale players at end of rookie contract, OR players with ≤3 YOS
+// QO: Rookie Scale = 130% of last year salary; Non-Rookie ≤3 YOS = 125% (if sal ≤ avg) or 110% (if sal > avg)
+function calcFAStatus(p, endYear, optDeclined) {
+  const e = (p.exc || '').toLowerCase();
+  const notes_lc = (p.notes || '').toLowerCase();
+  const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
+  const faYOS = p.yos + (endYear - 2025);
+
+  // Two-Way: RFA if ≤3 YOS, no QO amount
+  if (isTwoWay) {
+    return faYOS <= 3 ? { status: 'RFA', qo: null, detail: 'Two-Way' } : { status: 'UFA', qo: null };
+  }
+
+  // Rookie Scale (1st round picks)
+  const isRookie = e.includes('rookie') && !e.includes('second');
+  if (isRookie) {
+    // TO declined → automatic UFA
+    if (optDeclined === 'TEAM OPT') {
+      return { status: 'UFA', qo: null, detail: 'Rookie TO declined → UFA' };
+    }
+    // End of full rookie contract → RFA with pick-specific QO
+    const lastYrIdx = endYear - 2026;
+    const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+    const pick = p.draftPick || 0;
+    if (pick >= 1 && pick <= 30) {
+      const pctTable = endYear <= 2026 ? QO_PCT_OLD : QO_PCT_NEW;
+
+      // Apply SC override if available
+      const sc = (p.name in MANUAL_SC) ? MANUAL_SC[p.name] : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
+      const ref = REF_QO[endYear];
+
+      // Base QO for this pick (no SC adjustment)
+      const basePct = 1 + pctTable[pick - 1] / 100;
+      let qo = Math.round(lastSal * basePct);
+      let scNote = '';
+
+      if (sc === true && ref) {
+        if (pick >= 10 && pick <= 30) {
+          // Bumped to pick 9's reference QO dollar amount
+          qo = ref.pick9;
+          scNote = ` (SC met → pick 9 QO $${(ref.pick9/1e6).toFixed(1)}M)`;
+        }
+        // Picks 1-9 who meet SC → no change (already high)
+      } else if (sc === false && ref) {
+        if (pick >= 1 && pick <= 14) {
+          // Capped at lesser of own QO or pick 15's reference amount
+          const capped = Math.min(qo, ref.pick15);
+          if (capped < qo) {
+            scNote = ` (SC not met → capped at pick 15 QO $${(ref.pick15/1e6).toFixed(1)}M)`;
+            qo = capped;
+          } else {
+            scNote = ' (SC not met, own QO already lower)';
+          }
+        }
+      }
+      // sc === null → use normal pick QO (no adjustment)
+
+      return { status: 'RFA', qo, detail: `QO Pick ${pick}${scNote} (+${pctTable[pick-1]}%)` };
+    }
+    // Fallback if no pick data
+    const qo = Math.round(lastSal * 1.3);
+    return { status: 'RFA', qo, detail: 'Rookie Scale QO (~130%)' };
+  }
+
+  // Non-rookie: RFA if ≤3 YOS at FA
+  if (faYOS <= 3) {
+    const lastYrIdx = endYear - 2026;
+    const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+    // New CBA: 135% of prior salary or min+$200K, whichever greater
+    // Old CBA (signed before 2023-24): 125%
+    const sigBefore2324 = p.sigDate && parseInt((p.sigDate.split('/')[2]||'')) < 2023;
+    const pct = sigBefore2324 ? 1.25 : 1.35;
+    const chYrIdx = endYear - 2025;
+    // Min salary + $200K floor
+    const minFloor = minCapHoldForYear(chYrIdx) + 200000;
+    const qoBase = Math.round(lastSal * pct);
+    const qo = Math.max(qoBase, minFloor);
+
+    let scNote = '';
+    // Starter criteria for non-rookie ≤3 YOS: bump to 21st pick's QO if higher
+    const sc = (p.name in MANUAL_SC) ? MANUAL_SC[p.name] : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
+    const ref = REF_QO[endYear];
+    if (sc === true && ref && ref.pick21 > qo) {
+      const prevQo = qo;
+      qo = ref.pick21;
+      scNote = ` (SC met → pick 21 QO $${(ref.pick21/1e6).toFixed(1)}M)`;
+    }
+
+    return { status: 'RFA', qo, detail: `QO (${Math.round(pct*100)}%)${scNote}` };
+  }
+
+  return { status: 'UFA', qo: null };
+}
+
+// =====================================================
+// EXTENSION ELIGIBILITY
+// =====================================================
+function dvLabel(p) {
+  if (!p.dvEligible || !p.dvAwards || !p.dvAwards.length) return '';
+  const short = { 'Most Valuable Player': 'MVP', 'Defensive Player of the Year': 'DPOY',
+    'All-NBA First Team': 'All-NBA 1st', 'All-NBA Second Team': 'All-NBA 2nd', 'All-NBA Third Team': 'All-NBA 3rd' };
+  const items = p.dvAwards.map(a => `${short[a.award]||a.award} '${String(a.year).slice(-2)}`).join(', ');
+  return ` · Designated Veteran Eligible (${items})`;
+}
+
+function maxPct(p) {
+  // Designated Veteran: 35% regardless of YOS
+  if (p.dvEligible) return 35;
+  // 10+ YOS: 35%
+  if (p.yos >= 10) return 35;
+  // 7-9 YOS: 30%
+  if (p.yos >= 7) return 30;
+  // 0-6 YOS: 25%
+  return 25;
+}
+
+// CBA "Higher Max Criteria" (2023 CBA) — shared by BOTH the Rose Rule (rookie 30%)
+// and the Designated Veteran supermax (35%). A player qualifies if any of:
+//   (a) All-NBA (1st/2nd/3rd) or DPOY in the most recent season, OR in 2 of the
+//       last 3 seasons (counting DISTINCT SEASONS, not award entries); OR
+//   (b) MVP in any of the last 3 seasons.
+// Note: All-Star is NOT a criterion (the All-Star path was removed in the 2017 CBA).
+const HIGHER_MAX_AWARDS = ['All-NBA First Team', 'All-NBA Second Team', 'All-NBA Third Team', 'Defensive Player of the Year'];
+const MOST_RECENT_SEASON = 2026; // season just completed (awards announced)
+function meetsHigherMaxCriteria(awards, refYear) {
+  if (!awards || !awards.length) return false;
+  refYear = refYear || MOST_RECENT_SEASON;
+  const win = [refYear, refYear - 1, refYear - 2];
+  // MVP in any of the last 3 seasons
+  if (awards.some(a => a.award === 'Most Valuable Player' && win.includes(a.year))) return true;
+  // distinct seasons with an All-NBA team or DPOY, within the window
+  const seasons = new Set(awards.filter(a => HIGHER_MAX_AWARDS.includes(a.award) && win.includes(a.year)).map(a => a.year));
+  if (seasons.has(refYear)) return true;      // most recent season
+  return seasons.size >= 2;                    // 2 of the last 3 seasons
+}
+
+function rookieDesignated(p) {
+  // Rose Rule (5th-Year 30% Max): same Higher Max Criteria as the supermax.
+  return meetsHigherMaxCriteria(p.allAwards, MOST_RECENT_SEASON);
+}
+
+function guaranteedEnd(p) {
+  // Walk backwards through contract years to find last non-option year
+  // YEARS[0]=2026, YEARS[1]=2027, etc.
+  const END_YEARS = [2026, 2027, 2028, 2029, 2030, 2031];
+  let lastGuarIdx = -1;
+  for (let i = p.yrs.length - 1; i >= 0; i--) {
+    const y = p.yrs[i];
+    if (y.sal && y.st && y.st !== 'PLAYER OPT' && y.st !== 'TEAM OPT') {
+      lastGuarIdx = i;
+      break;
+    }
+  }
+  if (lastGuarIdx < 0) return null;
+  return END_YEARS[lastGuarIdx];
+}
+
+function calcExtElig(p) {
+  const dv = dvLabel(p);
+  const pct = maxPct(p);
+  const pctLabel = ` · Max ${pct}%`;
+  const notes_lc = (p.notes||'').toLowerCase();
+
+  // No team = free agent
+  if (!p.team) return { status: 'na', text: 'Free Agent', sortVal: 9, dv: p.dvEligible };
+
+  // Two-Way / 10-Day
+  if (notes_lc.includes('two-way') || p.yrs.every(y => y.st === 'TWO-WAY' || !y.st))
+    return { status: 'na', text: 'Standard Contract Conversion Eligible', detail: 'Two-Way Contract', sortVal: 8, dv: p.dvEligible };
+  if (notes_lc.includes('10-day') || p.yrs.every(y => y.st === '10-DAY' || !y.st))
+    return { status: 'na', text: 'N/A', detail: '10-Day', sortVal: 8, dv: p.dvEligible };
+
+  // Already extended
+  if (notes_lc.includes('extension')) {
+    if (!p.sigDate || !p.end) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
+    const parts = p.sigDate.split('/');
+    if (parts.length !== 3) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
+    let eMonth = parseInt(parts[0]), eDay = parseInt(parts[1]), eYear = parseInt(parts[2]);
+    if (isNaN(eMonth) || isNaN(eDay) || isNaN(eYear)) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
+    if (eMonth === 10 && eDay >= 2) eDay = 1;
+    const eFirstEnd = eMonth >= 7 ? eYear + 1 : eYear;
+    const eEndYear = parseInt(p.end);
+    if (isNaN(eEndYear)) return { status: 'extended', text: 'Extended', detail: p.notes + dv + pctLabel, sortVal: 6, dv: p.dvEligible };
+    const eTotalLen = eEndYear - eFirstEnd + 1;
+    if (eTotalLen <= 2) return { status: 'extended', text: 'Extended', detail: `${p.notes} · ${eTotalLen}-yr total, next ext. ineligible` + dv, sortVal: 6, dv: p.dvEligible };
+    const eWait = eTotalLen <= 4 ? 2 : 3;
+    const eAnniv = new Date(eYear + eWait, eMonth - 1, eDay);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const eFmt = eAnniv.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (eAnniv <= today) {
+      return { status: 'eligible', text: 'Eligible',
+        detail: `Extended (${p.notes}) · Re-eligible since ${eFmt}` + dv + pctLabel,
+        sortVal: 1, dateVal: eAnniv.getTime(), dv: p.dvEligible };
+    } else {
+      return { status: 'future', text: eFmt,
+        detail: `Extended (${p.notes}) · ${eTotalLen}-yr total, ${eWait === 2 ? '2nd' : '3rd'} anniv.` + dv + pctLabel,
+        sortVal: 2, dateVal: eAnniv.getTime(), dv: p.dvEligible };
+    }
+  }
+
+  // Rookie Scale Contract
+  if (notes_lc.includes('rookie scale')) {
+    // Expiring rookie scale — player will be RFA, no extension possible
+    const now = new Date();
+    const currentSeasonEnd = now.getMonth() >= 6 ? now.getFullYear() + 1 : now.getFullYear();
+    if (parseInt(p.end) === currentSeasonEnd) {
+      return { status: 'ineligible', text: 'Ineligible', detail: `Expiring rookie scale (RFA ${currentSeasonEnd})` + dv, sortVal: 7, dv: p.dvEligible };
+    }
+    const isDRE = rookieDesignated(p);
+    const dreLabel = isDRE ? 'Des. Rookie Scale Ext. / Max (30%)' : 'Rookie Scale Ext. / Max (25%)';
+    if (p.draftYear > 0) {
+      const eligDate = new Date(p.draftYear + 3, 6, 1);
+      const deadline = new Date(p.draftYear + 4, 9, 21);
+      const today = new Date(); today.setHours(0,0,0,0);
+      const eligFmt = eligDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const deadFmt = deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      if (today >= deadline) {
+        return { status: 'ineligible', text: 'Ineligible', detail: `Rookie scale window closed (${deadFmt})` + dv, sortVal: 7, dv: p.dvEligible };
+      } else if (today >= eligDate) {
+        return { status: 'eligible', text: dreLabel,
+          detail: `Eligible since ${eligFmt} · Deadline: ${deadFmt}` + dv,
+          sortVal: 1, dateVal: eligDate.getTime(), dv: p.dvEligible };
+      } else {
+        return { status: 'future', text: eligFmt,
+          detail: `Rookie scale · ${dreLabel} · Window: ${eligFmt} – ${deadFmt}` + dv,
+          sortVal: 2, dateVal: eligDate.getTime(), dv: p.dvEligible };
+      }
+    }
+    return { status: 'rookie', text: 'Rookie Scale', detail: dreLabel + dv, sortVal: 5, dv: p.dvEligible };
+  }
+
+  // No signing date
+  if (!p.sigDate || !p.end) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
+
+  // Parse signing date (M/D/YYYY)
+  const parts = p.sigDate.split('/');
+  if (parts.length !== 3) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
+  let sigMonth = parseInt(parts[0]);
+  let sigDay = parseInt(parts[1]);
+  const sigYear = parseInt(parts[2]);
+  if (isNaN(sigMonth) || isNaN(sigDay) || isNaN(sigYear)) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
+  if (sigMonth === 10 && sigDay >= 2) { sigDay = 1; }
+  const firstSeasonEnd = sigMonth >= 7 ? sigYear + 1 : sigYear;
+
+  // Contract length (full, including options)
+  const endYear = parseInt(p.end);
+  if (isNaN(endYear)) return { status: 'unknown', text: '—', sortVal: 10, dv: p.dvEligible };
+  const length = endYear - firstSeasonEnd + 1;
+
+  // Check for shorter "guaranteed end" (options declined)
+  const guarEnd = guaranteedEnd(p);
+  const hasOptions = guarEnd && guarEnd < endYear;
+  const guarLength = hasOptions ? guarEnd - firstSeasonEnd + 1 : length;
+
+  // Helper: compute eligibility for a given contract length
+  function calcForLength(len) {
+    if (len <= 2) return { elig: false };
+    const wait = len <= 4 ? 2 : 3;
+    const anniv = new Date(sigYear + wait, sigMonth - 1, sigDay);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const fmt = anniv.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (anniv <= today) return { elig: true, fmt, date: anniv, wait, len };
+    else return { elig: null, fmt, date: anniv, wait, len };
+  }
+
+  const full = calcForLength(length);
+
+  // No options — simple case
+  if (!hasOptions) {
+    if (full.elig === false) {
+      return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal` + dv, sortVal: 7, dv: p.dvEligible };
+    } else if (full.elig === true) {
+      return { status: 'eligible', text: 'Eligible', detail: `Since ${full.fmt}` + dv + pctLabel, sortVal: 1, dateVal: full.date.getTime(), dv: p.dvEligible };
+    } else {
+      return { status: 'future', text: full.fmt, detail: `${length}-year deal, ${full.wait === 2 ? '2nd' : '3rd'} anniv.` + dv + pctLabel, sortVal: 2, dateVal: full.date.getTime(), dv: p.dvEligible };
+    }
+  }
+
+  // Has options — compute both scenarios
+  const optType = p.yrs.some(y => y.st === 'PLAYER OPT') ? 'PO' : 'TO';
+  const decl = calcForLength(guarLength);
+
+  if (full.elig === false) {
+    // Ineligible with full contract
+    if (decl.elig === false) {
+      return { status: 'ineligible', text: 'Ineligible', detail: `${length}-year deal · Also ineligible if ${optType} declined` + dv, sortVal: 7, dv: p.dvEligible };
+    } else if (decl.elig === true) {
+      return { status: 'eligible', text: 'Eligible',
+        detail: `Ineligible if ${optType} exercised (${length}-yr) · Eligible if declined (${guarLength}-yr, since ${decl.fmt})` + dv + pctLabel,
+        sortVal: 1, dateVal: decl.date.getTime(), dv: p.dvEligible };
+    } else {
+      return { status: 'future', text: decl.fmt,
+        detail: `Ineligible if ${optType} exercised (${length}-yr) · If declined: ${guarLength}-yr, eligible ${decl.fmt}` + dv + pctLabel,
+        sortVal: 2, dateVal: decl.date.getTime(), dv: p.dvEligible };
+    }
+  } else if (full.elig === true) {
+    let optNote = '';
+    if (decl.elig === true && decl.date < full.date) optNote = ` · Earlier if ${optType} declined`;
+    else if (decl.elig === false) optNote = ` · Ineligible if ${optType} declined`;
+    return { status: 'eligible', text: 'Eligible', detail: `Since ${full.fmt}` + optNote + dv + pctLabel, sortVal: 1, dateVal: full.date.getTime(), dv: p.dvEligible };
+  } else {
+    let optNote = '';
+    if (decl.elig === true) optNote = ` · Already eligible if ${optType} declined`;
+    else if (decl.elig !== false && decl.date && decl.date < full.date) {
+      optNote = ` · Earlier (${decl.fmt}) if ${optType} declined`;
+    } else if (decl.elig === false) optNote = ` · Ineligible if ${optType} declined`;
+    return { status: 'future', text: full.fmt, detail: `${length}-year deal, ${full.wait === 2 ? '2nd' : '3rd'} anniv.` + optNote + dv + pctLabel, sortVal: 2, dateVal: full.date.getTime(), dv: p.dvEligible };
+  }
+}
+
+async function loadStarterCriteria() {
+  // Fetch SC data from GitHub-hosted JSON (updated daily by Action)
+  // Try relative path first (same repo), then absolute URL
+  const urls = [
+    './sc_data.json',
+    'https://jsierrahoopshype.github.io/Contracts/sc_data.json',  // Update with your actual repo URL
+  ];
+  let scJson = null;
+  for (const url of urls) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 5000);
+      const resp = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (resp.ok) {
+        scJson = await resp.json();
+        console.log(`SC: loaded from ${url}, updated ${scJson.updated}`);
+        break;
+      }
+    } catch(e) { console.warn(`SC: ${url} failed`, e.message); }
+  }
+  if (!scJson || !scJson.players) {
+    console.warn('SC: no data available, QO will use base pick percentages');
+    return;
+  }
+
+  // Populate SC_OVERRIDE and SC_STATS globals
+  const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
+    .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+  const scByNorm = {};
+  for (const [name, data] of Object.entries(scJson.players)) {
+    scByNorm[norm(name)] = { name, ...data };
+  }
+
+  let matched = 0;
+  allPlayers.forEach(p => {
+    const sc = scByNorm[norm(p.name)];
+    if (!sc) return;
+    SC_OVERRIDE[p.name] = sc.met;
+    SC_STATS[p.name] = {
+      gs_curr: sc.gs4, min_curr: sc.min4,
+      gs_prev: sc.gs3, min_prev: sc.min3,
+      reason: sc.reason,
+    };
+    p.starterCriteria = sc.met;
+    p.scStats = SC_STATS[p.name];
+    matched++;
+  });
+  console.log(`SC: matched ${matched} players from JSON`);
+}
+
+async function loadTenureData() {
+  const urls = [
+    './tenure_data.json',
+    'https://jsierrahoopshype.github.io/Contracts/tenure_data.json',
+  ];
+  let tenureJson = null;
+  for (const url of urls) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 5000);
+      const resp = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (resp.ok) {
+        tenureJson = await resp.json();
+        console.log(`Tenure: loaded from ${url}, updated ${tenureJson.updated}`);
+        break;
+      }
+    } catch(e) { console.warn(`Tenure: ${url} failed`, e.message); }
+  }
+  if (!tenureJson || !tenureJson.players) {
+    console.warn('Tenure: no data available');
+    return;
+  }
+
+  const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
+    .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+
+  // Alias map: sheet name (normed) → API name (normed)
+  const TENURE_ALIASES = {
+    'nicolas claxton': 'nic claxton',
+    'santiago aldama': 'santi aldama',
+    'herb jones': 'herbert jones',
+    'cameron payne': 'cam payne',
+    'sviatoslav mykhailiuk': 'svi mykhailiuk',
+    'carlton carrington': 'bub carrington',
+    'jeenathan williams': 'nate williams',
+    'dennis schroeder': 'dennis schroder',
+    'david jones': 'david jones-garcia',
+  };
+
+  const tenByNorm = {};
+  for (const [name, data] of Object.entries(tenureJson.players)) {
+    tenByNorm[norm(name)] = data;
+  }
+
+  let matched = 0;
+  const unmatched = [];
+  allPlayers.forEach(p => {
+    const n = norm(p.name);
+    const t = tenByNorm[n] || tenByNorm[TENURE_ALIASES[n]];
+    if (t) {
+      p.joinedSeason = t.joined_season;
+      p.continuousSeasons = t.continuous_seasons;
+      matched++;
+    } else if (p.sigDate) {
+      // Fallback: derive season from signing date (M/D/YYYY)
+      const parts = p.sigDate.split('/');
+      if (parts.length === 3) {
+        const m = parseInt(parts[0]), y = parseInt(parts[2]);
+        const startYr = m >= 7 ? y : y - 1;
+        const curSeason = tenureJson ? tenureJson.season : '2025-26';
+        p.joinedSeason = `${startYr}-${String(startYr + 1).slice(-2)}`;
+        p.continuousSeasons = parseInt(curSeason.split('-')[0]) - startYr + 1;
+        matched++;
+      } else { unmatched.push(p.name); }
+    } else { unmatched.push(p.name); }
+  });
+  console.log(`Tenure: matched ${matched} players from JSON`);
+  if (unmatched.length) console.log('Tenure: unmatched players:', unmatched);
+}
+
+async function loadStats() {
+  try {
+    let data;
+    // Use server-injected stats if available
+    if (window.__STATS_JSON__) {
+      data = window.__STATS_JSON__;
+      delete window.__STATS_JSON__;
+      console.log('[Stats] Using injected data:', data.length, 'players');
+    } else {
+      console.log('[Stats] Fetching from', `${API_BASE}/api/stats`);
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      const resp = await fetch(`${API_BASE}/api/stats`, { signal: ctrl.signal });
+      clearTimeout(timer);
+      console.log('[Stats] Response:', resp.status, resp.statusText);
+      if (!resp.ok) { console.warn('[Stats] HTTP', resp.status); return; }
+      data = await resp.json();
+      console.log('[Stats] Received', data.length, 'players');
+    }
+    const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
+      .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+    const statsByNorm = {};
+    for (const s of data) { statsByNorm[norm(s.name)] = s; }
+    let matched = 0;
+    allPlayers.forEach(p => {
+      const s = statsByNorm[norm(p.name)];
+      if (s) { playerStats[p.name] = s; matched++; }
+    });
+    console.log(`[Stats] Matched ${matched} of ${data.length} players`);
+  } catch(e) { console.warn('[Stats] Load failed:', e.message); }
+}
+
+// Pull the dedicated Awards sheet (AWARD, YEAR, PLAYER / COACH) via the Worker proxy,
+// build the per-player award map, then recompute DV / Rose-Rule eligibility.
+async function loadAwards() {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const resp = await fetch(`${API_BASE}/api/awards`, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!resp.ok) throw new Error('awards HTTP ' + resp.status);
+    const rows = parseCSV(await resp.text());
+    if (rows.length < 2) throw new Error('no award rows');
+    // Locate columns by header (robust to minor column shifts): AWARD, YEAR, PLAYER / COACH
+    const hdr = rows[0].map(h => (h||'').trim().toUpperCase());
+    let ai = hdr.indexOf('AWARD'), yi = hdr.indexOf('YEAR');
+    let pi = hdr.indexOf('PLAYER / COACH'); if (pi < 0) pi = hdr.indexOf('PLAYER/COACH');
+    if (pi < 0) pi = hdr.indexOf('PLAYER');
+    if (ai < 0 || yi < 0 || pi < 0) throw new Error('awards columns not found');
+    const map = {};
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i]; if (!r) continue;
+      const player = (r[pi]||'').trim();
+      const award = (r[ai]||'').trim();
+      const year = parseInt((r[yi]||'').trim()) || 0;
+      if (!player || !award || !year) continue;
+      const n = AWARD_NORM(player);
+      (map[n] = map[n] || []).push({ award, year });
+    }
+    awardsMap = map;
+    console.log(`[Awards] loaded ${Object.keys(awardsMap).length} players from /api/awards`);
+    attachAwards();
+  } catch (e) {
+    console.warn('[Awards] load failed:', e.message);
+  }
+}
+
+// Attach awards to players and recompute eligibility using the CBA Higher Max Criteria.
+function attachAwards() {
+  const DV_AWARDS = ['Most Valuable Player','Defensive Player of the Year','All-NBA First Team','All-NBA Second Team','All-NBA Third Team'];
+  const win = [MOST_RECENT_SEASON, MOST_RECENT_SEASON-1, MOST_RECENT_SEASON-2];
+  allPlayers.forEach(p => {
+    const pAwards = awardsMap[AWARD_NORM(p.name)] || [];
+    p.allAwards = pAwards;
+    p.dvAwards = pAwards.filter(a => DV_AWARDS.includes(a.award) && win.includes(a.year));
+    p.dvEligible = meetsHigherMaxCriteria(pAwards, MOST_RECENT_SEASON);
+  });
+  // Extension eligibility embeds dvEligible/dvLabel, so it must be recomputed now
+  // that awards have arrived (otherwise DV candidates stay frozen as ineligible).
+  allPlayers.forEach(p => { p.ext = calcExtElig(p); });
+}
+
+console.log('%c📋 Contract DB — awards-sheet + CBA Higher-Max fix','color:#22c55e;font-weight:bold');
+async function loadData() {
+  try {
+    // Fetch all three CSVs in parallel (uses injected data if available)
+    const [csvR, rosterR, draftR] = await Promise.all([
+      _injectedOrFetch(CSV_URL, '__CSV_CONTRACTS__'),
+      _injectedOrFetch(ROSTER_CSV_URL, '__CSV_ROSTER__').catch(() => null),
+      _injectedOrFetch(DRAFT_CSV_URL, '__CSV_DRAFT__').catch(() => null),
+    ]);
+
+    if (!csvR.ok) throw new Error('CSV fetch failed');
+    const rows = parseCSV(await csvR.text());
+    if (rows.length < 2) throw new Error('No data');
+
+    allPlayers = [];
+    const awardsRaw = [];
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      const name = (r[0]||'').trim();
+
+      const awPlayer = (r[40]||'').trim();
+      const awAward = (r[41]||'').trim();
+      const awYear = parseInt((r[42]||'').trim()) || 0;
+      if (awPlayer && awAward && awYear) awardsRaw.push({ player: awPlayer, award: awAward, year: awYear });
+
+      if (!name) continue;
+      const team = (r[2]||'').trim() || null;
+      const yrs = YEARS.map(yr => ({ sal: parseSal(r[yr.sc]), ch: parseSal(r[yr.cc]), st: normSt(r[yr.tc]) }));
+
+      allPlayers.push({
+        name, team, yrs,
+        sal2425: parseSal(r[4]),
+        totG: parseSal(r[28]), totGCur: parseSal(r[25]),
+        option: (r[26]||'').trim(), end: (r[27]||'').trim(),
+        sigDate: (r[29]||'').trim(), sigTeam: (r[30]||'').trim(),
+        exc: (r[31]||'').trim(), notes: (r[32]||'').trim(),
+        tk: (r[33]||'').trim(), lb: (r[34]||'').trim(), ub: (r[35]||'').trim(),
+        yos: parseInt((r[38]||'').trim()) || 0,
+        draftPick: 0, draftYear: 0, starterCriteria: null, scStats: null,
+        joinedSeason: null, continuousSeasons: 0,
+        ntc: '', tradeRestriction: '',
+      });
+    }
+
+    // Build awards map
+    const normAw = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
+      .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+    // Awards now come from the dedicated Awards sheet via /api/awards (loaded in the
+    // background by loadAwards(), which calls attachAwards() when ready). The legacy
+    // cols-40-42 awardsRaw is ignored. Players start with empty awards; eligibility
+    // is (re)computed once the awards feed arrives.
+    AWARD_NORM = normAw; // expose the normalizer for loadAwards/attachAwards
+    allPlayers.forEach(p => { p.allAwards = []; p.dvAwards = []; p.dvEligible = false; });
+
+    allPlayers = allPlayers.filter(p => p.team);
+
+    // Process roster data (already fetched in parallel)
+    try {
+      if (rosterR && rosterR.ok) {
+        const rRows = parseCSV(await rosterR.text());
+        if (rRows.length > 1) {
+          const hdr = rRows[0];
+          const pi = hdr.findIndex(h => h.toUpperCase() === 'PLAYER');
+          const hi = hdr.findIndex(h => h.toUpperCase() === 'HEADSHOT');
+          const ntci = hdr.findIndex(h => h.toUpperCase() === 'NO TRADE');
+          const resi = hdr.findIndex(h => h.toUpperCase() === 'RESTRICTIONS');
+          if (pi >= 0 && hi >= 0) {
+            for (let j = 1; j < rRows.length; j++) {
+              const n = (rRows[j][pi]||'').trim();
+              const hs = (rRows[j][hi]||'').trim();
+              if (n && hs) headshots[n] = hs;
+            }
+          }
+          // Build NTC and restrictions maps
+          if (pi >= 0) {
+            const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
+              .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+            const ntcMap = {}, resMap = {};
+            for (let j = 1; j < rRows.length; j++) {
+              const n = (rRows[j][pi]||'').trim();
+              if (!n) continue;
+              const nk = norm(n);
+              if (ntci >= 0) { const v = (rRows[j][ntci]||'').trim(); if (v) ntcMap[nk] = v; }
+              if (resi >= 0) { const v = (rRows[j][resi]||'').trim(); if (v) resMap[nk] = v; }
+            }
+            allPlayers.forEach(p => {
+              const nk = norm(p.name);
+              p.ntc = ntcMap[nk] || '';
+              p.tradeRestriction = resMap[nk] || '';
+            });
+            console.log('NTC:', Object.keys(ntcMap).length, 'Restrictions:', Object.keys(resMap).length);
+          }
+        }
+      }
+    } catch(e) {}
+
+    // Draft position + draft year (already fetched in parallel)
+    try {
+      if (draftR && draftR.ok) {
+        const dRows = parseCSV(await draftR.text());
+        if (dRows.length > 1) {
+          const hdr = dRows[0].map(h => (h||'').trim().toUpperCase());
+          // This sheet has multiple sections; the player+draft data is at col 50 (PLAYER) + col 62 (DRAFT POS)
+          // Use lastIndexOf to get the rightmost DRAFT POS column
+          let di = hdr.lastIndexOf('DRAFT POS');
+          // Find the PLAYER column nearest (before) the draft pos column
+          let ni = -1;
+          for (let k = di - 1; k >= 0; k--) {
+            if (hdr[k] === 'PLAYER') { ni = k; break; }
+          }
+          // DRAFT YEAR column (BJ = index 61)
+          let dyi = hdr.lastIndexOf('DRAFT YEAR');
+          if (dyi < 0) dyi = 61; // fallback to BJ
+          console.log('Draft sheet: name col=', ni, 'draft col=', di, 'year col=', dyi);
+          if (ni >= 0 && di >= 0) {
+            const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase()
+              .replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+            const draftMap = {};
+            const draftYearMap = {};
+            for (let j = 1; j < dRows.length; j++) {
+              const n = (dRows[j][ni]||'').trim();
+              const dp = parseInt((dRows[j][di]||'').trim());
+              const dy = parseInt((dRows[j][dyi]||'').trim());
+              if (n && dp > 0) draftMap[norm(n)] = dp;
+              if (n && dy > 0) draftYearMap[norm(n)] = dy;
+            }
+            allPlayers.forEach(p => {
+              const nn = norm(p.name);
+              p.draftPick = draftMap[nn] || 0;
+              p.draftYear = draftYearMap[nn] || 0;
+            });
+            const loaded = Object.keys(draftMap).length;
+            const matched = allPlayers.filter(p => p.draftPick > 0).length;
+            const yearMatched = allPlayers.filter(p => p.draftYear > 0).length;
+            console.log('Draft picks loaded:', loaded, 'Matched to contracts:', matched, 'Draft years:', yearMatched);
+          }
+        }
+      }
+    } catch(e) { console.warn('Draft sheet fetch failed:', e); }
+
+    // Compute extension eligibility AFTER all data loaded (needs draftYear, awards, etc.)
+    allPlayers.forEach(p => { p.ext = calcExtElig(p); });
+
+    // Populate team filter
+    const teams = [...new Set(allPlayers.filter(p=>p.team).map(p=>p.team))].sort();
+    const sel = document.getElementById('filterTeam');
+    teams.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o); });
+
+    // Restore team filter from ?team= URL param. URL uses abbreviations
+    // (LAL, BOS, …) for cross-app consistency; internal data uses city names
+    // (LA Lakers, Boston, …), so translate here.
+    const urlTeamAbbr = (new URLSearchParams(location.search).get('team') || '').toUpperCase();
+    const urlTeamName = TEAM_ABBR_TO_NAME[urlTeamAbbr];
+    if (urlTeamName && [...sel.options].some(o => o.value === urlTeamName)) {
+      sel.value = urlTeamName;
+    }
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('controls').style.display = 'flex';
+    document.getElementById('legend').style.display = 'flex';
+    document.getElementById('tableArea').style.display = 'block';
+    applyFilters();
+    checkHashPlayer();
+
+    // Fire-and-forget: load starter criteria, tenure data, and stats in background, re-render when done
+    Promise.all([
+      loadStarterCriteria(),
+      loadTenureData(),
+      loadStats(),
+      loadAwards(),
+    ]).then(() => {
+      applyFilters();
+      // Re-render open player card if any (so stats show up)
+      const overlay = document.getElementById('playerOverlay');
+      if (overlay && overlay.classList.contains('open') && location.hash.length > 1) {
+        const name = decodeURIComponent(location.hash.slice(1));
+        const p = allPlayers.find(pl => pl.name === name);
+        if (p) overlay.innerHTML = renderPlayerPage(p);
+      }
+    }).catch(() => {});
+
+  } catch(err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = "Couldn't load contracts. Try refreshing — if this keeps happening, the data might be updating right now.";
+    document.getElementById('error').style.display = 'block';
+    console.error('[Contracts]', err);
+  }
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchBox').value.toLowerCase().trim();
+  const fTeam = document.getElementById('filterTeam').value;
+  const fSt = document.getElementById('filterStatus').value;
+  const fExc = document.getElementById('filterException').value;
+  const fEnd = document.getElementById('filterEnd').value;
+  const fExt = document.getElementById('filterExt').value;
+
+  filteredPlayers = allPlayers.filter(p => {
+    if (q && !p.name.toLowerCase().includes(q) && !(p.team||'').toLowerCase().includes(q) && !(p.notes||'').toLowerCase().includes(q)) return false;
+    if (fTeam && p.team !== fTeam) return false;
+    if (fSt && !p.yrs.some(y => y.st === fSt)) return false;
+    if (fExc && p.exc !== fExc) return false;
+    if (fEnd && p.end !== fEnd) return false;
+    if (fExt && p.ext.status !== fExt) return false;
+    return true;
+  });
+
+  doSort();
+  renderTable();
+  document.getElementById('resultCount').textContent = `${filteredPlayers.length} of ${allPlayers.length} contracts`;
+}
+
+function doSort() {
+  filteredPlayers.sort((a, b) => {
+    let va, vb;
+    if (sortCol === 'name') { va = a.name; vb = b.name; }
+    else if (sortCol === 'team') { va = a.team || 'zzz'; vb = b.team || 'zzz'; }
+    else if (sortCol === 'end') { va = a.end || ''; vb = b.end || ''; }
+    else if (sortCol === 'totG') { va = a.totG; vb = b.totG; }
+    else if (sortCol === 'exc') { va = a.exc; vb = b.exc; }
+    else if (sortCol === 'notes') { va = a.notes; vb = b.notes; }
+    else if (sortCol === 'sigDate') {
+      va = a.sigDate ? new Date(a.sigDate).getTime() || 0 : 0;
+      vb = b.sigDate ? new Date(b.sigDate).getTime() || 0 : 0;
+    }
+    else if (sortCol === 'sigTeam') { va = a.sigTeam; vb = b.sigTeam; }
+    else if (sortCol === 'tenure') { va = a.continuousSeasons || 0; vb = b.continuousSeasons || 0; }
+    else if (sortCol === 'option') { va = a.option; vb = b.option; }
+    else if (sortCol === 'tk') { va = parseFloat(a.tk) || 0; vb = parseFloat(b.tk) || 0; }
+    else if (sortCol === 'tradeRes') {
+      const trs = p => { const t = tradeStatus(p); if (!t) return 9e15; return t.sortVal * 1e15 + (t.dateVal || 0); };
+      va = trs(a); vb = trs(b);
+    }
+    else if (sortCol === 'lb') { va = parseSal(a.lb); vb = parseSal(b.lb); }
+    else if (sortCol === 'ub') { va = parseSal(a.ub); vb = parseSal(b.ub); }
+    else if (sortCol === 'ext') {
+      // Sort by status priority first, then by date for eligible/future
+      va = a.ext.sortVal * 1e15 + (a.ext.dateVal || 0);
+      vb = b.ext.sortVal * 1e15 + (b.ext.dateVal || 0);
+    }
+    else if (sortCol.startsWith('sal')) {
+      const yi = parseInt(sortCol.slice(3));
+      va = a.yrs[yi]?.sal || 0; vb = b.yrs[yi]?.sal || 0;
+    } else { va = 0; vb = 0; }
+
+    if (typeof va === 'string') {
+      const c = va.localeCompare(vb);
+      const r = sortDir === 'asc' ? c : -c;
+      // Secondary sort: by current salary (desc) when primary is team
+      if (r === 0 && sortCol === 'team') return (b.yrs[0]?.sal || 0) - (a.yrs[0]?.sal || 0);
+      return r;
+    }
+    return sortDir === 'asc' ? va - vb : vb - va;
+  });
+}
+
+function setSort(col) {
+  if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortCol = col; sortDir = (col === 'name' || col === 'team' || col === 'exc' || col === 'notes' || col === 'sigTeam' || col === 'ext') ? 'asc' : 'desc'; }
+  applyFilters();
+}
+
+function renderTable() {
+  const area = document.getElementById('tableArea');
+  let html = '<div class="table-wrap"><table><thead><tr>';
+
+  html += thS('Player', 'name', 'col-player');
+  html += thS('Team', 'team', 'col-team');
+  YEARS.forEach((yr, i) => { html += thS(yr.label, 'sal' + i, 'yr-col' + (yr.current ? ' yr-current' : '')); });
+  html += thS('End', 'end', 'meta-col', 'Contract end year');
+  html += thS('Option', 'option', 'meta-col', 'Team or player option in the final year (TO = team, PO = player)');
+  html += thS('Total G', 'totG', 'meta-col', 'Total guaranteed salary across all remaining years');
+  html += thS('Exception', 'exc', 'meta-col', 'Salary cap exception used to sign (MLE, BAE, Bird Rights, minimum, etc.)');
+  html += thS('Signed', 'sigDate', 'meta-col', 'Date the current contract was signed');
+  html += thS('Sign. Team', 'sigTeam', 'meta-col', 'Team that originally signed the player (matters for Bird Rights)');
+  html += thS('Since', 'tenure', 'meta-col', 'Years with current team (continuous tenure)');
+  html += thS('Trade Kicker', 'tk', 'meta-col', 'Bonus the player receives if traded (% of remaining salary)');
+  html += thS('Trade Restriction', 'tradeRes', 'meta-col', 'Restrictions that prevent or limit trading this player');
+  html += thS('Likely Bonus', 'lb', 'meta-col', 'Performance bonus deemed likely — counts against the cap');
+  html += thS('Unlikely Bonus', 'ub', 'meta-col', 'Performance bonus deemed unlikely — does NOT count against the cap');
+  html += thS('Ext. Eligible', 'ext', 'meta-col', 'When the player becomes eligible for a contract extension');
+  html += '</tr></thead><tbody>';
+
+  for (const p of filteredPlayers) {
+    html += '<tr>';
+
+    // Player
+    const hs = headshots[p.name];
+    const hsH = hs
+      ? `<div class="pc-hs"><img src="${hs}" onerror="this.parentElement.innerHTML='<span class=\\'ini\\'>${ini(p.name)}</span>'"></div>`
+      : `<div class="pc-hs"><span class="ini">${ini(p.name)}</span></div>`;
+    html += `<td class="col-player"><div class="pc">${hsH}<a class="pc-nm pp-link" onclick="showPlayer('${p.name.replace(/'/g,"\\'")}')">${p.name}</a></div></td>`;
+
+    // Team
+    html += `<td class="col-team"><div class="tm"><img src="${teamLogo(p.team)}" alt=""><span>${p.team}</span></div></td>`;
+
+    // Year cells
+    for (let i = 0; i < YEARS.length; i++) { html += '<td>' + salCell(p, i) + '</td>'; }
+
+    // End + Cap Hold scenarios
+    const scenarios = getEndScenarios(p);
+    let endHtml = '';
+    const isTW = (p.notes||'').toLowerCase().includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
+    const isMin = (p.exc||'').toLowerCase().includes('minimum') || (p.notes||'').toLowerCase().includes('minimum salary');
+
+    if (scenarios.length <= 1) {
+      // No options — single end year
+      const sc = scenarios[0];
+      const ey = sc ? sc.endYr : parseInt(p.end);
+      endHtml = `<span style="font-weight:700;font-size:0.75rem;">${ey || p.end || ''}</span>`;
+      if (ey) {
+        const lastYrIdx = ey - 2026;
+        const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+        const chYrIdx = ey - 2025;
+        if (lastSal || isTW || isMin) {
+          const ch = calcCapHold(lastSal, p, chYrIdx, ey);
+          if (ch !== null) {
+            endHtml += `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">CH: ${fmtS(ch.hold)}</span>`;
+          }
+        }
+        const fa = calcFAStatus(p, ey);
+        if (fa.status === 'RFA') {
+          const qoTitle = qoTooltip(fa, p);
+          endHtml += `<span class="fa-badge rfa" title="${qoTitle}">RFA${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
+        }
+      }
+    } else {
+      // Multiple scenarios
+      endHtml = '<div class="end-scenarios">';
+      for (const sc of scenarios) {
+        const ey = sc.endYr;
+        const lastYrIdx = ey - 2026;
+        const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+        const chYrIdx = ey - 2025;
+        let chHtml = '';
+        if (lastSal || isTW || isMin) {
+          const ch = calcCapHold(lastSal, p, chYrIdx, ey);
+          if (ch !== null) {
+            chHtml = `<span class="end-ch" title="${ch.rights} · Projected cap hold: ${fmtFull(ch.hold)}">CH: ${fmtS(ch.hold)}</span>`;
+          }
+        }
+        const fa = calcFAStatus(p, ey, sc.optDeclined);
+        let faHtml = '';
+        if (fa.status === 'RFA') {
+          const qoTitle = qoTooltip(fa, p);
+          faHtml = `<span class="fa-badge rfa" title="${qoTitle}">RFA${fa.qo ? ' QO:' + fmtS(fa.qo) : ''}</span>`;
+        }
+        endHtml += `<div class="end-scenario ${sc.cls}">`;
+        endHtml += `<span class="end-sc-year">${ey}</span>`;
+        endHtml += chHtml;
+        endHtml += faHtml;
+        endHtml += `</div>`;
+      }
+      endHtml += '</div>';
+    }
+    html += `<td style="text-align:left">${endHtml}</td>`;
+
+    // Option
+    html += '<td>' + optTag(p.option) + '</td>';
+
+    // Total Guaranteed
+    html += `<td style="font-weight:700;font-size:0.75rem;">${fmtS(p.totG)}</td>`;
+
+    // Exception
+    html += `<td>${p.exc ? `<span class="tag tag-exc" title="${p.exc}">${shortExc(p.exc)}</span>` : ''}</td>`;
+
+    // Signing date
+    html += `<td class="meta-val">${p.sigDate || ''}</td>`;
+
+    // Signing team (highlight if different from current)
+    const traded = p.sigTeam && p.team && p.sigTeam !== p.team;
+    html += `<td class="meta-val"${traded ? ' style="color:#e65100;font-weight:600;"' : ''}>${p.sigTeam || ''}</td>`;
+
+    // Tenure (since season)
+    html += `<td class="meta-val">${p.joinedSeason || ''}</td>`;
+
+    // Trade Kicker
+    html += `<td>${p.tk ? `<span class="tag tag-tk">${p.tk}</span>` : ''}</td>`;
+
+    // Trade Restriction (NTC / Restrictions)
+    const ts = tradeStatus(p);
+    if (ts) {
+      html += `<td><span class="tag ${ts.cls}" title="${ts.detail}">${ts.text}</span></td>`;
+    } else {
+      html += '<td></td>';
+    }
+
+    // Likely Bonus
+    html += `<td>${p.lb ? `<span class="tag tag-lb">${p.lb}</span>` : ''}</td>`;
+
+    // Unlikely Bonus
+    html += `<td>${p.ub ? `<span class="tag tag-ub">${p.ub}</span>` : ''}</td>`;
+
+    // Extension Eligibility
+    html += '<td>' + extTag(p.ext) + '</td>';
+
+    html += '</tr>';
+  }
+
+  html += '</tbody></table></div>';
+  if (filteredPlayers.length === 0) {
+    html = '<div class="table-wrap" style="text-align:center;padding:3rem 1rem;color:var(--text-muted);">No contracts match these filters. Try clearing the team or status selection.</div>';
+  }
+  area.innerHTML = html;
+}
+
+function thS(label, col, cls, title) {
+  const sc = sortCol === col ? (sortDir === 'asc' ? ' sorted-asc' : ' sorted-desc') : '';
+  const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+  return `<th class="${cls || ''}${sc}"${titleAttr} onclick="setSort('${col}')">${label}</th>`;
+}
+
+function salCell(p, yi) {
+  const y = p.yrs[yi];
+  if (!y || (!y.sal && !y.st)) return '<span class="empty">—</span>';
+
+  const cls = { 'GUARANTEED':'g','PARTIAL G':'pg','NOT G':'ng','TEAM OPT':'to','PLAYER OPT':'po','TWO-WAY':'tw','10-DAY':'td' }[y.st] || 'g';
+  let html = `<span class="sc ${cls}">${fmtS(y.sal)}</span>`;
+
+  // Show guaranteed portion inline for PARTIAL G and NOT G
+  if (y.st === 'PARTIAL G' && y.ch && y.ch !== y.sal) {
+    html += `<span class="guar-line partial">G: ${fmtS(y.ch)}</span>`;
+  } else if (y.st === 'NOT G') {
+    html += `<span class="guar-line non-g">G: ${y.ch ? fmtS(y.ch) : '$0'}</span>`;
+  } else if (y.st === 'PLAYER OPT') {
+    html += `<span class="guar-line po">PO</span>`;
+  } else if (y.st === 'TEAM OPT') {
+    html += `<span class="guar-line to">TO</span>`;
+  }
+
+  return html;
+}
+
+function optTag(opt) {
+  if (opt === 'TEAM OPT') return '<span class="tag tag-opt-to">Team Opt</span>';
+  if (opt === 'PLAYER OPT') return '<span class="tag tag-opt-po">Player Opt</span>';
+  return '';
+}
+
+function tradeStatus(p) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  // Restrictions expiring before Apr 20 are irrelevant (no trades during season)
+  const seasonCutoff = new Date(today.getFullYear(), 3, 20); // Apr 20
+  const currentSeasonEnd = today.getMonth() >= 6 ? today.getFullYear() + 1 : today.getFullYear();
+
+  // Check if contract is expiring with no available options
+  const endYr = parseInt(p.end);
+  const hasOptions = p.yrs && p.yrs.some(y => y.sal && (y.st === 'PLAYER OPT' || y.st === 'TEAM OPT'));
+  const isExpiring = endYr === currentSeasonEnd && !hasOptions;
+
+  // No-Trade Clause (from roster sheet column M)
+  if (p.ntc) {
+    return { type: 'ntc', text: 'No-Trade Clause', detail: `No-Trade Clause`, cls: 'trade-ntc', sortVal: 0 };
+  }
+
+  // Expiring contract with no options — will be FA, not tradeable in any meaningful sense
+  if (isExpiring) {
+    return { type: 'expiring', text: 'Expiring', detail: `Expiring contract (FA ${currentSeasonEnd})`, cls: 'trade-expiring', sortVal: 3 };
+  }
+
+  // Explicit restriction date from roster sheet column N (e.g. Shai's extension restriction)
+  if (p.tradeRestriction) {
+    const rd = new Date(p.tradeRestriction);
+    if (!isNaN(rd.getTime())) {
+      rd.setHours(0,0,0,0);
+      if (rd > today && rd > seasonCutoff) {
+        return { type: 'restricted', text: fmt(rd), detail: `Cannot be traded until ${fmt(rd)}`, cls: 'trade-restricted', sortVal: 1, dateVal: rd.getTime() };
+      }
+    }
+  }
+
+  // Mid-season signing: 3-month restriction from signing date
+  if (p.sigDate) {
+    const parts = p.sigDate.split('/');
+    if (parts.length === 3) {
+      const sm = parseInt(parts[0]), sd = parseInt(parts[1]), sy = parseInt(parts[2]);
+      if (!isNaN(sm) && !isNaN(sd) && !isNaN(sy)) {
+        const restrict = new Date(sy, sm - 1 + 3, sd);
+        restrict.setHours(0,0,0,0);
+        // Only relevant if signing was during the season (Oct–Jun) and restriction is still active and after cutoff
+        if (restrict > today && restrict > seasonCutoff && sm !== 7 && sm !== 8 && sm !== 9) {
+          return { type: 'restricted', text: fmt(restrict), detail: `3-mo restriction from signing · Tradeable ${fmt(restrict)}`, cls: 'trade-restricted', sortVal: 1, dateVal: restrict.getTime() };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+function shortExc(exc) {
+  return { 'Bird Exception':'Bird','Early Bird Exception':'Early Bird','Non-Bird Exception':'Non-Bird','Mid-Level Exception':'MLE','Taxpayer Mid-Level Exception':'Tax MLE','Room Mid-Level Exception':'Room MLE','Biannual Exception':'BAE','Minimum Salary Exception':'Minimum','Rookie Exception':'Rookie','Second Round Exception':'2nd Rnd' }[exc] || exc;
+}
+
+function cleanNotes(notes) {
+  if (!notes) return '';
+  return notes
+    .replace(/No[- ]?Trade\s*Clause/gi, '')
+    .replace(/NTC/g, '')
+    .replace(/[·;,\s]*$/,'').replace(/^[·;,\s]*/,'')
+    .replace(/\s*[·;,]\s*[·;,]\s*/g,' · ')
+    .trim();
+}
+
+function shortNotes(notes) {
+  const n = cleanNotes(notes).replace(/Designated /g,'Des. ').replace(/Extension/g,'Ext.').replace(/Contract/g,'').replace(/Maximum /g,'Max ');
+  return n.length > 30 ? n.slice(0,28) + '…' : n;
+}
+
+function extTag(ext) {
+  const cls = {
+    'eligible': 'tag-ext-elig',
+    'future': 'tag-ext-date',
+    'ineligible': 'tag-ext-inelig',
+    'rookie': 'tag-ext-rookie',
+    'extended': 'tag-ext-done',
+    'na': 'tag-ext-na',
+    'unknown': 'tag-ext-na',
+  }[ext.status] || 'tag-ext-na';
+
+  const title = ext.detail ? ` title="${ext.detail}"` : '';
+  let html = `<span class="tag ${cls}"${title}>${ext.text}</span>`;
+  if (ext.dv) {
+    html += '<span class="tag tag-dv">Designated Veteran</span>';
+  }
+  return html;
+}
+
+document.getElementById('searchBox').addEventListener('input', applyFilters);
+document.getElementById('filterTeam').addEventListener('change', function() {
+  const val = this.value; // internal name, e.g. "LA Lakers"
+  const abbr = TEAM_NAME_TO_ABBR[val]; // e.g. "LAL"
+  const url = new URL(location.href);
+  if (abbr) url.searchParams.set('team', abbr);
+  else url.searchParams.delete('team');
+  history.replaceState(null, '', url);
+  applyFilters();
+});
+document.getElementById('filterStatus').addEventListener('change', applyFilters);
+document.getElementById('filterException').addEventListener('change', applyFilters);
+document.getElementById('filterEnd').addEventListener('change', applyFilters);
+document.getElementById('filterExt').addEventListener('change', applyFilters);
+
+// =====================================================
+// PLAYER DETAIL PAGE
+// =====================================================
+function showPlayer(name) {
+  const p = allPlayers.find(pl => pl.name === name);
+  if (!p) return;
+  location.hash = encodeURIComponent(name);
+  const overlay = document.getElementById('playerOverlay');
+  overlay.innerHTML = renderPlayerPage(p);
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const card = overlay.querySelector('.pp-card');
+  if (card) setupCardDrag(card);
+}
+
+function closePlayer() {
+  const overlay = document.getElementById('playerOverlay');
+  overlay.classList.remove('open');
+  overlay.innerHTML = '';
+  document.body.style.overflow = '';
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
+function setupCardDrag(card) {
+  const hdr = card.querySelector('.pp-hdr');
+  if (!hdr) return;
+  let dragging = false, startX, startY, origX, origY;
+  hdr.addEventListener('mousedown', e => {
+    if (e.target.closest('button, a, input')) return;
+    dragging = true;
+    card.classList.add('dragging');
+    const rect = card.getBoundingClientRect();
+    const overlay = card.closest('.pp-overlay');
+    const oRect = overlay.getBoundingClientRect();
+    // Switch to absolute positioning within overlay
+    if (!card.style.position || card.style.position !== 'absolute') {
+      card.style.position = 'absolute';
+      card.style.left = (rect.left - oRect.left + overlay.scrollLeft) + 'px';
+      card.style.top = (rect.top - oRect.top + overlay.scrollTop) + 'px';
+      card.style.margin = '0';
+      card.style.alignSelf = 'unset';
+    }
+    startX = e.clientX; startY = e.clientY;
+    origX = parseInt(card.style.left); origY = parseInt(card.style.top);
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    card.style.left = (origX + e.clientX - startX) + 'px';
+    card.style.top = (origY + e.clientY - startY) + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (dragging) { dragging = false; card.classList.remove('dragging'); }
+  });
+}
+
+function renderPlayerPage(p) {
+  const hs = headshots[p.name];
+  const hsH = hs
+    ? `<img src="${hs}" onerror="this.parentElement.innerHTML='<span class=ini>${ini(p.name)}</span>'">`
+    : `<span class="ini">${ini(p.name)}</span>`;
+  const logo = teamLogo(p.team);
+
+  // Current salary (25-26)
+  const curSal = p.yrs[0]?.sal || 0;
+
+  let h = `<div class="pp-card">`;
+  h += `<button class="pp-close" onclick="closePlayer()">✕</button>`;
+
+  // Header: headshot, name, team, salary
+  h += `<div class="pp-hdr">`;
+  h += `<div class="pp-hs">${hsH}</div>`;
+  h += `<div>`;
+  h += `<div class="pp-name">${p.name}</div>`;
+  h += `<div class="pp-team">${logo ? `<img src="${logo}">` : ''}${p.team || 'Free Agent'}${curSal ? ` · <strong>${fmtFull(curSal)}</strong>` : ''}</div>`;
+  h += `</div></div>`;
+
+  // 2025-26 Stats
+  const st = playerStats[p.name];
+  if (st) {
+    h += `<div class="pp-section"><div class="pp-section-title">2025-26 Season Stats</div>`;
+    h += `<div style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.75rem">`;
+    h += `<div><span style="font-size:.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px">Games</span><div style="font-weight:700">${st.gp}</div></div>`;
+    h += `<div><span style="font-size:.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px">Minutes</span><div style="font-weight:700">${st.mpg != null ? st.mpg.toFixed(1) : '—'}</div></div>`;
+    h += `<div><span style="font-size:.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px">Points</span><div style="font-weight:700">${st.ppg != null ? st.ppg.toFixed(1) : '—'}</div></div>`;
+    h += `<div><span style="font-size:.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px">Rebounds</span><div style="font-weight:700">${st.rpg != null ? st.rpg.toFixed(1) : '—'}</div></div>`;
+    h += `<div><span style="font-size:.6rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px">Assists</span><div style="font-weight:700">${st.apg != null ? st.apg.toFixed(1) : '—'}</div></div>`;
+    h += `</div></div>`;
+  }
+
+  // Contract Overview
+  let endLabel = p.end || '—';
+  if (p.option === 'TEAM OPT') endLabel += ' (TO)';
+  else if (p.option === 'PLAYER OPT') endLabel += ' (PO)';
+
+  h += `<div class="pp-section"><div class="pp-section-title">Contract Overview</div><div class="pp-grid">`;
+  h += ppField('Contract End', endLabel);
+  h += ppField('Total Guaranteed', fmtFull(p.totG || 0));
+  h += ppField('Years of Service', p.yos || '0');
+  h += ppField('Signed', p.sigDate || '—');
+  h += ppField('Signing Team', p.sigTeam || '—');
+  if (p.exc) h += ppField('Exception', p.exc);
+  if (p.draftPick) h += ppField('Draft Pick', `#${p.draftPick}${p.draftYear ? ` (${p.draftYear})` : ''}`);
+  if (p.joinedSeason) h += ppField('With Team Since', p.joinedSeason);
+  h += `</div></div>`;
+
+  // Year-by-Year Salary Table (25-26 onwards only)
+  h += `<div class="pp-section"><div class="pp-section-title">Year-by-Year Salary</div>`;
+  h += `<table class="pp-sal-table"><thead><tr><th>Season</th><th>Salary</th><th>Status</th></tr></thead><tbody>`;
+  const SEASON_LABELS = ["'25-26","'26-27","'27-28","'28-29","'29-30","'30-31"];
+  for (let i = 0; i < YEARS.length; i++) {
+    const y = p.yrs[i];
+    if (!y || (!y.sal && !y.st)) continue;
+    const cls = {'GUARANTEED':'g','PARTIAL G':'pg','NOT G':'ng','TEAM OPT':'to','PLAYER OPT':'po','TWO-WAY':'tw','10-DAY':'td'}[y.st] || 'g';
+    const stLabel = {'GUARANTEED':'Guaranteed','PARTIAL G':'Partial G','NOT G':'Non-Guaranteed','TEAM OPT':'Team Option','PLAYER OPT':'Player Option','TWO-WAY':'Two-Way Contract','10-DAY':'10-Day'}[y.st] || y.st;
+    const guarTitle = (y.st === 'PARTIAL G' || y.st === 'NOT G') && y.ch ? ` title="Guaranteed: ${fmtFull(y.ch)}"` : '';
+    h += `<tr><td>${SEASON_LABELS[i]}</td><td>${fmtFull(y.sal)}</td><td><span class="sc ${cls}" style="min-width:auto;cursor:${guarTitle ? 'help' : 'default'}"${guarTitle}>${stLabel}</span></td></tr>`;
+  }
+  h += `</tbody></table></div>`;
+
+  // End Scenarios & FA Status
+  const scenarios = getEndScenarios(p);
+  if (scenarios.length) {
+    h += `<div class="pp-section"><div class="pp-section-title">Contract End Scenarios</div>`;
+    for (const sc of scenarios) {
+      const ey = sc.endYr;
+      const lastYrIdx = ey - 2026;
+      const lastSal = lastYrIdx >= 0 && lastYrIdx < YEARS.length ? (p.yrs[lastYrIdx]?.sal || 0) : 0;
+      const chYrIdx = ey - 2025;
+      const isTW = (p.notes||'').toLowerCase().includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
+      const isMin = (p.exc||'').toLowerCase().includes('minimum');
+      let chInfo = '';
+      if (lastSal || isTW || isMin) {
+        const ch = calcCapHold(lastSal, p, chYrIdx, ey);
+        if (ch) chInfo = `Cap Hold: ${fmtFull(ch.hold)} (${ch.rights})`;
+      }
+      const fa = calcFAStatus(p, ey, sc.optDeclined);
+      let scLabel;
+      if (sc.optDeclined === 'TEAM OPT') scLabel = '(if Team Option declined)';
+      else if (sc.optDeclined === 'PLAYER OPT') scLabel = '(if Player Option declined)';
+      else if (sc.cls === 'sc-last' && scenarios.length > 1) scLabel = '(if option exercised)';
+      else scLabel = '';
+      h += `<div style="padding:.35rem 0;font-size:.75rem">`;
+      h += `<strong>Free agent ${ey}</strong> <span style="color:var(--text-muted)">${scLabel}</span>`;
+      h += ` — <span class="pp-badge ${fa.status === 'RFA' ? 'tag-tk' : 'tag-ext-na'}" style="font-size:.65rem">${fa.status}</span>`;
+      if (fa.qo) h += ` <span style="color:var(--text-secondary)">QO: ${fmtFull(fa.qo)}</span>`;
+      if (fa.detail) h += ` <span style="color:var(--text-muted);font-size:.65rem">(${fa.detail})</span>`;
+      if (chInfo) h += `<div style="color:var(--text-secondary);font-size:.65rem;margin-top:.1rem">${chInfo}</div>`;
+      h += `</div>`;
+    }
+    h += `</div>`;
+  }
+
+  // Extension Eligibility
+  if (p.ext) {
+    h += `<div class="pp-section"><div class="pp-section-title">Extension Eligibility</div>`;
+    const extCls = {'eligible':'tag-ext-elig','future':'tag-ext-date','ineligible':'tag-ext-inelig','rookie':'tag-ext-rookie','extended':'tag-ext-done','na':'tag-ext-na','unknown':'tag-ext-na'}[p.ext.status] || 'tag-ext-na';
+    h += `<div style="font-size:.8rem"><span class="pp-badge ${extCls}">${p.ext.text}</span></div>`;
+    // Replace DV with Designated Veteran in detail text
+    if (p.ext.detail) {
+      const detailText = p.ext.detail.replace(/\bDV Eligible\b/g, 'Designated Veteran Eligible');
+      h += `<div style="font-size:.7rem;color:var(--text-secondary);margin-top:.25rem">${detailText}</div>`;
+    }
+    h += `</div>`;
+  }
+
+  // Trade Info
+  const ts = tradeStatus(p);
+  if (ts || p.tk || p.lb || p.ub || p.tradeRestriction) {
+    h += `<div class="pp-section"><div class="pp-section-title">Trade Information</div><div class="pp-grid">`;
+    if (ts) h += ppField('Trade Status', `<span class="pp-badge ${ts.cls}">${ts.text}</span>${ts.detail ? '<br><span style="font-size:.6rem;color:var(--text-muted)">' + ts.detail + '</span>' : ''}`);
+    if (p.tk) h += ppField('Trade Kicker', p.tk);
+    if (p.tradeRestriction) h += ppField('Restriction Until', p.tradeRestriction);
+    if (p.lb) h += ppField('Likely Bonus', p.lb);
+    if (p.ub) h += ppField('Unlikely Bonus', p.ub);
+    h += `</div></div>`;
+  }
+
+  // Awards — consolidate repeating awards per season, use season format
+  if (p.allAwards && p.allAwards.length) {
+    h += `<div class="pp-section"><div class="pp-section-title">Awards</div>`;
+    // Group: { "award|year" → count }
+    const awMap = {};
+    const sorted = [...p.allAwards].sort((a,b) => b.year - a.year || a.award.localeCompare(b.award));
+    for (const a of sorted) {
+      const key = a.award + '|' + a.year;
+      awMap[key] = (awMap[key] || 0) + 1;
+    }
+    // Convert year to season format: 2025 → "24-25"
+    function yearToSeason(y) {
+      const s = y - 1;
+      return String(s).slice(-2) + '-' + String(y).slice(-2);
+    }
+    h += `<div style="display:flex;flex-wrap:wrap;gap:.3rem">`;
+    const seen = new Set();
+    for (const a of sorted) {
+      const key = a.award + '|' + a.year;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const count = awMap[key];
+      const label = count > 1 ? `${a.award} ${yearToSeason(a.year)} x${count}` : `${a.award} ${yearToSeason(a.year)}`;
+      h += `<span class="pp-badge tag-exc" style="font-size:.6rem">${label}</span>`;
+    }
+    h += `</div></div>`;
+  }
+
+  // Starter Criteria
+  if (p.scStats) {
+    h += `<div class="pp-section"><div class="pp-section-title">Starter Criteria</div><div class="pp-grid">`;
+    h += ppField('Games Started (S4/S3)', `${p.scStats.gs_curr} / ${p.scStats.gs_prev}`);
+    h += ppField('Minutes (S4/S3)', `${p.scStats.min_curr} / ${p.scStats.min_prev}`);
+    h += ppField('Criteria Met', p.starterCriteria ? '<span style="color:var(--green);font-weight:700">Yes</span>' : '<span style="color:var(--red);font-weight:700">No</span>');
+    if (p.scStats.reason) h += ppField('Reason', p.scStats.reason);
+    h += `</div></div>`;
+  }
+
+  h += `<div style="padding:.75rem 1.25rem;text-align:center">`;
+  h += `<span style="font-size:.65rem;color:var(--text-muted)">Data compiled by HoopsMatic</span>`;
+  h += `</div>`;
+
+  h += `</div>`;
+  return h;
+}
+
+function ppField(label, value) {
+  return `<div class="pp-field"><div class="pp-field-label">${label}</div><div class="pp-field-value">${value}</div></div>`;
+}
+
+// Hash routing: open player page from URL
+window.addEventListener('hashchange', () => {
+  const name = decodeURIComponent(location.hash.slice(1));
+  if (name && allPlayers.length) showPlayer(name);
+  else closePlayer();
+});
+
+// Check hash on initial load (after data loads)
+function checkHashPlayer() {
+  if (location.hash.length > 1) {
+    const name = decodeURIComponent(location.hash.slice(1));
+    if (name) showPlayer(name);
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
+
+console.log('%c[HoopsMatic Contracts v2.4]', 'color:#3b82f6;font-weight:bold');
+loadData();
+</script>
+</body>
+</html>
