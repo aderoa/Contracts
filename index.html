@@ -561,14 +561,22 @@ let SC_OVERRIDE = {};
 let SC_STATS = {};  // { playerName: { gs4, min4, gs3, min3, reason } }
 
 // Manual starter-criteria corrections — AUTHORITATIVE official rulings that
-// override the auto-generated sc_data.json. The daily scrape can be wrong
-// (e.g. mid-season-traded players whose games-started come through inflated),
-// so a confirmed league ruling belongs here. Keyed by exact roster name;
-// true = SC met, false = SC not met. Takes priority everywhere sc is resolved,
-// even if sc_data.json fails to load.
-const MANUAL_SC = {
+// override the auto-generated sc_data.json (the daily scrape can be wrong, e.g.
+// mid-season-traded players whose games-started come through inflated). Matched
+// by NORMALIZED name (accents / dots / Jr-Sr suffix / spacing insensitive) —
+// the SAME normalization the SC loader uses — so a small name discrepancy can't
+// silently skip the override. true = SC met, false = SC not met. Wins everywhere
+// sc is resolved, even if sc_data.json fails to load.
+const normSCName = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\./g,'').replace(/\s+/g,' ').trim().toLowerCase().replace(/\s+(jr|sr|ii|iii|iv|v)$/,'');
+const MANUAL_SC_RAW = {
   'Bennedict Mathurin': false, // Officially ruled NOT met (Mar 2026) → QO drops to pick-15 ref (~$8.8M)
 };
+const MANUAL_SC = {};
+for (const [k, v] of Object.entries(MANUAL_SC_RAW)) MANUAL_SC[normSCName(k)] = v;
+function manualSCFor(name) {
+  const key = normSCName(name);
+  return (key in MANUAL_SC) ? MANUAL_SC[key] : undefined;
+}
 
 // Reference QO dollar amounts per draft class year (used when SC triggers)
 // Calculated as: 120% of scale 4th-year salary × (1 + QO pct)
@@ -593,8 +601,8 @@ const REF_QO = {
 function qoTooltip(fa, p) {
   let tip = fa.detail || fa.status;
   if (fa.qo) tip += ` · QO: ${fmtFull(fa.qo)}`;
-  const manualSC = (p.name in MANUAL_SC);
-  const sc = (p.name in MANUAL_SC) ? MANUAL_SC[p.name] : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
+  const manualSC = (manualSCFor(p.name) !== undefined);
+  const _msc = manualSCFor(p.name); const sc = (_msc !== undefined) ? _msc : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
   const stats = SC_STATS[p.name] || p.scStats;
   if (stats) {
     tip += ` · GS: ${stats.gs_curr}/${stats.gs_prev} (S4/S3) · MIN: ${stats.min_curr}/${stats.min_prev}`;
@@ -639,7 +647,7 @@ function calcFAStatus(p, endYear, optDeclined) {
       const pctTable = endYear <= 2026 ? QO_PCT_OLD : QO_PCT_NEW;
 
       // Apply SC override if available
-      const sc = (p.name in MANUAL_SC) ? MANUAL_SC[p.name] : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
+      const _msc = manualSCFor(p.name); const sc = (_msc !== undefined) ? _msc : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
       const ref = REF_QO[endYear];
 
       // Base QO for this pick (no SC adjustment)
@@ -691,7 +699,7 @@ function calcFAStatus(p, endYear, optDeclined) {
 
     let scNote = '';
     // Starter criteria for non-rookie ≤3 YOS: bump to 21st pick's QO if higher
-    const sc = (p.name in MANUAL_SC) ? MANUAL_SC[p.name] : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
+    const _msc = manualSCFor(p.name); const sc = (_msc !== undefined) ? _msc : (p.name in SC_OVERRIDE) ? SC_OVERRIDE[p.name] : p.starterCriteria;
     const ref = REF_QO[endYear];
     if (sc === true && ref && ref.pick21 > qo) {
       const prevQo = qo;
