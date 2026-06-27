@@ -578,6 +578,30 @@ function manualSCFor(name) {
   return (key in MANUAL_SC) ? MANUAL_SC[key] : undefined;
 }
 
+// Build marker — confirm in DevTools console that the deployed build is current.
+console.log('%c🏀 Contracts build 2026-06-27c — normalized MANUAL_SC + apply', 'color:#7c3aed;font-weight:bold');
+
+// Apply manual SC rulings directly onto the loaded player data (correcting both
+// SC_OVERRIDE and p.starterCriteria), so the override propagates everywhere SC is
+// read — not just the resolution helper. Logs which entries matched a roster name
+// and which didn't, so a name mismatch is visible rather than silent.
+function applyManualSC() {
+  let applied = 0; const missed = [];
+  const list = (typeof allPlayers !== 'undefined' && allPlayers) ? allPlayers : [];
+  for (const [rawName, met] of Object.entries(MANUAL_SC_RAW)) {
+    const key = normSCName(rawName);
+    const p = list.find(pl => normSCName(pl.name) === key);
+    if (!p) { missed.push(rawName); continue; }
+    SC_OVERRIDE[p.name] = met;
+    p.starterCriteria = met;
+    if (SC_STATS[p.name]) SC_STATS[p.name].reason = 'Official ruling (manual override)';
+    else SC_STATS[p.name] = { reason: 'Official ruling (manual override)' };
+    applied++;
+    console.log(`MANUAL_SC: "${rawName}" → ${met ? 'MET' : 'NOT MET'} (matched roster name "${p.name}")`);
+  }
+  console.log(`MANUAL_SC applied to ${applied} player(s)` + (missed.length ? ` · NO roster match for: ${missed.join(', ')}` : ''));
+}
+
 // Reference QO dollar amounts per draft class year (used when SC triggers)
 // Calculated as: 120% of scale 4th-year salary × (1 + QO pct)
 // For pick 21 (non-rookie SC): 100% of scale × (1 + QO pct)
@@ -1304,6 +1328,7 @@ async function loadData() {
       loadStats(),
       loadAwards(),
     ]).then(() => {
+      applyManualSC();
       applyFilters();
       // Re-render open player card if any (so stats show up)
       const overlay = document.getElementById('playerOverlay');
