@@ -1662,11 +1662,19 @@ function tradeStatus(p) {
       if (!isNaN(sm) && !isNaN(sd) && !isNaN(sy)) {
         const signDate = new Date(sy, sm - 1, sd); signDate.setHours(0,0,0,0);
         const threeMo = new Date(sy, sm - 1 + 3, sd); threeMo.setHours(0,0,0,0);
-        let dec15 = new Date(sy, 11, 15);
-        if (signDate.getTime() > dec15.getTime()) dec15 = new Date(sy + 1, 11, 15);
-        dec15.setHours(0,0,0,0);
-        const eligible = new Date(Math.max(threeMo.getTime(), dec15.getTime()));
-        const byDec15 = eligible.getTime() === dec15.getTime();
+        // The Dec 15 rule only applies to CURRENT-offseason signings (2026-27 free
+        // agency, starting ~Jun 15, 2026). Anything signed before that follows the
+        // plain 3-month rule — its league-year Dec 15 has already passed.
+        const OFFSEASON_START = new Date(2026, 5, 15); // Jun 15, 2026
+        let eligible, byDec15 = false;
+        if (signDate.getTime() >= OFFSEASON_START.getTime()) {
+          const dec15 = new Date(2026, 11, 15); dec15.setHours(0,0,0,0);
+          eligible = new Date(Math.max(threeMo.getTime(), dec15.getTime()));
+          byDec15 = eligible.getTime() === dec15.getTime();
+        } else {
+          eligible = threeMo;
+        }
+        eligible.setHours(0,0,0,0);
         if (eligible > today && eligible > seasonCutoff) {
           return { type: 'restricted', text: fmt(eligible),
             detail: byDec15 ? `Signed ${p.sigDate} · Tradeable ${fmt(eligible)} (Dec 15 rule)` : `3-mo restriction from signing · Tradeable ${fmt(eligible)}`,
@@ -1977,7 +1985,7 @@ function checkHashPlayer() {
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
 
-console.log('%c[HoopsMatic Contracts v2.6 (Dec15 rule)]', 'color:#3b82f6;font-weight:bold');
+console.log('%c[HoopsMatic Contracts v2.7 (offseason-gated)]', 'color:#3b82f6;font-weight:bold');
 loadData();
 </script>
 </body>
