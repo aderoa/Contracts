@@ -1647,6 +1647,7 @@ function tradeStatus(p) {
     if (rd && !isNaN(rd.getTime())) {
       rd.setHours(0,0,0,0);
       if (rd > today && rd > seasonCutoff) {
+        console.log('[Contracts trade] ' + (p.name||'?') + ': from RESTRICTIONS column ="' + p.tradeRestriction + '" → ' + fmt(rd));
         return { type: 'restricted', text: fmt(rd), detail: `Cannot be traded until ${fmt(rd)}`, cls: 'trade-restricted', sortVal: 1, dateVal: rd.getTime() };
       }
     }
@@ -1676,6 +1677,7 @@ function tradeStatus(p) {
         }
         eligible.setHours(0,0,0,0);
         if (eligible > today && eligible > seasonCutoff) {
+          console.log('[Contracts trade] ' + (p.name||'?') + ': from signing date ' + p.sigDate + ' (' + (byDec15 ? 'Dec 15 rule' : '3-month') + ') → ' + fmt(eligible));
           return { type: 'restricted', text: fmt(eligible),
             detail: byDec15 ? `Signed ${p.sigDate} · Tradeable ${fmt(eligible)} (Dec 15 rule)` : `3-mo restriction from signing · Tradeable ${fmt(eligible)}`,
             cls: 'trade-restricted', sortVal: 1, dateVal: eligible.getTime() };
@@ -1985,7 +1987,7 @@ function checkHashPlayer() {
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
 
-console.log('%c[HoopsMatic Contracts v2.7 (offseason-gated)]', 'color:#3b82f6;font-weight:bold');
+console.log('%c[HoopsMatic Contracts v2.8 (trade-restriction diagnostics)]', 'color:#3b82f6;font-weight:bold');
 loadData();
 </script>
 </body>
