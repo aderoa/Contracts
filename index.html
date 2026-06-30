@@ -649,7 +649,7 @@ function qoTooltip(fa, p) {
 // =====================================================
 // RFA: Rookie Scale players at end of rookie contract, OR players with ≤3 YOS
 // QO: Rookie Scale = 130% of last year salary; Non-Rookie ≤3 YOS = 125% (if sal ≤ avg) or 110% (if sal > avg)
-function _isRFAList(nm){if(!_isRFAList._s){_isRFAList._s=new Set("moussa cisse|spencer jones|peyton watson|jalen duren|quinten post|tari eason|isaiah crawford|jalen slawson|bennedict mathurin|jordan miller|kobe sanders|chris manon|vladislav goldin|jaylen clark|enrique freeman|hunter dickinson|brooks barnhizer|colin castleton|mark williams|koby brea|daeqwon plowden|harrison ingram|david jones|david jones garcia|alijah martin|walker kessler".split("|"));}var n=(nm||'').toLowerCase().replace(/[.'`]/g,'').replace(/-/g,' ').replace(/\b(jr|sr|ii|iii|iv)\b/g,'').replace(/\s+/g,' ').trim();return _isRFAList._s.has(n);}
+function _isRFAList(nm){if(!_isRFAList._s){_isRFAList._s=new Set("moussa cisse|spencer jones|peyton watson|jalen duren|quinten post|tari eason|isaiah crawford|jalen slawson|bennedict mathurin|jordan miller|kobe sanders|chris manon|vladislav goldin|jaylen clark|enrique freeman|hunter dickinson|brooks barnhizer|colin castleton|mark williams|koby brea|daeqwon plowden|harrison ingram|david jones|david jones garcia|alijah martin|walker kessler|jamir watkins".split("|"));}var n=(nm||'').toLowerCase().replace(/[.'`]/g,'').replace(/-/g,' ').replace(/\b(jr|sr|ii|iii|iv)\b/g,'').replace(/\s+/g,' ').trim();return _isRFAList._s.has(n);}
 function calcFAStatus(p, endYear, optDeclined){
   var _r = _calcFAStatusRaw(p, endYear, optDeclined);
   if (_isRFAList(p.name)) return _r.status === 'RFA' ? _r : { status:'RFA', qo:_r.qo||null, detail:_r.detail||'Restricted' };
