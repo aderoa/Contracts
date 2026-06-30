@@ -234,7 +234,7 @@ footer a { color:var(--accent); text-decoration:none; font-weight:500; }
   <div class="header" style="padding:1.5rem 0 0.75rem;">
     <div class="header-inner" style="max-width:none;padding:0;">
       <h1>📋 NBA Contract Database</h1>
-      <span class="tag">2024-25 → 2030-31</span>
+      <span class="tag">2026-27 → 2031-32</span>
     </div>
   </div>
   <div id="controls" class="controls" style="display:none;">
@@ -349,12 +349,13 @@ function teamLogo(t) { const id = TEAM_IDS[t]; return id ? `https://cdn.nba.com/
 function ini(n) { return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
 
 const YEARS = [
-  { label: "'25-26", sc: 7, cc: 8, tc: 9, current: true },
-  { label: "'26-27", sc: 10, cc: 11, tc: 12 },
+  { label: "'25-26", sc: 7, cc: 8, tc: 9, hidden: true },
+  { label: "'26-27", sc: 10, cc: 11, tc: 12, current: true },
   { label: "'27-28", sc: 13, cc: 14, tc: 15 },
   { label: "'28-29", sc: 16, cc: 17, tc: 18 },
   { label: "'29-30", sc: 19, cc: 20, tc: 21 },
   { label: "'30-31", sc: 22, cc: 23, tc: 24 },
+  { label: "'31-32", sc: 46, cc: 47, tc: 48 },
 ];
 
 let allPlayers = [];
@@ -793,7 +794,7 @@ function rookieDesignated(p) {
 function guaranteedEnd(p) {
   // Walk backwards through contract years to find last non-option year
   // YEARS[0]=2026, YEARS[1]=2027, etc.
-  const END_YEARS = [2026, 2027, 2028, 2029, 2030, 2031];
+  const END_YEARS = [2026, 2027, 2028, 2029, 2030, 2031, 2032];
   let lastGuarIdx = -1;
   for (let i = p.yrs.length - 1; i >= 0; i--) {
     const y = p.yrs[i];
@@ -1432,7 +1433,7 @@ function renderTable() {
 
   html += thS('Player', 'name', 'col-player');
   html += thS('Team', 'team', 'col-team');
-  YEARS.forEach((yr, i) => { html += thS(yr.label, 'sal' + i, 'yr-col' + (yr.current ? ' yr-current' : '')); });
+  YEARS.forEach((yr, i) => { if (yr.hidden) return; html += thS(yr.label, 'sal' + i, 'yr-col' + (yr.current ? ' yr-current' : '')); });
   html += thS('End', 'end', 'meta-col', 'Contract end year');
   html += thS('Option', 'option', 'meta-col', 'Team or player option in the final year (TO = team, PO = player)');
   html += thS('Total G', 'totG', 'meta-col', 'Total guaranteed salary across all remaining years');
@@ -1461,7 +1462,7 @@ function renderTable() {
     html += `<td class="col-team"><div class="tm"><img src="${teamLogo(p.team)}" alt=""><span>${p.team}</span></div></td>`;
 
     // Year cells
-    for (let i = 0; i < YEARS.length; i++) { html += '<td>' + salCell(p, i) + '</td>'; }
+    for (let i = 0; i < YEARS.length; i++) { if (YEARS[i].hidden) continue; html += '<td>' + salCell(p, i) + '</td>'; }
 
     // End + Cap Hold scenarios
     const scenarios = getEndScenarios(p);
@@ -1857,14 +1858,14 @@ function renderPlayerPage(p) {
   // Year-by-Year Salary Table (25-26 onwards only)
   h += `<div class="pp-section"><div class="pp-section-title">Year-by-Year Salary</div>`;
   h += `<table class="pp-sal-table"><thead><tr><th>Season</th><th>Salary</th><th>Status</th></tr></thead><tbody>`;
-  const SEASON_LABELS = ["'25-26","'26-27","'27-28","'28-29","'29-30","'30-31"];
   for (let i = 0; i < YEARS.length; i++) {
+    if (YEARS[i].hidden) continue;
     const y = p.yrs[i];
     if (!y || (!y.sal && !y.st)) continue;
     const cls = {'GUARANTEED':'g','PARTIAL G':'pg','NOT G':'ng','TEAM OPT':'to','PLAYER OPT':'po','TWO-WAY':'tw','10-DAY':'td'}[y.st] || 'g';
     const stLabel = {'GUARANTEED':'Guaranteed','PARTIAL G':'Partial G','NOT G':'Non-Guaranteed','TEAM OPT':'Team Option','PLAYER OPT':'Player Option','TWO-WAY':'Two-Way Contract','10-DAY':'10-Day'}[y.st] || y.st;
     const guarTitle = (y.st === 'PARTIAL G' || y.st === 'NOT G') && y.ch ? ` title="Guaranteed: ${fmtFull(y.ch)}"` : '';
-    h += `<tr><td>${SEASON_LABELS[i]}</td><td>${fmtFull(y.sal)}</td><td><span class="sc ${cls}" style="min-width:auto;cursor:${guarTitle ? 'help' : 'default'}"${guarTitle}>${stLabel}</span></td></tr>`;
+    h += `<tr><td>${YEARS[i].label}</td><td>${fmtFull(y.sal)}</td><td><span class="sc ${cls}" style="min-width:auto;cursor:${guarTitle ? 'help' : 'default'}"${guarTitle}>${stLabel}</span></td></tr>`;
   }
   h += `</tbody></table></div>`;
 
