@@ -357,6 +357,9 @@ const YEARS = [
   { label: "'30-31", sc: 22, cc: 23, tc: 24 },
   { label: "'31-32", sc: 46, cc: 47, tc: 48 },
 ];
+// index (within YEARS / p.yrs) of the season used as the secondary sort key —
+// the current season (2026-27). Free agents have no salary here, so they sort last.
+const SORT_YI = (() => { const c = YEARS.findIndex(y => y.current); return c >= 0 ? c : YEARS.findIndex(y => !y.hidden); })();
 
 let allPlayers = [];
 let filteredPlayers = [];
@@ -1413,8 +1416,8 @@ function doSort() {
     if (typeof va === 'string') {
       const c = va.localeCompare(vb);
       const r = sortDir === 'asc' ? c : -c;
-      // Secondary sort: by current salary (desc) when primary is team
-      if (r === 0 && sortCol === 'team') return (b.yrs[0]?.sal || 0) - (a.yrs[0]?.sal || 0);
+      // Secondary sort: by 2026-27 salary (desc) when primary is team — free agents (no 26-27 salary) fall to the end
+      if (r === 0 && sortCol === 'team') return (b.yrs[SORT_YI]?.sal || 0) - (a.yrs[SORT_YI]?.sal || 0);
       return r;
     }
     return sortDir === 'asc' ? va - vb : vb - va;
