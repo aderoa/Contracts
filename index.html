@@ -645,7 +645,9 @@ function qoTooltip(fa, p) {
 // =====================================================
 // RFA: Rookie Scale players at end of rookie contract, OR players with ≤3 YOS
 // QO: Rookie Scale = 130% of last year salary; Non-Rookie ≤3 YOS = 125% (if sal ≤ avg) or 110% (if sal > avg)
+function _isUFAOverride(nm){if(!_isUFAOverride._s){_isUFAOverride._s=new Set("tosan evbuomwan|keaton wallace|max shulga|jordan walsh|amari williams|john tonje|ochai agbaji|jalen wilson|tyson etienne|ej liddell|antonio reeves|mac mcclung|yuki kawamura|lachlan olbrich|olivier sarr|jalen pickett|curtis jones|pat spencer|jeenathan williams|norchad omier|drew timme|rayan rupert|keshad johnson|trevor keels|jahmir young|ousmane dieng|andre jackson|alex antetokounmpo|julian phillips|trey alexander|josh oduro|ariel hukporti|kevin mccullar|trey jemison|branden carlson|tyrese martin|isaiah livers|caleb love|jonathan mogbo|elijah harkless|oscar tshiebwe|sharife cooper|nick smith|jamir watkins".split("|"));}var n=(nm||'').toLowerCase().replace(/[.'`]/g,'').replace(/\b(jr|sr|ii|iii|iv)\b/g,'').replace(/\s+/g,' ').trim();return _isUFAOverride._s.has(n);}
 function calcFAStatus(p, endYear, optDeclined) {
+  if (_isUFAOverride(p.name)) return { status: 'UFA', qo: null, detail: 'Now unrestricted' };
   const e = (p.exc || '').toLowerCase();
   const notes_lc = (p.notes || '').toLowerCase();
   const isTwoWay = notes_lc.includes('two-way') || p.yrs.some(y => y.st === 'TWO-WAY');
